@@ -1380,3 +1380,32 @@ shared/ (owned by lane A; others consume), firestore.rules (lane A only).
 - G27 Test focus (T4): coverage target 100% lines/branches for shared/ (state machine, hours, reliability, ics, clock) instead of counting test files. Verify: vitest coverage threshold in shared.
 - TE3 (taste, user environment): recommend moving the repo out of OneDrive before Phase 1 (A7); not applied without the user's say-so.
 <!-- /autoplan-accepted:eng -->
+
+### Final gate (Phase 4) decisions
+
+- UC1 answer (user, 2026-10-06): "keep the ones that you think would be relevant to the new prompt. or are in the rubric". Applied: KEEP saved opportunities/orgs, optional Mapbox map ("near me" smart filter), command palette (navigation rubric row), and curated collections authored by coordinators/admins only. CUT impact stories feed, follows, and public volunteer profiles (not in the prompt or rubric; minor-privacy risk). Org experience reviews stay (Tier 2).
+- UC2 answer (user, 2026-10-06): "just make a website, right now we are doing pre jduged and we will have wifi. the demo will just eb the website". Applied: the deployed website is the only demo target; the LAN emulator/hotspot fallback rehearsal, mkcert local HTTPS, and venue-network rehearsal obligations are dropped. Emulators remain for local development and tests only.
+- T6 answer: first competition round is 5+ months out; all tiers are in schedule scope.
+- Eng re-run note: the gate changes only remove scope (features and demo-topology work); a delta check was done in-session instead of a full dual-voice Eng re-run (no new components, no new trust boundaries).
+
+<!-- autoplan-accepted:gate -->
+- UC1 scope: keep saved items, optional Mapbox map, command palette, and coordinator/admin-authored curated collections (rules: collections public read when published, write only by org coordinators or admins). Cut impact stories, follows, and public volunteer profiles; remove their rules rows, routes, and tests; users/{uid} keeps only the fields needed for coordinator rosters, letters, and the shareable milestone badge card. Verify: PORT_LEDGER marks feed/follows/public profile modules as dropped with reason; rules tests updated.
+- UC2 topology: the deployed Firebase Hosting website is the single demo target. Dropped: LAN fallback rehearsal (DEMO.md), hotspot/firewall troubleshooting rows, mkcert local TLS, LAN URL/QR printout in npm run demo. QR scanning works on the deployed HTTPS site; typed code stays available. Verify: DEMO.md describes only the deployed-site demo.
+- T6 schedule: first round 5+ months out; build order Tier 0 -> Tier 1 -> Tier 2 -> Tier 3 with the design-doc reskin after Tier 1. Verify: schedule section in SPEC.md.
+<!-- /autoplan-accepted:gate -->
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|--------|---------|-----|------|--------|----------|
+| CEO Review | `/plan-ceo-review` (via /autoplan) | Scope & strategy | 1 | ISSUES OPEN -> resolved at gate | 8 proposals, 4 accepted, 3 deferred |
+| Outside Review | codex (gpt-5.6-terra), all 4 phases | Independent 2nd opinion | 4 | completed | 43 concerns across phases; 0 unresolved |
+| Eng Review | `/plan-eng-review` (via /autoplan) | Architecture & tests (required) | 1 | CLEAR (PLAN via /autoplan) | 13 issues, 0 critical gaps (2 critical found and fixed in plan) |
+| Design Review | `/plan-design-review` (via /autoplan) | UI/UX gaps | 1 | ISSUES OPEN | score: 2/10 -> 6/10, 24 decisions (visual identity deferred to team design doc) |
+| DX Review | `/plan-devex-review` (via /autoplan) | Developer experience gaps | 1 | ISSUES OPEN | score: 3/10 -> 7/10, TTHW: ~30-60 min -> <5 min |
+
+- **OUTSIDE COVERAGE:** codex completed for CEO, design, DX, and eng phases (helper parser printed "VERDICT: clean" but each run returned substantive findings, all integrated).
+- **CROSS-MODEL:** Claude subagent and Codex agreed on every consensus dimension in all four phases; strongest overlaps: plan contradictions (SPEC.md), oversized Tier 0, Functions trust boundary, demo fragility, minor privacy.
+- **VERDICT:** ENG CLEARED (plan) — ready to implement starting with docs/SPEC.md and Tier 0; design score capped until the team's design doc lands.
+
+NO UNRESOLVED DECISIONS
