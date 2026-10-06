@@ -1,4 +1,5 @@
 <!-- /autoplan restore point: "C:\\Users\\jingd\\.gstack\\projects\\jingd\\main-autoplan-restore-20261006-170233.md" -->
+> **Status: APPROVED 2026-10-06 via /autoplan.** Build inputs: docs/SPEC.md (to be written), docs/PORT_LEDGER.md, TODOS.md. The Review record below is history.
 ## Implementation plan
 # Port Plan: Trove (2025-26) → Volunteer Management App (2026-27)
 
