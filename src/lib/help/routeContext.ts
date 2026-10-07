@@ -22,30 +22,43 @@ export const DEFAULT_SUGGESTIONS: readonly string[] = Object.freeze([
   "kiosk-check-in"
 ]);
 
-/** Route pattern -> article slugs, most specific screens first. */
+/**
+ * Route pattern -> article slugs, most specific screens first. The first
+ * matching pattern wins, so literal routes that a ":param" pattern would also
+ * match (/org/:orgId/shifts/new) must come before it.
+ */
 export const ROUTE_SUGGESTIONS: ReadonlyArray<readonly [pattern: string, slugs: readonly string[]]> = Object.freeze([
+  // Tier 1 lane C
+  ["/me/notifications", ["alerts-are-in-app", "waitlist-and-promotion", "calendar-export"]],
+  ["/me/saved", ["saved-items", "explore-filters", "find-and-sign-up"]],
+  ["/org/:orgId/shifts/new", ["coordinator-create-shifts", "waitlist-and-promotion", "coordinator-start-kiosk"]],
+  ["/join", ["coordinator-invites", "org-registration", "getting-started"]],
+  ["/privacy", ["privacy-and-minors", "ai-assistant", "alerts-are-in-app"]],
+  ["/terms", ["privacy-and-minors", "getting-started"]],
+  ["/accessibility", ["accessibility-settings", "privacy-and-minors"]],
+  // Tier 0 routes
   ["/", ["getting-started", "find-and-sign-up", "create-account"]],
-  ["/explore", ["find-and-sign-up", "getting-started", "org-verification"]],
-  ["/opportunity/:instanceId", ["find-and-sign-up", "kiosk-check-in", "privacy-and-minors"]],
-  ["/organizations/:orgId", ["org-verification", "find-and-sign-up", "verified-letters"]],
-  ["/me/shifts", ["kiosk-check-in", "check-out-and-hours", "troubleshooting-check-in"]],
+  ["/explore", ["find-and-sign-up", "explore-filters", "waitlist-and-promotion"]],
+  ["/opportunity/:instanceId", ["find-and-sign-up", "waitlist-and-promotion", "calendar-export"]],
+  ["/organizations/:orgId", ["org-verification", "find-and-sign-up", "saved-items"]],
+  ["/me/shifts", ["kiosk-check-in", "check-out-and-hours", "calendar-export"]],
   ["/checkin", ["kiosk-check-in", "troubleshooting-check-in", "check-out-and-hours"]],
-  ["/impact", ["check-out-and-hours", "verified-letters", "verify-a-letter"]],
+  ["/impact", ["check-out-and-hours", "verified-letters", "track-record"]],
   ["/impact/letters/new", ["verified-letters", "verify-a-letter", "org-verification"]],
-  ["/impact/report", ["coordinator-reports", "verified-letters"]],
+  ["/impact/report", ["coordinator-reports", "milestones", "verified-letters"]],
   ["/verify", ["verify-a-letter", "verified-letters"]],
   ["/verify/:code", ["verify-a-letter", "verified-letters"]],
   ["/help", ["getting-started", "ai-assistant", "accessibility-settings"]],
   ["/help/:slug", ["getting-started", "ai-assistant", "accessibility-settings"]],
   ["/login", ["create-account", "getting-started", "privacy-and-minors"]],
   ["/onboarding", ["create-account", "privacy-and-minors", "accessibility-settings"]],
-  ["/me/profile", ["accessibility-settings", "privacy-and-minors"]],
-  ["/org/register", ["org-verification", "privacy-and-minors"]],
-  ["/org/:orgId/dashboard", ["coordinator-start-kiosk", "coordinator-approve-hours", "coordinator-attendance"]],
-  ["/org/:orgId/shifts", ["coordinator-attendance", "coordinator-start-kiosk"]],
-  ["/org/:orgId/shifts/:instanceId", ["coordinator-start-kiosk", "coordinator-attendance", "coordinator-approve-hours"]],
+  ["/me/profile", ["edit-profile", "accessibility-settings", "privacy-and-minors"]],
+  ["/org/register", ["org-registration", "org-verification", "privacy-and-minors"]],
+  ["/org/:orgId/dashboard", ["coordinator-start-kiosk", "coordinator-needs-attention", "coordinator-attendance"]],
+  ["/org/:orgId/shifts", ["coordinator-create-shifts", "coordinator-attendance", "coordinator-start-kiosk"]],
+  ["/org/:orgId/shifts/:instanceId", ["coordinator-start-kiosk", "coordinator-attendance", "attendance-disputes"]],
   ["/org/:orgId/reports", ["coordinator-reports", "coordinator-attendance"]],
-  ["/org/:orgId/settings", ["org-verification", "privacy-and-minors"]],
+  ["/org/:orgId/settings", ["coordinator-invites", "org-verification", "privacy-and-minors"]],
   ["/org/:orgId/kiosk/:instanceId", ["coordinator-start-kiosk", "troubleshooting-check-in"]],
   ["/admin", ["org-verification", "coordinator-attendance"]]
 ]);

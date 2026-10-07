@@ -24,7 +24,9 @@ export const COLLECTIONS = Object.freeze({
   jobLeases: "jobLeases",
   jobRuns: "jobRuns",
   demoClock: "demoClock",
-  meta: "meta"
+  meta: "meta",
+  // Tier 1 lane C
+  aiUsage: "aiUsage"
 });
 
 export const PATHS = Object.freeze({

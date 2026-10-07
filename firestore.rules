@@ -177,5 +177,7 @@ service cloud.firestore {
     match /rateLimits/{id} { allow read, write: if false; }
     match /jobLeases/{id} { allow read, write: if false; }
     match /turnstileTokens/{id} { allow read, write: if false; }
+    // Tier 1 lane C: AI usage counters (askAssistant limits) are server-only.
+    match /aiUsage/{id} { allow read, write: if false; }
   }
 }

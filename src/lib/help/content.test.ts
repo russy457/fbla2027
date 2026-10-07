@@ -17,7 +17,7 @@ const DASHES = new RegExp(`[${String.fromCharCode(0x2013)}${String.fromCharCode(
 const articles = loadHelpArticles();
 const slugs = new Set(articles.map((article) => article.slug));
 
-/** Error catalog helpSlugs (SPEC 10.10) that this help set covers. */
+/** Required articles (SPEC 8.5) and error catalog helpSlugs (SPEC 10.10) this help set covers. */
 const SPEC_SLUGS = [
   "getting-started",
   "privacy-and-minors",
@@ -32,13 +32,27 @@ const SPEC_SLUGS = [
   "coordinator-start-kiosk",
   "coordinator-approve-hours",
   "coordinator-attendance",
-  "coordinator-reports"
+  "coordinator-reports",
+  // Tier 1 (SPEC 8.5 required list and 10.10 helpSlugs)
+  "waitlist-and-promotion",
+  "manual-hours",
+  "track-record",
+  "calendar-export",
+  "alerts-are-in-app",
+  // Tier 1 feature articles
+  "saved-items",
+  "milestones",
+  "coordinator-needs-attention",
+  "attendance-disputes",
+  "org-registration",
+  "coordinator-invites",
+  "coordinator-create-shifts"
 ];
 
 describe("bundled help content", () => {
-  it("loads between 12 and 16 articles, sorted by title", () => {
-    expect(articles.length).toBeGreaterThanOrEqual(12);
-    expect(articles.length).toBeLessThanOrEqual(16);
+  it("loads between 25 and 45 articles, sorted by title", () => {
+    expect(articles.length).toBeGreaterThanOrEqual(25);
+    expect(articles.length).toBeLessThanOrEqual(45);
     const titles = articles.map((article) => article.title);
     expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)));
   });
@@ -69,7 +83,22 @@ describe("bundled help content", () => {
     ["how are hours counted", "check-out-and-hours"],
     ["revoked letter", "verify-a-letter"],
     ["text size", "accessibility-settings"],
-    ["birth date", "create-account"]
+    ["birth date", "create-account"],
+    // Tier 1 questions
+    ["waitlist", "waitlist-and-promotion"],
+    ["add to calendar", "calendar-export"],
+    ["no-show dispute", "attendance-disputes"],
+    ["register my nonprofit", "org-registration"],
+    ["invite a coordinator", "coordinator-invites"],
+    ["manual hours", "manual-hours"],
+    ["reliability score", "track-record"],
+    ["notifications", "alerts-are-in-app"],
+    ["saved shifts", "saved-items"],
+    ["25 hour milestone", "milestones"],
+    ["needs attention", "coordinator-needs-attention"],
+    ["create a shift", "coordinator-create-shifts"],
+    ["do you send email reminders", "alerts-are-in-app"],
+    ["daily limit on the AI assistant", "ai-assistant"]
   ])("search for %j finds %s in the top 3", (query, slug) => {
     const top = getHelpLibrary().search(query, { limit: 3 }).map((hit) => hit.article.slug);
     expect(top).toContain(slug);

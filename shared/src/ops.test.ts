@@ -19,8 +19,8 @@ describe("op map (SPEC#api)", () => {
     expect(OP_NAMES.volunteer).toEqual(["ping", "completeProfile", "signup", "cancelSignup", "issueLetter"]);
     expect(OP_NAMES.kiosk).toEqual(["ping", "issueKioskCode", "checkIn", "checkOut"]);
     expect(OP_NAMES.coordinator).toEqual(["ping", "startKiosk", "finalizeShift", "revokeLetter"]);
-    expect(OP_NAMES.admin).toEqual(["ping", "runDueJobs", "setDemoClock"]);
-    expect(OP_NAMES.ai).toEqual(["ping"]);
+    expect(OP_NAMES.admin).toEqual(["ping", "runDueJobs", "setDemoClock", "resetDemoData"]); // Tier 1 lane C: resetDemoData
+    expect(OP_NAMES.ai).toEqual(["ping", "askAssistant"]); // Tier 1 lane C: askAssistant
   });
 
   it("only treats own op keys as op names", () => {

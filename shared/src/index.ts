@@ -26,3 +26,8 @@ export * from "./schemas/ops/volunteerOps";
 export * from "./schemas/ops/shiftOps";
 export * from "./schemas/ops/systemOps";
 export * from "./validation/env";
+// Tier 1 lane C
+export * from "./schemas/ops/aiOps";
+export * from "./schemas/ops/demoOps";
+export * from "./schemas/aiUsageDocs";
+export * from "./plannerParse";

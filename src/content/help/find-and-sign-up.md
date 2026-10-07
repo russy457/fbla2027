@@ -22,11 +22,13 @@ Press **Sign up**. The button shows that it is working until the server confirms
 - **Signed up**: you have a spot. You can cancel from here or from My Shifts.
 - **Ages N+**: you are younger than this shift's minimum age.
 - **Not available yet**: volunteers under 18 can join after this organization is verified.
-- **Full**: every seat is taken.
+- **Join waitlist (#N)**: every seat is taken, but you can wait in line for one.
+- **Waitlisted #N of M**: you are in line. You can leave the waitlist from here.
+- **Full**: every seat is taken and the waitlist is full or closed.
 - **Shift started**: you can't sign up once a shift begins.
 - **Cancelled by organization**: the organization cancelled this shift.
 
-Waitlists are coming soon. When they arrive, a full shift will offer Join waitlist.
+After you sign up, press **Add to calendar** to save the shift in your calendar app.
 
 ## Cancelling
 
@@ -37,6 +39,8 @@ You can cancel any time before the shift starts. Two things to know:
 
 ## Related articles
 
+- waitlist-and-promotion
+- calendar-export
 - kiosk-check-in
 - privacy-and-minors
 - org-verification

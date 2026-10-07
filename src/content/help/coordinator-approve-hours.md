@@ -16,9 +16,7 @@ If a volunteer checked in but never checked out, the app counts their time up to
 
 ## Reviewing hours
 
-> Coming soon: the Needs attention list on your Dashboard. Until it arrives, pending hours stay pending.
-
-When it arrives, the Dashboard will group items by shift:
+Pending hours appear in the **Needs attention** list on your Dashboard, grouped by shift, along with manual hours volunteers submitted:
 
 - **Approve** one row, or **Approve all** for kiosk-verified rows of one shift (up to 50 at a time).
 - **Reject** a row with a required reason. The volunteer sees the reason.
@@ -27,6 +25,7 @@ When it arrives, the Dashboard will group items by shift:
 
 ## Related articles
 
+- coordinator-needs-attention
 - coordinator-attendance
 - check-out-and-hours
 - verified-letters

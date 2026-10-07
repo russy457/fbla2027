@@ -6,8 +6,6 @@ tags: [account, sign up, birth date, age, onboarding, profile, register, login]
 roles: volunteer
 ---
 
-> Coming soon: self-service account creation opens in an upcoming release. Until then, the demo uses prepared accounts you can pick on the sign-in screen.
-
 ## Birth date comes first
 
 Setup asks for your birth date **before** an account is created. You must be **13 or older** to use this app. If you are younger, setup stops with "You must be 13 or older to use this app" and no account is made. Ask a parent or guardian about volunteering together.

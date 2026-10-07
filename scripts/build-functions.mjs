@@ -10,11 +10,13 @@
  * functions/package.json, and creates its own package-lock.json. The result
  * never imports ../shared or any workspace path, so Cloud Build can install
  * and run it on its own. firebase.json points functions.source here.
+ * The help articles (src/content/help/*.md) are copied to functions-dist/help
+ * for askAssistant grounding.
  *
  * Usage: node scripts/build-functions.mjs [--skip-lock]
  */
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -85,11 +87,19 @@ const writeLockfile = () => {
   }
 };
 
+// Tier 1 lane C: askAssistant grounds answers on the help articles; ship them next to the bundle.
+const copyHelpArticles = () => {
+  const target = join(OUT_DIR, "help");
+  rmSync(target, { recursive: true, force: true });
+  cpSync(join(ROOT, "src", "content", "help"), target, { recursive: true, filter: (source) => !/\.(json|ts)$/.test(source) });
+};
+
 const main = async () => {
   const startedAt = Date.now();
   rmSync(join(OUT_DIR, "lib"), { recursive: true, force: true });
   mkdirSync(join(OUT_DIR, "lib"), { recursive: true });
   await bundle();
+  copyHelpArticles();
   writePackageJson();
   if (!skipLock) writeLockfile();
   console.log(`build:functions: wrote functions-dist/ in ${Date.now() - startedAt} ms`);

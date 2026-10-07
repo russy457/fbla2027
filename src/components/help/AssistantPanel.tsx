@@ -1,76 +1,79 @@
 /**
  * AssistantPanel.tsx
- * The "Ask a question" box (SPEC 9.6, D7). In Tier 0 every answer comes from
- * Help Center search and is labeled "From Help Center"; no AI is called. A
- * note says the AI assistant is coming soon and needs sign-in. The question
- * counter appears near the 2,000-character limit, and answers are announced
- * through a polite live region. Answers are plain text plus article links.
+ * The "Ask a question" box (SPEC 9.6, D7), on /help and in the Quick help
+ * slide-over (header button or the "?" key), so it is reachable from any page.
+ *
+ *   signed in + finished profile   asks ai.askAssistant: an answer grounded on
+ *                                  help articles, labeled "AI answer, may be
+ *                                  wrong" (or "From Help Center" when the
+ *                                  server fell back), with cited article links
+ *   everyone else                  answers locally from Help Center search
+ *                                  (top 3 articles) plus "Sign in to ask" or
+ *                                  "Finish your profile" as the way forward
+ *
+ * If the call fails (offline, rate limited) the local answer is shown with
+ * the error, so a question is never left unanswered. The counter appears
+ * near the 2,000-character limit, answers are announced through a polite
+ * live region, and every answer is plain text (G16).
  */
 import { useId, useState, type FormEvent, type ReactElement } from "react";
-import { BookOpenText, Sparkle } from "@phosphor-icons/react";
+import { Sparkle } from "@phosphor-icons/react";
+import { Link, useLocation } from "react-router-dom";
+import type { AskAssistantOutput, OpInput } from "@fbla/shared";
 import { buttonClassName } from "@/components/ui/buttonStyles";
-import {
-  answerFromHelpCenter,
-  COUNTER_THRESHOLD,
-  MAX_QUESTION_CHARS,
-  type HelpAnswer,
-  type HelpLibrary
-} from "@/lib/help";
-import { ArticleResultList } from "./ArticleResultList";
+import { api, toApiUserError } from "@/lib/api";
+import { answerFromHelpCenter, COUNTER_THRESHOLD, MAX_QUESTION_CHARS, type HelpAnswer, type HelpLibrary } from "@/lib/help";
+import { useSession } from "@/store/authStore";
+import { AssistantAnswerView } from "./AssistantAnswerView";
+import { HelpCenterAnswer } from "./HelpCenterAnswer";
 import { renderPageArticleLink, type RenderArticleLink } from "./articleLinks";
+import { accessFromSession, useSignedInAccess, type AssistantAccess } from "./useAssistantAccess";
+
+export type AskAssistantFn = (input: OpInput<"ai", "askAssistant">) => Promise<AskAssistantOutput>;
 
 interface AssistantPanelProps {
   readonly library: HelpLibrary;
   readonly renderLink?: RenderArticleLink;
   /** Heading level so the section nests under the host's headings. */
   readonly headingLevel?: 2 | 3;
+  /** Injected in tests; the app calls the ai.askAssistant op. */
+  readonly ask?: AskAssistantFn;
+  /** Injected in tests; the app reads the session and profile. */
+  readonly access?: AssistantAccess;
 }
 
-const numberFormat = new Intl.NumberFormat("en-US");
+type PanelState =
+  | { readonly kind: "idle" }
+  | { readonly kind: "pending" }
+  | { readonly kind: "local"; readonly answer: HelpAnswer; readonly notice: string | null }
+  | { readonly kind: "remote"; readonly result: AskAssistantOutput };
 
-const AnswerView = ({ answer, renderLink }: { answer: HelpAnswer; renderLink: RenderArticleLink }) => {
-  if (answer.kind === "articles") {
-    return (
-      <div className="flex flex-col gap-2">
-        <p className="inline-flex items-center gap-1.5 self-start rounded-full bg-accent-subtle px-2.5 py-1 text-xs font-semibold text-accent">
-          <BookOpenText aria-hidden="true" size={14} weight="bold" />
-          {answer.label}
-        </p>
-        <p className="text-sm text-fg">These articles answer questions like yours:</p>
-        <ArticleResultList
-          articles={answer.hits.map((hit) => hit.article)}
-          terms={answer.hits[0]?.matchedTerms ?? []}
-          renderLink={renderLink}
-          label="Suggested answers"
-          compact
-        />
-      </div>
-    );
-  }
-  if (answer.kind === "empty-question") {
-    return <p className="text-sm text-fg">Type a question first, for example "when does check-in open".</p>;
-  }
-  if (answer.kind === "too-long") {
-    return <p className="text-sm font-semibold text-status-danger">{answer.message}</p>;
-  }
-  if (answer.kind === "no-match") {
-    return (
-      <p className="text-sm text-fg">
-        <span className="font-semibold">No articles match.</span> Try other words, or browse the topics.
-      </p>
-    );
-  }
-  // Exhaustive: every HelpAnswer kind is handled above.
-  return null;
+const numberFormat = new Intl.NumberFormat("en-US");
+const defaultAsk: AskAssistantFn = (input) => api.ai.askAssistant(input);
+
+const AccessNote = ({ access, pathname }: { access: AssistantAccess; pathname: string }): ReactElement | null => {
+  if (access === "ready" || access === "checking") return null;
+  const isSignedOut = access === "signed-out";
+  const to = isSignedOut ? `/login?next=${encodeURIComponent(pathname)}` : `/onboarding?next=${encodeURIComponent(pathname)}`;
+  return (
+    <p className="flex items-start gap-2 border-t border-border pt-4 text-sm text-fg-muted">
+      <Sparkle aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
+      <span>
+        <Link to={to} className="font-semibold text-accent underline underline-offset-2">
+          {isSignedOut ? "Sign in to ask" : "Finish your profile"}
+        </Link>{" "}
+        the assistant for a written answer. Until then, answers come from Help Center articles.
+      </span>
+    </p>
+  );
 };
 
-export const AssistantPanel = ({
-  library,
-  renderLink = renderPageArticleLink,
-  headingLevel = 2
-}: AssistantPanelProps): ReactElement => {
+type PanelViewProps = Omit<AssistantPanelProps, "access"> & { readonly access: AssistantAccess };
+
+const AssistantPanelView = ({ library, renderLink = renderPageArticleLink, headingLevel = 2, ask = defaultAsk, access }: PanelViewProps): ReactElement => {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState<HelpAnswer | null>(null);
+  const [state, setState] = useState<PanelState>({ kind: "idle" });
+  const { pathname } = useLocation();
   const baseId = useId();
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const isTooLong = question.length > MAX_QUESTION_CHARS;
@@ -78,9 +81,27 @@ export const AssistantPanel = ({
   const errorId = `${baseId}-error`;
   const counterId = `${baseId}-counter`;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setAnswer(answerFromHelpCenter(question, library));
+    const local = answerFromHelpCenter(question, library);
+    // Empty and over-long questions never reach the server.
+    if (access !== "ready" || local.kind === "empty-question" || local.kind === "too-long") {
+      setState({ kind: "local", answer: local, notice: null });
+      return;
+    }
+    setState({ kind: "pending" });
+    try {
+      setState({ kind: "remote", result: await ask({ question: question.trim(), route: pathname }) });
+    } catch (error) {
+      setState({ kind: "local", answer: local, notice: toApiUserError(error).message });
+    }
+  };
+
+  const renderState = (): ReactElement | null => {
+    if (state.kind === "pending") return <p className="text-sm text-fg-muted">Finding an answer...</p>;
+    if (state.kind === "remote") return <AssistantAnswerView result={state.result} library={library} renderLink={renderLink} />;
+    if (state.kind === "local") return <HelpCenterAnswer answer={state.answer} notice={state.notice} renderLink={renderLink} />;
+    return null;
   };
 
   return (
@@ -89,10 +110,12 @@ export const AssistantPanel = ({
         <Heading id={`${baseId}-title`} className="text-lg font-semibold tracking-tight text-fg">
           Ask a question
         </Heading>
-        <p className="text-sm text-fg-muted">Answers come from Help Center articles.</p>
+        <p className="text-sm text-fg-muted">
+          {access === "ready" ? "The assistant answers from Help Center articles and links its sources." : "Answers come from Help Center articles."}
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-2">
+      <form onSubmit={(event) => void handleSubmit(event)} noValidate className="flex flex-col gap-2">
         <label htmlFor={`${baseId}-question`} className="text-sm font-semibold text-fg">
           Your question
         </label>
@@ -115,19 +138,30 @@ export const AssistantPanel = ({
             Keep it under 2,000 characters.
           </p>
         ) : null}
-        <button type="submit" disabled={isTooLong} className={buttonClassName("primary", "self-start")}>
+        <button type="submit" disabled={isTooLong || state.kind === "pending"} className={buttonClassName("primary", "self-start")}>
           Ask
         </button>
       </form>
 
-      <div aria-live="polite" className="empty:hidden">
-        {answer ? <AnswerView answer={answer} renderLink={renderLink} /> : null}
+      <div aria-live="polite" aria-busy={state.kind === "pending"} className="empty:hidden">
+        {renderState()}
       </div>
 
-      <p className="flex items-start gap-2 border-t border-border pt-4 text-sm text-fg-muted">
-        <Sparkle aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
-        <span>Sign in to ask the AI assistant (coming soon).</span>
-      </p>
+      <AccessNote access={access} pathname={pathname} />
     </section>
   );
+};
+
+/** Reads the profile only for signed-in people, then renders the panel. */
+const SignedInAssistantPanel = (props: PanelViewProps & { readonly uid: string }): ReactElement => {
+  const access = useSignedInAccess(props.uid);
+  return <AssistantPanelView {...props} access={access} />;
+};
+
+export const AssistantPanel = ({ access, ...props }: AssistantPanelProps): ReactElement => {
+  const session = useSession();
+  if (access) return <AssistantPanelView {...props} access={access} />;
+  const fromSession = accessFromSession(session);
+  if (fromSession === null && session.status === "user") return <SignedInAssistantPanel {...props} access="checking" uid={session.user.uid} />;
+  return <AssistantPanelView {...props} access={fromSession ?? "checking"} />;
 };

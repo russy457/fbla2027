@@ -1,7 +1,7 @@
 ---
 slug: coordinator-attendance
 title: Finalizing shifts and attendance
-summary: What happens to every signup when a shift is finalized, and how attendance corrections will work.
+summary: What happens to every signup when a shift is finalized, and how to correct attendance with a note.
 tags: [finalize, finalise, attendance, no-show, excused, shift ended, coordinator, roster, correct]
 roles: coordinator
 ---
@@ -22,16 +22,16 @@ After finalizing, contact details for that shift are frozen and the shift is mar
 
 ## Correcting attendance
 
-> Coming soon: attendance tools on the shift roster.
-
-When they arrive, each change needs a short note and the volunteer is told about it:
+Use the attendance tools on the shift roster. Each change needs a short note, and the volunteer is told about it:
 
 - Change a no-show to **excused** (no hours) or to **completed** with minutes in 15-minute steps, up to the scheduled length.
-- Change a completed signup to **no-show**, which removes its hours from letters.
-- Volunteers can ask for a review of a no-show within 30 days of the shift.
+- Change a completed signup to **no-show**, which rejects its hours and removes them from letters.
+- Volunteers can ask for a review of a no-show within 30 days of the shift. Open requests appear in **Needs attention**.
 
 ## Related articles
 
+- attendance-disputes
+- coordinator-needs-attention
 - coordinator-approve-hours
 - coordinator-start-kiosk
 - check-out-and-hours

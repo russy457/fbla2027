@@ -16,7 +16,8 @@
  *
  * Typo tolerance comes from the engine (Levenshtein expansion, penalized).
  */
-import { STOP_WORDS, SearchEngine, tokenize, type SearchableRecord } from "@/lib/search";
+// Relative (not "@/lib/search") so Cloud Functions can bundle this file for askAssistant retrieval.
+import { STOP_WORDS, SearchEngine, tokenize, type SearchableRecord } from "../search";
 import type { HelpArticle, HelpSearchHit } from "./types";
 
 /** Per-field term-frequency multipliers (title and tag boosts). */

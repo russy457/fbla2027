@@ -6,8 +6,6 @@ tags: [reports, pdf, csv, export, attendance rate, coordinator, volunteer, downl
 roles: all
 ---
 
-> Coming soon: reports open in an upcoming release. This article describes what they will contain.
-
 ## Two reports
 
 **Volunteer hours report** (for volunteers, from Impact): a summary, hours by organization, hours by month, your shift list, and milestones.

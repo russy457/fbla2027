@@ -28,6 +28,10 @@ const OrgDashboardPage = lazyWithReload(() => import("./pages/OrgDashboardPage")
 const KioskPage = lazyWithReload(() => import("./pages/KioskPage"));
 const AdminPage = lazyWithReload(() => import("./pages/AdminPage"));
 const NotFoundPage = lazyWithReload(() => import("./pages/NotFoundPage"));
+// Tier 1 lane C
+const PrivacyPage = lazyWithReload(() => import("./pages/legal/PrivacyPage"));
+const TermsPage = lazyWithReload(() => import("./pages/legal/TermsPage"));
+const AccessibilityPage = lazyWithReload(() => import("./pages/legal/AccessibilityPage"));
 
 export const routes: RouteObject[] = [
   {
@@ -52,6 +56,10 @@ export const routes: RouteObject[] = [
           { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] }
         ]
       },
+      // Tier 1 lane C
+      { path: "privacy", element: <PrivacyPage /> },
+      { path: "terms", element: <TermsPage /> },
+      { path: "accessibility", element: <AccessibilityPage /> },
       { path: "*", element: <NotFoundPage /> }
     ]
   },

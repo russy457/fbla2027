@@ -26,7 +26,13 @@ Many volunteers are high-school students, so the app collects as little as it ca
 
 Alerts appear inside the app only. We do not send email, text messages, or push notifications.
 
-The help search on this page runs in your browser. The future AI assistant will receive help article text and the page you are on, never your profile or personal data.
+The help search on this page runs in your browser. The AI assistant receives only your question, help article text, and the name of the page you are on, never your profile or personal data. Don't type private details into the Ask box.
+
+## Policies
+
+- [Privacy policy](/privacy)
+- [Terms of use](/terms)
+- [Accessibility statement](/accessibility)
 
 ## Related articles
 

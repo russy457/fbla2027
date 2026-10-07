@@ -1,10 +1,21 @@
 {
-  "//": "Cloud Functions source. Typechecked here, bundled by scripts/build-functions.mjs with esbuild.",
+  "//": "Cloud Functions source. Typechecked here, bundled by scripts/build-functions.mjs with esbuild. Tier 1 lane C: askAssistant reuses the web app's pure help/search modules (no DOM, no Vite APIs), listed below so this project typechecks them too.",
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2023"],
     "types": ["node"],
     "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.functions.tsbuildinfo"
   },
-  "include": ["src", "test"]
+  "include": [
+    "src",
+    "test",
+    "../src/lib/brand.ts",
+    "../src/lib/search/*.ts",
+    "../src/lib/help/frontMatter.ts",
+    "../src/lib/help/helpSearch.ts",
+    "../src/lib/help/parseArticle.ts",
+    "../src/lib/help/routeContext.ts",
+    "../src/lib/help/types.ts"
+  ],
+  "exclude": ["../src/**/*.test.ts"]
 }

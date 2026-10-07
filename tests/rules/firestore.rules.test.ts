@@ -268,4 +268,11 @@ describe("system collections", () => {
     await assertFails(setDoc(doc(as("vol1"), "somethingElse/x"), { a: 1 }));
     await assertFails(getDoc(doc(as("vol1"), "turnstileTokens/abc")));
   });
+
+  // Tier 1 lane C
+  it("aiUsage counters: no client access, not even your own or as admin", async () => {
+    await assertFails(getDoc(doc(as("vol1"), "aiUsage/vol1")));
+    await assertFails(setDoc(doc(as("vol1"), "aiUsage/vol1"), { hourCount: 0 }));
+    await assertFails(getDoc(doc(as("admin1", { admin: true }), "aiUsage/_global")));
+  });
 });

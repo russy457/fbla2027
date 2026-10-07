@@ -20,6 +20,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { AccountControls } from "./AccountControls";
+import { LegalLinks } from "./LegalLinks"; // Tier 1 lane C
 import { VOLUNTEER_NAV_ITEMS } from "./navItems";
 
 const desktopLinkClass = ({ isActive }: { isActive: boolean }): string =>
@@ -102,6 +103,8 @@ export const AppLayout = (): ReactElement => {
       <footer className="border-t border-border bg-surface pb-20 lg:pb-0">
         <div className="mx-auto w-full max-w-5xl px-4 py-6">
           <DisplayPreferences />
+          {/* Tier 1 lane C */}
+          <LegalLinks />
         </div>
       </footer>
 

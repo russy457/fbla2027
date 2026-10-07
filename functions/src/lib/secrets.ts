@@ -7,7 +7,13 @@
  */
 import { defineSecret } from "firebase-functions/params";
 
-export type SecretName = "KIOSK_MASTER_SECRET" | "TURNSTILE_SECRET";
+export type SecretName =
+  | "KIOSK_MASTER_SECRET"
+  | "TURNSTILE_SECRET"
+  // Tier 1 lane C: AI provider keys (ai endpoint) and the deployed demo account password (admin.resetDemoData).
+  | "ANTHROPIC_API_KEY"
+  | "OPENROUTER_API_KEY"
+  | "DEMO_ACCOUNT_PASSWORD";
 
 export const deploySecrets = (...names: SecretName[]) =>
   process.env.FUNCTIONS_EMULATOR === "true" ? [] : names.map((name) => defineSecret(name));

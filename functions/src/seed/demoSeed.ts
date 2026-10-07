@@ -9,12 +9,15 @@
  *   - a full shift at the second verified org with two people waitlisted,
  *   - a shift at the unverified org (Sam, a minor, is blocked from it),
  *   - another pantry shift later in the week.
- * The finished history and the past letter come from demoHistory.ts.
+ * The finished history and the past letter come from demoHistory.ts; the
+ * E1 extras (more causes, more shifts, a Needs attention queue) from
+ * demoExtras.ts.
  */
 import { DAY_MS, NEW_VOLUNTEER_RELIABILITY, signupIdFor, type InstanceDoc, type OpportunityDoc } from "@fbla/shared";
 import { ts } from "../lib/firestore";
 import { ADMIN, BACKGROUND, DEMO_ACCOUNTS, OPPORTUNITIES, ORGS, VOLUNTEER, type DemoAccount, type DemoOpportunity, type DemoPerson } from "./demoCast";
 import { buildHistory, buildPastLetter, localShiftStart, reliabilityInputs, type SeedWrite, type SeededLetter } from "./demoHistory";
+import { EXTRA_OPPORTUNITIES, buildDemoExtras } from "./demoExtras";
 import {
   instanceDoc,
   organizationDoc,
@@ -28,7 +31,7 @@ import {
 } from "./seedBuilders";
 
 /** Bump when the seed's shape changes; demo:reset reseeds when it differs. */
-export const SEED_SCHEMA_VERSION = 2;
+export const SEED_SCHEMA_VERSION = 3;
 export const DEMO_INSTANCE_ID = "demo-shift";
 export const FULL_INSTANCE_ID = "reading-buddies-full";
 export const DEMO_SHIFT_LENGTH_MIN = 180;
@@ -147,6 +150,7 @@ export const buildDemoSeed = (params: DemoSeedParams): DemoSeed => {
   const shifts = upcomingShifts(nowMs, demoShiftStartMs);
   const upcoming = buildUpcoming(params, shifts);
   const letter = buildPastLetter(nowMs, history, params.letterVerifyCode, params.letterNonce);
+  const extras = buildDemoExtras(nowMs, params.saltFor);
   const reliabilityFor = (uid: string) => {
     const inputs = reliabilityInputs(history, uid);
     return inputs.attended + inputs.noShows === 0 ? NEW_VOLUNTEER_RELIABILITY : reliabilityOf(inputs.attended, inputs.noShows);
@@ -156,13 +160,13 @@ export const buildDemoSeed = (params: DemoSeedParams): DemoSeed => {
     { path: `organizations/${org.id}`, data: organizationDoc(org, ADMIN.uid, nowMs) },
     { path: `organizations/${org.id}/members/${org.owner.uid}`, data: ownerMemberDoc(org, nowMs) }
   ]);
-  const nextStarts = nextStartByOpportunity(shifts);
-  const opportunityWrites = Object.values(OPPORTUNITIES).map(
+  const nextStarts = new Map([...nextStartByOpportunity(shifts), ...extras.nextStarts]);
+  const opportunityWrites = [...Object.values(OPPORTUNITIES), ...Object.values(EXTRA_OPPORTUNITIES)].map(
     (opportunity): SeedWrite => ({ path: `opportunities/${opportunity.id}`, data: opportunityDoc(opportunity, nextStarts.get(opportunity.id) ?? null, nowMs) })
   );
   const everyone: readonly DemoPerson[] = [...DEMO_ACCOUNTS, ...Object.values(BACKGROUND)];
   const peopleWrites = everyone.flatMap((person): SeedWrite[] => {
-    const approved = history.byUid.get(person.uid)?.approvedLogs ?? [];
+    const approved = [...(history.byUid.get(person.uid)?.approvedLogs ?? []), ...(extras.approvedLogs.get(person.uid) ?? [])];
     const account = accountOf(person);
     const publicDoc: SeedWrite = { path: `users/${person.uid}`, data: publicUserDoc(person, approved, nowMs) };
     if (!account) return [publicDoc];
@@ -171,7 +175,8 @@ export const buildDemoSeed = (params: DemoSeedParams): DemoSeed => {
   });
   const contactWrites = [
     ...history.contacts.map((entry) => ({ person: entry.account as DemoPerson, instanceId: entry.instanceId, instance: entry.instance })),
-    ...upcoming.contacts.map((entry) => ({ person: accountOf(entry.person) ?? entry.person, instanceId: entry.instanceId, instance: entry.instance }))
+    ...upcoming.contacts.map((entry) => ({ person: accountOf(entry.person) ?? entry.person, instanceId: entry.instanceId, instance: entry.instance })),
+    ...extras.contacts
   ].map(
     (entry): SeedWrite => ({
       path: `signupContacts/${signupIdFor(entry.instanceId, entry.person.uid)}`,
@@ -186,7 +191,7 @@ export const buildDemoSeed = (params: DemoSeedParams): DemoSeed => {
 
   return {
     accounts: DEMO_ACCOUNTS,
-    writes: [...orgWrites, ...opportunityWrites, ...peopleWrites, ...history.writes, ...upcoming.writes, ...contactWrites, ...letter.writes, ...systemWrites],
+    writes: [...orgWrites, ...opportunityWrites, ...peopleWrites, ...history.writes, ...upcoming.writes, ...extras.writes, ...contactWrites, ...letter.writes, ...systemWrites],
     letter,
     demoShiftStartMs
   };

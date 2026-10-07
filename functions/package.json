@@ -9,6 +9,7 @@
     "node": ">=22 <23"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@fbla/shared": "^0.1.0",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",

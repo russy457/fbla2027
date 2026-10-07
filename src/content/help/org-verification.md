@@ -1,14 +1,14 @@
 ---
 slug: org-verification
-title: Registering an organization and verification
+title: Organization verification, archiving, and deleting
 summary: Who can register a nonprofit, what the Unverified chip means, and how archiving and deleting work.
 tags: [organization, register, nonprofit, verified, unverified, ein, owner, coordinator, archive, delete, email]
 roles: coordinator
 ---
 
-> Coming soon: self-service registration opens in an upcoming release. The demo organization is already set up and verified.
-
 ## Who can register
+
+For the step-by-step form, see [Registering your nonprofit](/help/org-registration).
 
 To register an organization you must:
 
@@ -35,6 +35,8 @@ When verification is granted, these limits lift automatically. Changing the orga
 
 ## Related articles
 
+- org-registration
+- coordinator-invites
 - privacy-and-minors
 - verified-letters
 - coordinator-start-kiosk

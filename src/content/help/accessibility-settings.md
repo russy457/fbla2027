@@ -29,6 +29,10 @@ Every status, such as approved, pending, or revoked, shows an icon and a word, s
 
 Buttons and links are at least 44 pixels tall so they are easy to tap.
 
+## More information
+
+Read the [Accessibility statement](/accessibility) for more about how the app supports accessibility. When you are signed in, your display settings are also saved to your profile.
+
 ## Related articles
 
 - getting-started

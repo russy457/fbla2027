@@ -48,6 +48,9 @@ import {
   setDemoClockInput,
   setDemoClockOutput
 } from "./schemas/ops/systemOps";
+// Tier 1 lane C
+import { askAssistantInput, askAssistantOutput } from "./schemas/ops/aiOps";
+import { resetDemoDataInput, resetDemoDataOutput } from "./schemas/ops/demoOps";
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -74,10 +77,14 @@ export const OPS = {
   admin: {
     ping: op(pingInput, pingOutput),
     runDueJobs: op(runDueJobsInput, runDueJobsOutput),
-    setDemoClock: op(setDemoClockInput, setDemoClockOutput)
+    setDemoClock: op(setDemoClockInput, setDemoClockOutput),
+    // Tier 1 lane C
+    resetDemoData: op(resetDemoDataInput, resetDemoDataOutput)
   },
   ai: {
-    ping: op(pingInput, pingOutput)
+    ping: op(pingInput, pingOutput),
+    // Tier 1 lane C
+    askAssistant: op(askAssistantInput, askAssistantOutput)
   }
 } as const;
 

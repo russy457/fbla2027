@@ -2,15 +2,21 @@
  * HelpHome.test.tsx
  * Component tests for the /help page: search results with highlighted
  * terms, the announced result count, the "No articles match" empty state,
- * the topic index, and the Tier 0 Ask box (help articles only, no AI).
+ * the topic index, and the Ask box for visitors (help articles plus
+ * "Sign in to ask"; the signed-in assistant is in AssistantPanel.test.tsx).
  */
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { useAuthStore } from "@/store/authStore";
 import { createFixtureLibrary } from "@/lib/help/testFixtures";
 import HelpPage from "@/pages/HelpPage";
 
 const library = createFixtureLibrary();
+
+beforeEach(() => {
+  useAuthStore.setState({ session: { status: "signed-out" } });
+});
 
 const renderHelp = (path = "/help") =>
   render(
@@ -74,7 +80,7 @@ describe("Help Center home", () => {
     expect(screen.getByText("From Help Center")).toBeInTheDocument();
     const answers = screen.getByRole("list", { name: "Suggested answers" });
     expect(within(answers).getAllByRole("link")[0]).toHaveAttribute("href", "/help/kiosk-check-in");
-    expect(screen.getByText("Sign in to ask the AI assistant (coming soon).")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sign in to ask" })).toHaveAttribute("href", "/login?next=%2Fhelp");
   });
 
   it("shows the counter near the limit and blocks questions that are too long", () => {

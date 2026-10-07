@@ -2,7 +2,7 @@
 slug: verify-a-letter
 title: Checking a letter on the Verify page
 summary: Anyone can enter a letter code to see whether the letter is valid, superseded, or revoked.
-tags: [verify, letter, code, valid, superseded, revoked, school, check, proof]
+tags: [verify, letter, code, valid, superseded, revoked, school, check, proof, real, authentic, fake, teacher, counselor, employer]
 roles: all
 ---
 

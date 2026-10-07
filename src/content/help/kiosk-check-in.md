@@ -27,7 +27,7 @@ The code changes every **30 seconds**. The current code and the one just before 
 
 ## Scanning a QR code
 
-Typing the code always works and is the main way to check in. QR scanning is coming soon: on the secure website, the kiosk will also show a QR code you can scan from the check-in screen. If your camera is blocked, you can type the code instead.
+The kiosk also shows a QR code. On the secure website, press **Scan QR** on the check-in screen and point your camera at it. Typing the code always works too, so if your camera is blocked or scanning fails, switch to typing the code.
 
 ## Please don't share codes
 
