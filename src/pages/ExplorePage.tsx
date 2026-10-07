@@ -9,8 +9,10 @@
  *      with the signup button matrix (D5) and Save.
  * Visitors can browse; "Sign up" sends them to sign in first. Live: seat
  * counts and the viewer's signup status update without a reload.
+ * Tier 2 lane C: with a public Mapbox token configured, a List / Map switch
+ * shows the filtered shifts' organizations on a map (list stays default).
  */
-import { useMemo, type ReactElement } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ErrorState } from "@/components/ErrorState";
@@ -31,6 +33,16 @@ import { getOrganizations } from "@/lib/data/orgs";
 import { applyFilters, filtersToParams, parseFilters, type ExploreFilters as Filters, type ExploreRow } from "@/lib/explore/filters";
 import { recommendShifts } from "@/lib/explore/recommendations";
 import { useSessionUser } from "@/store/authStore";
+// Tier 2 lane C
+import { ExploreMapView, ExploreViewToggle, type ExploreView } from "@/components/explore/ExploreMapView";
+import { readClientEnv } from "@/lib/env";
+import { coarsePoint, mapboxTokenFrom, orgMapPoints } from "@/lib/explore/mapPoints";
+
+/** The public Mapbox token, or null (map switch hidden) when unset or not a pk. token. */
+const MAPBOX_TOKEN = ((): string | null => {
+  const result = readClientEnv();
+  return result.ok ? mapboxTokenFrom(result.env.VITE_MAPBOX_TOKEN) : null;
+})();
 
 /** Explore re-checks "Shift started" and seat states every 15 seconds. */
 const EXPLORE_TICK_MS = 15_000;
@@ -41,11 +53,13 @@ const ExplorePage = (): ReactElement => {
   const uid = user?.uid ?? null;
   const [params, setParams] = useSearchParams();
   const filters = useMemo(() => parseFilters(params), [params]);
+  const [view, setView] = useState<ExploreView>("list"); // Tier 2 lane C
+  const isMapView = MAPBOX_TOKEN !== null && view === "map";
   const instances = useUpcomingInstances(nowMs);
   const opportunities = useActiveOpportunities();
   const signups = useMySignups(uid);
   const profile = usePrivateProfile(uid);
-  const orgs = useQuery({ queryKey: ["organizations"], queryFn: getOrganizations, staleTime: 60_000, enabled: filters.org !== null });
+  const orgs = useQuery({ queryKey: ["organizations"], queryFn: getOrganizations, staleTime: 60_000, enabled: filters.org !== null || isMapView });
 
   const signupByInstance = useMemo(
     () => new Map<string, Signup>((signups.data ?? []).map((signup) => [signup.instanceId, signup])),
@@ -70,6 +84,13 @@ const ExplorePage = (): ReactElement => {
     [rows, me, signupByInstance, nowMs]
   );
   const visibleCount = days.reduce((sum, day) => sum + day.instances.length, 0);
+  // Tier 2 lane C: map markers for the organizations behind the filtered list.
+  const mapPoints = useMemo(
+    () => (isMapView ? orgMapPoints(orgs.data ?? [], filtered.map((row) => row.instance.orgId)) : []),
+    [isMapView, orgs.data, filtered]
+  );
+  const homeGeohash = me?.homeGeohash ?? null;
+  const homeArea = useMemo(() => (homeGeohash === null ? null : coarsePoint(homeGeohash)), [homeGeohash]);
   const orgName = filters.org === null ? null : (orgs.data?.find((org) => org.id === filters.org)?.name ?? "one organization");
   const setFilters = (next: Filters): void => setParams(filtersToParams(next), { replace: true });
 
@@ -102,7 +123,10 @@ const ExplorePage = (): ReactElement => {
             canUseDistance={me?.homeGeohash != null}
             orgName={orgName}
           />
-          {days.length === 0 ? (
+          {MAPBOX_TOKEN !== null ? <ExploreViewToggle view={view} onChange={setView} /> : null}
+          {isMapView && MAPBOX_TOKEN !== null ? (
+            <ExploreMapView accessToken={MAPBOX_TOKEN} points={mapPoints} homeArea={homeArea} isLoading={orgs.isLoading} />
+          ) : days.length === 0 ? (
             <section className="flex max-w-xl flex-col items-start gap-3 border-t border-border pt-6">
               <h2 className="text-xl font-semibold text-fg">No shifts match these filters.</h2>
               <button type="button" onClick={() => setFilters(parseFilters(new URLSearchParams()))} className={buttonClassName("secondary")}>

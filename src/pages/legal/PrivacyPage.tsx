@@ -113,6 +113,11 @@ const SECTIONS: ReadonlyArray<LegalSection> = [
       <ul>
         <li>Your display preferences (text size, contrast, and motion) are saved in your browser's local storage.</li>
         <li>Firebase Authentication keeps you signed in by storing a session in your browser.</li>
+        <li>The storage notice remembers that you dismissed it.</li>
+        <li>
+          If you open the optional map on Explore, Mapbox loads the map and may store an anonymous identifier in your
+          browser. The map shows organizations' approximate areas only, never volunteers' locations.
+        </li>
         <li>We do not use advertising or tracking cookies.</li>
       </ul>
     )
@@ -125,6 +130,7 @@ const SECTIONS: ReadonlyArray<LegalSection> = [
         <li>Google Firebase stores app data, runs our server code, and handles sign-in.</li>
         <li>Cloudflare Turnstile checks that sign-ups come from a person, not a bot.</li>
         <li>Anthropic provides the AI model behind the help assistant's answers.</li>
+        <li>Mapbox draws the optional Explore map when you choose to open it.</li>
       </ul>
     )
   },

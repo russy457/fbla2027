@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CONSENT_STORAGE_KEY, getConsent, setConsent } from "./consent";
+import { CONSENT_STORAGE_KEY, getConsent, hasOptionalConsent, setConsent } from "./consent";
 
 describe("consent storage", () => {
   beforeEach(() => {
@@ -39,5 +39,19 @@ describe("consent storage", () => {
     });
     expect(() => setConsent("granted")).not.toThrow();
     spy.mockRestore();
+  });
+});
+
+describe("hasOptionalConsent", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("is false until the visitor explicitly opts in", () => {
+    expect(hasOptionalConsent()).toBe(false);
+    setConsent("denied");
+    expect(hasOptionalConsent()).toBe(false);
+    setConsent("granted");
+    expect(hasOptionalConsent()).toBe(true);
   });
 });

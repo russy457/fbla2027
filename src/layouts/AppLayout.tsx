@@ -23,6 +23,10 @@ import { cn } from "@/lib/cn";
 import { useSessionUser } from "@/store/authStore";
 import { AccountControls } from "./AccountControls";
 import { LegalLinks } from "./LegalLinks"; // Tier 1 lane C
+// Tier 2 lane C
+import { CommandPaletteLauncher } from "@/components/palette/CommandPaletteLauncher";
+import { CookieConsent } from "@/components/CookieConsent";
+import { RouteHead } from "@/components/seo/RouteHead";
 import { VOLUNTEER_NAV_ITEMS } from "./navItems";
 
 const desktopLinkClass = ({ isActive }: { isActive: boolean }): string =>
@@ -69,6 +73,8 @@ export const AppLayout = (): ReactElement => {
         Skip to main content
       </a>
       {import.meta.env.DEV ? <DevEnvironmentBanner /> : null}
+      {/* Tier 2 lane C: per-route title, description, canonical, Open Graph (SPEC Tier 3 SEO). */}
+      <RouteHead />
 
       <header className="sticky top-0 z-(--z-header) border-b border-border bg-surface/95 backdrop-blur-sm">
         <div className="mx-auto flex min-h-16 w-full max-w-5xl items-center justify-between gap-4 px-4">
@@ -88,12 +94,17 @@ export const AppLayout = (): ReactElement => {
                 ))}
               </ul>
             </nav>
+            {/* Tier 2 lane C: command palette, also opened with Ctrl/Cmd+K (SPEC 9.1). */}
+            <CommandPaletteLauncher />
             {/* Quick help slide-over, also opened with the "?" key (SPEC 9.6). */}
             <HelpPanelLauncher />
             <AccountControls />
           </div>
         </div>
       </header>
+
+      {/* Tier 2 lane C: storage notice, in flow so it never covers controls. */}
+      <CookieConsent />
 
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-10 pb-12 outline-none">
         <FadeContent key={pathname}>
