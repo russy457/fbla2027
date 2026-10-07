@@ -45,6 +45,17 @@ describe("suggestedSlugsForRoute", () => {
     expect(suggestedSlugsForRoute("/org/org_123/kiosk/inst-9")[0]).toBe("coordinator-start-kiosk");
   });
 
+  it("covers the Tier 1 screens", () => {
+    expect(suggestedSlugsForRoute("/organizations/alamo-community-pantry")[0]).toBe("organization-page");
+    expect(suggestedSlugsForRoute("/me/profile")[0]).toBe("edit-profile");
+    expect(suggestedSlugsForRoute("/me/notifications")[0]).toBe("alerts-are-in-app");
+    expect(suggestedSlugsForRoute("/me/saved")[0]).toBe("saved-items");
+    expect(suggestedSlugsForRoute("/impact/hours/new")[0]).toBe("manual-hours");
+    expect(suggestedSlugsForRoute("/org/org_123/shifts/new")[0]).toBe("coordinator-create-shifts");
+    expect(suggestedSlugsForRoute("/join")[0]).toBe("coordinator-invites");
+    expect(suggestedSlugsForRoute("/checkin")[0]).toBe("kiosk-check-in");
+  });
+
   it("resolves the verify page with a letter code", () => {
     expect(suggestedSlugsForRoute("/verify/ABCDEFGH234567")[0]).toBe("verify-a-letter");
   });

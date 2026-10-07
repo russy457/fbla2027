@@ -3,10 +3,12 @@
  * Street, city, state, ZIP inputs shared by the organization profile and
  * opportunity forms (SPEC 3.2 address {line1, city, state, zip}). `errorPrefix`
  * maps zod issue paths ("address.zip", "location.address.zip") to fields.
+ * `highlightLine1` marks a street line filled from the shift planner.
  */
 import type { ReactElement } from "react";
 import type { Address } from "@fbla/shared";
 import { TextField } from "@/components/ui/TextField";
+import { PREFILLED_HINT, PREFILLED_INPUT_CLASSES } from "./plannerHighlight";
 import type { FieldErrors } from "@/lib/validation/fieldErrors";
 
 export const EMPTY_ADDRESS: Address = { line1: "", city: "", state: "TX", zip: "" };
@@ -17,15 +19,19 @@ interface AddressFieldsProps {
   readonly errors: FieldErrors;
   readonly errorPrefix: string;
   readonly disabled?: boolean;
+  readonly highlightLine1?: boolean;
 }
 
-export const AddressFields = ({ value, onChange, errors, errorPrefix, disabled = false }: AddressFieldsProps): ReactElement => {
+export const AddressFields = ({ value, onChange, errors, errorPrefix, disabled = false, highlightLine1 = false }: AddressFieldsProps): ReactElement => {
   const set = (key: keyof Address, next: string): void => onChange({ ...value, [key]: key === "state" ? next.toUpperCase() : next });
   const err = (key: keyof Address): string | undefined => errors[`${errorPrefix}.${key}`];
   return (
     <fieldset className="flex flex-col gap-3" disabled={disabled}>
       <legend className="mb-1 text-sm font-semibold text-fg">Address</legend>
-      <TextField label="Street address" value={value.line1} onChange={(event) => set("line1", event.target.value)} error={err("line1")} autoComplete="address-line1" />
+      <TextField
+        label="Street address"
+        {...(highlightLine1 ? { hint: PREFILLED_HINT, inputClassName: PREFILLED_INPUT_CLASSES } : {})}
+        value={value.line1} onChange={(event) => set("line1", event.target.value)} error={err("line1")} autoComplete="address-line1" />
       <div className="grid gap-3 sm:grid-cols-[1fr_6rem_8rem]">
         <TextField label="City" value={value.city} onChange={(event) => set("city", event.target.value)} error={err("city")} autoComplete="address-level2" />
         <TextField label="State" value={value.state} maxLength={2} onChange={(event) => set("state", event.target.value)} error={err("state")} autoComplete="address-level1" />

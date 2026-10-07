@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { Sparkle } from "@phosphor-icons/react";
 import { formatShiftTime } from "@fbla/shared";
 import SpotlightCard from "@/components/bits/SpotlightCard";
+import { OrgLink } from "@/components/ui/OrgLink";
 import { UnverifiedChip } from "@/components/ui/UnverifiedChip";
 import type { Recommendation } from "@/lib/explore/recommendations";
 
@@ -33,7 +34,12 @@ export const RecommendedShifts = ({ picks, hasInterests, title = "Recommended fo
         <Heading id="recommended-title" tabIndex={headingLevel === 1 ? -1 : undefined} className={headingClass}>
           {title}
         </Heading>
-        <p className="text-fg-muted">Add interests to see shifts picked for you.</p>
+        <p className="text-fg-muted">
+          <Link to="/me/profile#interests" className="font-semibold text-accent underline underline-offset-2">
+            Add interests
+          </Link>{" "}
+          to see shifts picked for you.
+        </p>
       </section>
     );
   }
@@ -59,7 +65,7 @@ export const RecommendedShifts = ({ picks, hasInterests, title = "Recommended fo
                   </Link>
                 </h3>
                 <p className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
-                  {row.instance.orgName}
+                  <OrgLink orgId={row.instance.orgId} name={row.instance.orgName} />
                   {row.instance.orgVerified ? null : <UnverifiedChip />}
                 </p>
                 <p className="mt-auto font-mono text-sm text-fg">{formatShiftTime(row.instance.start.toDate(), row.instance.timeZone)}</p>

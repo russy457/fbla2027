@@ -15,6 +15,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { SignupAction } from "@/components/shifts/SignupAction";
 import { formatTimeRange, opportunityPathFor, seatsText } from "@/components/shifts/ShiftRow";
+import { OrgLink } from "@/components/ui/OrgLink";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { UnverifiedChip } from "@/components/ui/UnverifiedChip";
@@ -102,7 +103,7 @@ const OpportunityPage = (): ReactElement => {
           Organization
         </h2>
         <p className="flex flex-wrap items-center gap-2 text-fg">
-          {shift.orgName}
+          <OrgLink orgId={shift.orgId} name={shift.orgName} className="font-semibold text-accent underline underline-offset-2" />
           {shift.orgVerified ? null : <UnverifiedChip />}
         </p>
       </section>

@@ -51,3 +51,7 @@ export * from "./notifications";
 export * from "./schemas/inboxDocs";
 export * from "./schemas/ops/inboxOps";
 // End Tier 1 lane A
+// Tier 1 integration
+export * from "./disputes";
+export * from "./zipAreas";
+export * from "./schemas/ops/profileOps";

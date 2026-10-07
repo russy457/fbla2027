@@ -4,7 +4,8 @@
  * time in the org zone (D24), and the signup status as an icon + text badge
  * (D14). Reads its shift document live, so a cancellation by the
  * organization shows up without a reload. Tier 1: upcoming rows offer Add
- * to calendar (or Download cancellation once the org cancels), E2.
+ * to calendar (or Download cancellation once the org cancels), E2. Past
+ * no-show rows offer Request review (T3).
  */
 import type { ReactElement } from "react";
 import { formatShiftTime } from "@fbla/shared";
@@ -13,14 +14,17 @@ import { useInstance } from "@/hooks/useShiftData";
 import type { Signup } from "@/lib/data/signups";
 import { SIGNUP_STATUS_LABELS } from "@/lib/statusLabels";
 import { CalendarButton } from "./CalendarButton";
+import { RequestReview } from "./RequestReview";
 
 interface MyShiftRowProps {
   readonly signup: Signup;
   /** Show the calendar action (upcoming rows only). */
   readonly withCalendar?: boolean;
+  /** Current time, for the review window on past no-show rows. */
+  readonly nowMs?: number;
 }
 
-export const MyShiftRow = ({ signup, withCalendar = false }: MyShiftRowProps): ReactElement => {
+export const MyShiftRow = ({ signup, withCalendar = false, nowMs }: MyShiftRowProps): ReactElement => {
   const instance = useInstance(signup.instanceId);
   const status = SIGNUP_STATUS_LABELS[signup.status];
   const cancelledByOrg = instance.data?.status === "cancelled" && signup.status !== "cancelled";
@@ -41,6 +45,7 @@ export const MyShiftRow = ({ signup, withCalendar = false }: MyShiftRowProps): R
         {withCalendar && instance.data && signup.status !== "waitlisted" ? (
           <CalendarButton instance={instance.data} signupId={signup.id} cancelled={cancelledByOrg} />
         ) : null}
+        {nowMs !== undefined ? <RequestReview signup={signup} nowMs={nowMs} /> : null}
       </div>
     </li>
   );

@@ -23,15 +23,18 @@ import {
   letterRefDocSchema,
   letterVerificationDocSchema,
   memberDocSchema,
+  notificationDocSchema,
   opportunityDocSchema,
   organizationDocSchema,
   privateProfileDocSchema,
+  savedItemDocSchema,
   signupContactDocSchema,
   signupDocSchema,
   userPublicDocSchema,
   type HoursLogDoc,
   type InstanceDoc,
   type LetterDoc,
+  type NotificationDoc,
   type OrganizationDoc,
   type PrivateProfileDoc,
   type SignupContactDoc,
@@ -55,7 +58,8 @@ const seed = buildDemoSeed({
 const schemaFor = (path: string): z.ZodType | null => {
   const parts = path.split("/");
   if (parts[0] === "organizations") return parts.length === 2 ? organizationDocSchema : parts[2] === "members" ? memberDocSchema : letterRefDocSchema;
-  if (parts[0] === "users") return parts.length === 2 ? userPublicDocSchema : privateProfileDocSchema;
+  if (parts[0] === "users") return parts.length === 2 ? userPublicDocSchema : parts[2] === "saved" ? savedItemDocSchema : privateProfileDocSchema;
+  if (parts[0] === "notifications") return notificationDocSchema;
   const byCollection: Record<string, z.ZodType | null> = {
     opportunities: opportunityDocSchema,
     instances: instanceDocSchema,
@@ -172,6 +176,30 @@ describe("SPEC 10.7 facts", () => {
     const titles = [...new Set(docsIn<InstanceDoc>("instances").map((instance) => instance.data.title))];
     const overlapping = titles.filter((title) => titles.some((other) => other !== title && other.toLowerCase().includes(title.toLowerCase())));
     expect(overlapping).toEqual([]);
+  });
+});
+
+describe("Tier 1 inbox for the demo volunteer", () => {
+  it("has two unread hours-approved alerts for Jordan's latest shifts, so the badge shows", () => {
+    const alerts = seed.writes.filter((write) => write.path.startsWith(`notifications/${VOLUNTEER.uid}/items/`));
+    expect(alerts).toHaveLength(2);
+    alerts.forEach((write) => {
+      const alert = write.data as NotificationDoc;
+      expect(alert).toMatchObject({ type: "hours-approved", read: false, link: "/impact" });
+      expect(alert.createdAt.toMillis()).toBeLessThanOrEqual(NOW_MS);
+      expect(write.path).toMatch(/\/items\/hours-approved_/);
+    });
+    expect(seed.writes.some((write) => write.path.startsWith("notifications/") && !write.path.startsWith(`notifications/${VOLUNTEER.uid}/`))).toBe(false);
+  });
+
+  it("saves one organization for Jordan", () => {
+    const saved = seed.writes.filter((write) => write.path.startsWith(`users/${VOLUNTEER.uid}/saved/`));
+    expect(saved.map((write) => write.path)).toEqual([`users/${VOLUNTEER.uid}/saved/org_alamo-community-pantry`]);
+  });
+
+  it("puts the demo volunteer's ZIP on the map and the orgs at their ZIP centroids", () => {
+    expect(docAt<PrivateProfileDoc>(`users/${VOLUNTEER.uid}/private/profile`)).toMatchObject({ zip: "78204", homeGeohash: "9v1zq" });
+    docsIn<OrganizationDoc>("organizations").forEach(({ data }) => expect(data.geo?.geohash).toHaveLength(5));
   });
 });
 

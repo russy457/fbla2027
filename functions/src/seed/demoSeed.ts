@@ -11,13 +11,15 @@
  *   - another pantry shift later in the week.
  * The finished history and the past letter come from demoHistory.ts; the
  * E1 extras (more causes, more shifts, a Needs attention queue) from
- * demoExtras.ts.
+ * demoExtras.ts; Jordan's unread alerts and saved organization from
+ * demoInbox.ts.
  */
-import { DAY_MS, NEW_VOLUNTEER_RELIABILITY, signupIdFor, type InstanceDoc, type OpportunityDoc } from "@fbla/shared";
+import { DAY_MS, NEW_VOLUNTEER_RELIABILITY, signupIdFor, zipCentroid, type InstanceDoc, type OpportunityDoc } from "@fbla/shared";
 import { ts } from "../lib/firestore";
 import { ADMIN, BACKGROUND, DEMO_ACCOUNTS, OPPORTUNITIES, ORGS, VOLUNTEER, type DemoAccount, type DemoOpportunity, type DemoPerson } from "./demoCast";
 import { buildHistory, buildPastLetter, localShiftStart, reliabilityInputs, type SeedWrite, type SeededLetter } from "./demoHistory";
 import { EXTRA_OPPORTUNITIES, buildDemoExtras } from "./demoExtras";
+import { buildDemoInbox } from "./demoInbox";
 import {
   instanceDoc,
   organizationDoc,
@@ -31,7 +33,7 @@ import {
 } from "./seedBuilders";
 
 /** Bump when the seed's shape changes; demo:reset reseeds when it differs. */
-export const SEED_SCHEMA_VERSION = 3;
+export const SEED_SCHEMA_VERSION = 4;
 export const DEMO_INSTANCE_ID = "demo-shift";
 export const FULL_INSTANCE_ID = "reading-buddies-full";
 export const DEMO_SHIFT_LENGTH_MIN = 180;
@@ -93,7 +95,7 @@ const opportunityDoc = (opportunity: DemoOpportunity, nextStartMs: number | null
   type: "one-time",
   skills: [],
   minAge: opportunity.minAge,
-  location: { address: opportunity.org.address, geo: null },
+  location: { address: opportunity.org.address, geo: zipCentroid(opportunity.org.address.zip) },
   seriesId: null,
   status: "active",
   nextInstanceStart: nextStartMs === null ? null : ts(nextStartMs),
@@ -191,7 +193,7 @@ export const buildDemoSeed = (params: DemoSeedParams): DemoSeed => {
 
   return {
     accounts: DEMO_ACCOUNTS,
-    writes: [...orgWrites, ...opportunityWrites, ...peopleWrites, ...history.writes, ...upcoming.writes, ...extras.writes, ...contactWrites, ...letter.writes, ...systemWrites],
+    writes: [...orgWrites, ...opportunityWrites, ...peopleWrites, ...history.writes, ...upcoming.writes, ...extras.writes, ...contactWrites, ...letter.writes, ...buildDemoInbox(history.logIds, nowMs), ...systemWrites],
     letter,
     demoShiftStartMs
   };

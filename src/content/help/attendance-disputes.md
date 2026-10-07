@@ -10,10 +10,10 @@ Mistakes happen. A volunteer might help all morning but forget to check in, and 
 
 ## For volunteers: request a review
 
-1. Open **My Shifts** and find the past shift, or open **Your track record** on **Impact**.
+1. Open **My Shifts** and find the shift under **Past shifts**.
 2. Press **Request review** next to the no-show.
-3. Explain what happened in 10 to 500 characters, for example "I was at the sorting table from 9 to 1 but forgot to check in."
-4. Send it.
+3. Under **What happened?**, explain in 10 to 500 characters, for example "I was at the sorting table from 9 to 1 but forgot to check in."
+4. Press **Send request**. The row then says "Review requested. The organization will look at it."
 
 Things to know:
 

@@ -1,9 +1,11 @@
 /**
  * resetDemoData.ts
  * admin.resetDemoData (SPEC 5.2, SPEC#demo-accounts 10.7, E1): the admin
- * "Reset demo data" button. Clears every Firestore collection and runs the
- * same seed module as `npm run seed:demo` (applyDemoSeed.ts), so the
- * deployed competition site returns to the known demo state, with the demo
+ * "Reset demo data" button. Clears every Firestore collection (Tier 1
+ * notifications, saved items, invites, reports, the verification log, and
+ * AI usage included) and the generated report and letter PDFs in Storage,
+ * then runs the same seed module as `npm run seed:demo` (applyDemoSeed.ts),
+ * so the deployed competition site returns to the known demo state, with the demo
  * shift starting in `shiftStartsInMin` (default 10) minutes and the demo
  * clock back at zero.
  *
@@ -18,7 +20,7 @@ import { AppError, DEFAULT_DEMO_SHIFT_STARTS_IN_MIN, MINUTE_MS } from "@fbla/sha
 import { admin } from "../lib/auth";
 import { defineCallable } from "../lib/defineCallable";
 import type { FunctionsEnv } from "../lib/env";
-import { applyDemoSeed, clearDemoData } from "../seed/applyDemoSeed";
+import { applyDemoSeed, clearDemoData, clearDemoFiles } from "../seed/applyDemoSeed";
 
 /** Emulator-only demo password; matches scripts/seed-demo.mjs and the e2e helpers. */
 export const LOCAL_DEMO_PASSWORD = "pitchin-demo-2027";
@@ -40,6 +42,7 @@ export const resetDemoData = defineCallable({
     const nowMs = deps.nowMs();
 
     const collectionsCleared = await clearDemoData(deps.db);
+    const filesCleared = await clearDemoFiles(deps.storage, deps.env.storageBucket);
     const { seed, letterPdfStatus } = await applyDemoSeed({
       db: deps.db,
       auth: deps.auth,
@@ -51,7 +54,7 @@ export const resetDemoData = defineCallable({
       password,
       appBaseUrl: deps.env.appBaseUrl
     });
-    deps.log.info(`${fn} reseeded`, { fn, uid: caller.uid, documents: seed.writes.length, collectionsCleared, letterPdfStatus });
+    deps.log.info(`${fn} reseeded`, { fn, uid: caller.uid, documents: seed.writes.length, collectionsCleared, filesCleared, letterPdfStatus });
     return {
       documents: seed.writes.length,
       collectionsCleared,

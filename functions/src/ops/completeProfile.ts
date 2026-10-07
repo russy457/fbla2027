@@ -12,7 +12,8 @@
  * any Turnstile widget is shown, and their account must still be deleted
  * (G18). Deleting your own account needs no bot check, and the age check
  * reads nothing but the input, so running it first gives nothing away.
- *   3. validated profile fields (zod, in the shared op schema),
+ *   3. validated profile fields (zod, in the shared op schema); the ZIP is
+ *      stored with its coarse area from the bundled ZIP table (SPEC 5.9),
  *   4. writes users/{uid}/private/profile and the public users/{uid}
  *      projection (displayName = first name + last initial).
  * Idempotent: an already-complete profile returns its current values; a
@@ -28,6 +29,7 @@ import {
   ageOn,
   displayNameFor,
   fullNameFor,
+  homeGeohashForZip,
   userPublicDocSchema,
   type PrivateProfileDoc,
   type UserPublicDoc
@@ -88,8 +90,8 @@ export const completeProfile = defineCallable({
       skills: input.skills ?? [],
       availability: input.availability ?? null,
       zip: input.zip ?? null,
-      // The ZIP-to-geohash table arrives with Tier 1 onboarding; until then no location is stored.
-      homeGeohash: null,
+      // Coarse area only (SPEC 4.2): the geohash-5 of the bundled ZIP centroid, or null.
+      homeGeohash: homeGeohashForZip(input.zip),
       profileComplete: true,
       profileCompletedAt: ts(nowMs),
       turnstileVerifiedAt: verifiedByTurnstile ? ts(nowMs) : null,

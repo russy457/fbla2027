@@ -5,18 +5,20 @@
  * approved log into a rejected one), every still-valid letter whose frozen
  * evidence lists that log becomes "superseded" with reason hours-changed:
  * on the letter, its letterRefs, and the public projection, so /verify shows
- * "The hours on this letter changed after it was issued." The evidence
- * snapshot itself is never edited.
+ * "The hours on this letter changed after it was issued." The volunteer gets
+ * a "letter-superseded" notification in the same transaction (keyed by
+ * letterId). The evidence snapshot itself is never edited.
  *
  * Bounded: one query (Q20, letters where evidence.logIds array-contains
  * logId and status == valid), one small transaction per letter, and it never
  * writes hoursLogs, so it cannot retrigger itself.
  */
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { COLLECTIONS, PATHS, type HoursLogDoc, type LetterDoc } from "@fbla/shared";
+import { COLLECTIONS, PATHS, letterSupersededNotification, type HoursLogDoc, type LetterDoc } from "@fbla/shared";
 import { defaultDeps, type ServerDeps } from "../lib/deps";
 import { readDoc, runTx, ts } from "../lib/firestore";
 import { requestClock } from "../lib/requestClock";
+import { queueNotification } from "../notifications/notify";
 
 type LogFacts = Pick<HoursLogDoc, "status" | "minutes"> | null;
 
@@ -35,7 +37,7 @@ const supersedeOne = (deps: ServerDeps, letterId: string, nowMs: number): Promis
     // supersededByIssuedAt stays null: no newer letter exists, so /verify explains the hours changed.
     tx.update(deps.db.collection(COLLECTIONS.letterVerifications).doc(letter.verifyCode), { status: "superseded", supersededByIssuedAt: null });
     letter.orgIds.forEach((orgId) => tx.update(deps.db.doc(PATHS.letterRef(orgId, letterId)), { status: "superseded", updatedAt: at }));
-    // TODO(lane A notify): "letter-superseded" notification to letter.uid.
+    queueNotification(tx, deps.db, letter.uid, letterSupersededNotification(letterId), letterId, nowMs);
     return true;
   });
 

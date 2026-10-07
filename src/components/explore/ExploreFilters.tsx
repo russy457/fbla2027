@@ -8,6 +8,7 @@
  * screen reader. The result count is announced politely.
  */
 import { useId, useState, type ChangeEvent, type ReactElement, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { Funnel, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { CAUSE_AREAS, TIME_BLOCKS, WEEKDAY_KEYS } from "@fbla/shared";
 import { buttonClassName } from "@/components/ui/buttonStyles";
@@ -171,7 +172,10 @@ export const ExploreFilters = ({ filters, onChange, resultCount, signedIn, canUs
             </select>
             {canUseDistance ? null : (
               <span id={`${id}-within-hint`} className="text-xs text-fg-muted">
-                Add your ZIP code to your profile to filter by distance.
+                <Link to="/me/profile#zip" className="font-semibold text-accent underline underline-offset-2">
+                  Add your ZIP code
+                </Link>{" "}
+                to your profile to filter by distance.
               </span>
             )}
           </Field>

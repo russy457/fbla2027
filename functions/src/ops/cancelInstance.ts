@@ -9,8 +9,10 @@
  *   checked-in            -> completed mid-shift: hours credited up to the
  *                            cancel time, logged pending + needsReview with
  *                            source org-cancel for a coordinator to confirm
- * A shift that already ended cannot be cancelled (SHIFT_ENDED). A repeat call
- * returns the totals with alreadyCancelled: true.
+ * Each cancelled signup gets a "shift-cancelled" notification (SPEC 8.3) in
+ * the same transaction as its status change, keyed by signupId, so a repeat
+ * call never alerts twice. A shift that already ended cannot be cancelled
+ * (SHIFT_ENDED). A repeat call returns the totals with alreadyCancelled: true.
  */
 import type { Firestore } from "firebase-admin/firestore";
 import {
@@ -18,6 +20,7 @@ import {
   COLLECTIONS,
   assertTransition,
   creditedMinutes,
+  shiftCancelledNotification,
   type HoursLogDoc,
   type InstanceDoc,
   type SignupDoc
@@ -25,6 +28,7 @@ import {
 import { coordinatorOf, instanceResource } from "../lib/auth";
 import { defineCallable } from "../lib/defineCallable";
 import { msOf, readDoc, runTx, ts } from "../lib/firestore";
+import { queueNotification } from "../notifications/notify";
 import { newShiftHoursLog } from "../shifts/hoursRecords";
 import { refreshNextInstanceStart } from "../shifts/opportunitySchedule";
 import { withHistory } from "../shifts/signupRecords";
@@ -63,6 +67,15 @@ const settleSignup = (db: Firestore, signupId: string, instance: InstanceDoc, ac
     if (signup.status === "waitlisted" || signup.status === "confirmed") {
       assertTransition(signup.status, "cancelled", "cancelInstance");
       tx.update(signupRef, { status: "cancelled", cancelReason: "org-cancelled", lateCancel: false, cancelledAt: ts(nowMs), history: history("cancelled"), updatedAt: ts(nowMs) });
+      const content = shiftCancelledNotification({
+        instanceId: signup.instanceId,
+        signupId,
+        title: instance.title,
+        orgName: instance.orgName,
+        startMs: msOf(instance.start),
+        timeZone: instance.timeZone
+      });
+      queueNotification(tx, db, signup.uid, content, signupId, nowMs);
       return "cancelled";
     }
     if (signup.status === "checked-in" && signup.checkInAt !== null) {
@@ -94,7 +107,6 @@ export const cancelInstance = defineCallable({
     const completedSignups = settled.filter((signup) => signup.status === "completed").length;
     await db.collection(COLLECTIONS.instances).doc(input.instanceId).update({ signupCount: completedSignups, updatedAt: ts(nowMs) });
     if (!already) await refreshNextInstanceStart(db, instance.opportunityId, nowMs);
-    // TODO(lane A notify): "shift-cancelled" notification to every cancelled signup.
     return { cancelledSignups, completedSignups, alreadyCancelled: already };
   }
 });

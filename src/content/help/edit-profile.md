@@ -6,7 +6,7 @@ tags: [profile, edit profile, name, interests, skills, availability, zip, phone,
 roles: volunteer
 ---
 
-Your profile helps Explore suggest shifts that fit you. Open it from the avatar menu in the header: choose **Profile**.
+Your profile helps Explore suggest shifts that fit you. Open it with **Profile** in the header. The **Add interests** link on Explore and the **Add your ZIP code** link under the distance filter also take you straight there.
 
 ## What you can change
 
@@ -15,14 +15,15 @@ Your profile helps Explore suggest shifts that fit you. Open it from the avatar 
 - **Interests**: the causes you care about. These power the Recommended row on Explore.
 - **Skills**, such as tutoring or Spanish.
 - **Availability**: mornings, afternoons, and evenings for each day of the week.
-- **ZIP code** (optional). The app keeps only a rough area about 5 km wide, never your address. It lets you filter by distance.
-- **Display settings**: text size, high contrast, and reduce motion.
+- **ZIP code** (optional). The app keeps only a rough area about 5 km wide, never your address. It lets you filter by distance. San Antonio area ZIP codes work with the distance filter; other ZIP codes are kept but the filter stays off.
 
-Press **Save** when you are done.
+Press **Save profile** when you are done. Only the things you changed are sent.
+
+**Display settings** (text size, high contrast, and reduce motion) are at the bottom of every page. The Profile page has a **Display settings** link that jumps there.
 
 ## Discoverable
 
-The **Discoverable** setting lets organizations you haven't volunteered with yet find you when they look for volunteers. Turn it off if you only want to be found by organizations you have already served.
+The **Let new organizations invite me** checkbox (your discoverable setting) lets organizations you haven't volunteered with yet find you when they look for volunteers. They only ever see your first name and last initial. Leave it off if you only want to be found by organizations you have already served.
 
 ## What you can't change here
 

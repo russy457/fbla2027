@@ -10,11 +10,13 @@ Shifts live under an **opportunity**, which describes the work (for example "Foo
 
 ## Use the shift planner
 
-On **Shifts**, press **Create shift**. At the top is a text box. Type what you need in plain words, for example:
+On **Shifts**, press **Create shift**. At the top is a box called **Describe the shift in plain words**. Type what you need, for example:
 
 "need 12 people Sat 9-1 sorting at the food bank"
 
-Press **Parse**. The planner fills in the form below: the number of people, the day, the start and end time, and place or cause words it recognizes. Filled fields are highlighted. Check each one and change anything it got wrong. Nothing is created until you press **Create shift**.
+Press **Fill in the form**. The planner fills in the form below: a title, the cause, the place, the day, the start and end time, and the number of people it recognizes. If the title matches one of your opportunities, that opportunity is picked; otherwise the **New opportunity** form opens already filled in. Filled fields are highlighted and say "Filled from your description." Check each one and change anything it got wrong. If there was no AM or PM, the planner guesses and tells you so.
+
+Nothing is created until you press **Save opportunity** or **Create shift** yourself. Repeating every week is not available yet, so a "every Tuesday" sentence fills in one shift.
 
 ## Fill in the form
 

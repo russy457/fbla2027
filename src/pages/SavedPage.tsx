@@ -2,7 +2,7 @@
  * SavedPage.tsx
  * Route "/me/saved" (SPEC#screen-inventory "Saved", Tier 1): saved shifts
  * (opportunities, each linking to its next upcoming date) and saved
- * organizations (linking to Explore filtered to that organization), each
+ * organizations (linking to their public page, /organizations/:orgId), each
  * with Remove. Saved items are the person's own documents under the rules
  * (SPEC 3.18); names come from the public catalog.
  */
@@ -13,6 +13,7 @@ import { formatShiftTime } from "@fbla/shared";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { SaveToggle } from "@/components/shifts/SaveToggle";
+import { OrgLink, organizationPathFor } from "@/components/ui/OrgLink";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { UnverifiedChip } from "@/components/ui/UnverifiedChip";
@@ -68,7 +69,7 @@ const SavedPage = (): ReactElement => {
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <p className="font-semibold text-fg">{title}</p>
                     <p className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
-                      {opportunity?.orgName}
+                      {opportunity ? <OrgLink orgId={opportunity.orgId} name={opportunity.orgName} /> : null}
                       {opportunity && !opportunity.orgVerified ? <UnverifiedChip /> : null}
                     </p>
                     {next ? (
@@ -104,8 +105,8 @@ const SavedPage = (): ReactElement => {
                       {org && !org.verified ? <UnverifiedChip /> : null}
                     </p>
                     {org ? <p className="max-w-[60ch] text-sm text-fg-muted">{org.mission}</p> : null}
-                    <Link to={`/?org=${encodeURIComponent(item.refId)}`} className="w-fit text-sm font-semibold text-accent underline underline-offset-2">
-                      See their shifts
+                    <Link to={organizationPathFor(item.refId)} className="w-fit text-sm font-semibold text-accent underline underline-offset-2">
+                      See the organization and its shifts
                     </Link>
                   </div>
                   <SaveToggle kind="org" refId={item.refId} label={name} />

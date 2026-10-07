@@ -4,18 +4,21 @@
  * the owner of any organization the letter counts, can revoke it with a
  * reason. The letter, its letterRefs, and the public projection all become
  * "revoked"; /verify shows only the reason's label, never the private note.
- * The volunteer notification is Tier 1 (notifications).
+ * The volunteer gets a "letter-revoked" notification in the same
+ * transaction, keyed by letterId.
  */
 import {
   AppError,
   COLLECTIONS,
   PATHS,
   REVOKE_REASON_LABELS,
+  letterRevokedNotification,
   type LetterDoc
 } from "@fbla/shared";
 import { letterRevoker } from "../lib/auth";
 import { defineCallable } from "../lib/defineCallable";
 import { readDoc, runTx, ts } from "../lib/firestore";
+import { queueNotification } from "../notifications/notify";
 
 export const revokeLetter = defineCallable({
   endpoint: "coordinator",
@@ -23,7 +26,8 @@ export const revokeLetter = defineCallable({
   auth: letterRevoker((input: { letterId: string }) => input.letterId),
   handler: async ({ input, caller, clock, deps }) => {
     const { db } = deps;
-    const at = ts(clock.nowMs());
+    const nowMs = clock.nowMs();
+    const at = ts(nowMs);
     const letterRef = db.collection(COLLECTIONS.letters).doc(input.letterId);
 
     return runTx(db, async (tx) => {
@@ -44,6 +48,7 @@ export const revokeLetter = defineCallable({
         revokeReasonLabel: REVOKE_REASON_LABELS[input.reason]
       });
       letter.orgIds.forEach((orgId) => tx.update(db.doc(PATHS.letterRef(orgId, input.letterId)), { status: "revoked", updatedAt: at }));
+      queueNotification(tx, db, letter.uid, letterRevokedNotification(input.letterId), input.letterId, nowMs);
       return { letterId: input.letterId, alreadyRevoked: false };
     });
   }

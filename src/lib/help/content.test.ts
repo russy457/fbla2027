@@ -46,7 +46,10 @@ const SPEC_SLUGS = [
   "attendance-disputes",
   "org-registration",
   "coordinator-invites",
-  "coordinator-create-shifts"
+  "coordinator-create-shifts",
+  // Tier 1 integration screens
+  "edit-profile",
+  "organization-page"
 ];
 
 describe("bundled help content", () => {

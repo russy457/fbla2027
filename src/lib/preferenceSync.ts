@@ -36,3 +36,11 @@ export const samePreferences = (a: DisplayPreferences, b: DisplayPreferences): b
 export const savePreferencesToProfile = async (uid: string, prefs: DisplayPreferences): Promise<void> => {
   await updateDoc(doc(getFirebase().db, PATHS.privateProfile(uid)), { ...toProfilePreferences(prefs) });
 };
+
+/**
+ * notificationPrefs.discoverable (SPEC 3.17, allowlisted client key): whether
+ * organizations you have not served may find you when ranking volunteers.
+ */
+export const saveDiscoverable = async (uid: string, discoverable: boolean): Promise<void> => {
+  await updateDoc(doc(getFirebase().db, PATHS.privateProfile(uid)), { notificationPrefs: { discoverable } });
+};

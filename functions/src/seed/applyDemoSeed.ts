@@ -90,10 +90,31 @@ export const applyDemoSeed = async (params: ApplySeedParams): Promise<AppliedSee
 /**
  * Deletes every top-level collection (and their subcollections). Only ever
  * called by admin.resetDemoData after its DEMO_MODE check; a demo project
- * holds nothing but demo data. Returns how many collections were cleared.
+ * holds nothing but demo data. That covers the Tier 1 collections too:
+ * notifications/{uid}/items (whose parent docs never exist), users/{uid}/saved,
+ * invites, reports, orgVerificationLog, and aiUsage. Returns how many
+ * collections were cleared.
  */
 export const clearDemoData = async (db: Firestore): Promise<number> => {
   const collections = await db.listCollections();
   for (const collection of collections) await db.recursiveDelete(collection);
   return collections.length;
+};
+
+/** Generated files the reset removes (SPEC 3.22): report PDFs and letter PDFs. */
+export const GENERATED_FILE_PREFIXES = ["reports/", "letters/"] as const;
+
+/**
+ * Deletes generated PDFs from Storage so a reset leaves no report or letter
+ * file whose document is gone (the seeded letter is rendered again right
+ * after). Same DEMO_MODE-only caller as clearDemoData. Returns files deleted.
+ */
+export const clearDemoFiles = async (storage: Storage, bucket: string): Promise<number> => {
+  let deleted = 0;
+  for (const prefix of GENERATED_FILE_PREFIXES) {
+    const [files] = await storage.bucket(bucket).getFiles({ prefix });
+    await Promise.all(files.map((file) => file.delete({ ignoreNotFound: true })));
+    deleted += files.length;
+  }
+  return deleted;
 };

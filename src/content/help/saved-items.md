@@ -18,14 +18,13 @@ Saving does not sign you up and does not hold a seat. To get a spot, press **Sig
 
 ## Find your saved items
 
-1. Open the avatar menu in the header.
-2. Choose **Saved**.
+Press **Saved** in the header.
 
-The Saved page lists **saved shifts** and **saved organizations**. Press an item to open it.
+The Saved page lists **saved shifts** with their next date and **saved organizations** with a link to their organization page. Press an item to open it.
 
 ## Remove an item
 
-On the Saved page, press **Remove** next to the item.
+On the Saved page, press **Saved** next to the item. It turns back into **Save** and the item leaves your list.
 
 ## Privacy
 

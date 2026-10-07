@@ -130,6 +130,9 @@ test("150% text + high contrast: Tier 0 screens have no horizontal overflow at 3
   await check("/impact", "Impact");
   await check("/me/notifications", "Notifications");
   await check("/me/saved", "Saved");
+  // Tier 1 integration screens.
+  await check("/me/profile", "Profile");
+  await check("/organizations/alamo-community-pantry", "Alamo Community Pantry");
   await context.close();
 });
 

@@ -100,7 +100,7 @@ const MyShiftsPage = (): ReactElement => {
           </h2>
           <ul className="divide-y divide-border">
             {groups.past.map((signup) => (
-              <MyShiftRow key={signup.id} signup={signup} />
+              <MyShiftRow key={signup.id} signup={signup} nowMs={nowMs} />
             ))}
           </ul>
         </section>

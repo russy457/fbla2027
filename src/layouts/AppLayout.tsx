@@ -8,7 +8,8 @@
  * (or <main> when the screen has none) so keyboard and screen reader users
  * start reading from the top (D20). The header also holds the Quick help
  * button that opens the help slide-over, the Coordinator and Admin links for
- * those roles, and Sign in / Sign out (AccountControls).
+ * those roles, and Sign in / Sign out (AccountControls). On phones the
+ * footer carries the Profile link, which the header shows from md up.
  */
 import { Suspense, useEffect, useRef, type ReactElement } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
@@ -19,6 +20,7 @@ import { HelpPanelLauncher } from "@/components/help/HelpPanelLauncher";
 import { LoadingState } from "@/components/LoadingState";
 import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
+import { useSessionUser } from "@/store/authStore";
 import { AccountControls } from "./AccountControls";
 import { LegalLinks } from "./LegalLinks"; // Tier 1 lane C
 import { VOLUNTEER_NAV_ITEMS } from "./navItems";
@@ -55,6 +57,7 @@ const useFocusMainOnNavigate = (): void => {
 
 export const AppLayout = (): ReactElement => {
   const { pathname } = useLocation();
+  const user = useSessionUser();
   useFocusMainOnNavigate();
 
   return (
@@ -102,7 +105,18 @@ export const AppLayout = (): ReactElement => {
 
       <footer className="border-t border-border bg-surface pb-20 lg:pb-0">
         <div className="mx-auto w-full max-w-5xl px-4 py-6">
-          <DisplayPreferences />
+          {/* Linked from /me/profile ("Display settings"). */}
+          <div id="display-preferences" tabIndex={-1} className="outline-none">
+            <DisplayPreferences />
+          </div>
+          {/* The header shows Profile from md up; on phones it lives here. */}
+          {user ? (
+            <p className="mt-4 text-sm md:hidden">
+              <Link to="/me/profile" className="font-medium text-accent underline-offset-4 hover:underline">
+                Your profile and settings
+              </Link>
+            </p>
+          ) : null}
           <p className="mt-4 text-sm">
             <Link to="/org/register" className="font-medium text-accent underline-offset-4 hover:underline">
               For organizations: register your nonprofit

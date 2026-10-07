@@ -1,6 +1,7 @@
 /**
  * profile.test.ts
  * volunteer.completeProfile (SPEC#fn-completeprofile, G11, G13, G18),
+ * volunteer.updateProfile (set semantics, ZIP to coarse area, display name),
  * Turnstile verification with replay protection, admin.setDemoClock, and the
  * bounded stats trigger (G1).
  */
@@ -9,7 +10,7 @@ import { COLLECTIONS, PATHS, type PrivateProfileDoc, type UserPublicDoc } from "
 import { readFunctionsEnv } from "../src/lib/env";
 import { recomputeStatsForUid } from "../src/triggers/recomputeVolunteerStats";
 import { verifyTurnstile, type FetchLike } from "../src/turnstile/verifyTurnstile";
-import { BASE_MS, HOUR, PROJECT_ID, adminUser, auth, call, db, expectCode, logLines, makeDeps, resetEmulators, tsAt, user } from "./harness";
+import { BASE_MS, HOUR, PROJECT_ID, adminUser, auth, call, db, expectCode, kioskUser, logLines, makeDeps, resetEmulators, tsAt, user } from "./harness";
 import { seedWorld } from "./fixtures";
 
 const profileInput = { firstName: "Jordan", lastName: "Rivera", birthDate: "2007-03-02", interests: ["seniors"] };
@@ -60,6 +61,46 @@ describe("volunteer.completeProfile", () => {
     await expectCode(call("volunteer", "completeProfile", { ...profileInput, birthDate: "2007-02-30" }, user("x")), "INVALID_INPUT");
     await expectCode(call("volunteer", "completeProfile", { ...profileInput, phone: "555-1234" }, user("x")), "INVALID_INPUT");
     await expectCode(call("volunteer", "completeProfile", { ...profileInput, interests: ["crypto"] }, user("x")), "INVALID_INPUT");
+  });
+});
+
+describe("volunteer.updateProfile", () => {
+  const profileOf = async (uid: string) => (await db.doc(PATHS.privateProfile(uid)).get()).data() as PrivateProfileDoc;
+
+  it("completeProfile stores a bundled ZIP as its geohash-5 area, never an address", async () => {
+    await call("volunteer", "completeProfile", { ...profileInput, zip: "78204" }, user("newbie"));
+    expect(await profileOf("newbie")).toMatchObject({ zip: "78204", homeGeohash: "9v1zq" });
+  });
+
+  it("changes only the fields sent; a ZIP sets or clears the coarse area", async () => {
+    await call("volunteer", "completeProfile", { ...profileInput, skills: ["Spanish"] }, user("newbie"));
+    const out = await call("volunteer", "updateProfile", { interests: ["environment", "seniors"], zip: "78212", phone: "+12105550100" }, user("newbie"));
+    expect(out).toEqual({ displayName: "Jordan R.", homeGeohash: "9v1zw" });
+    expect(await profileOf("newbie")).toMatchObject({ interests: ["environment", "seniors"], skills: ["Spanish"], zip: "78212", homeGeohash: "9v1zw", phone: "+12105550100", birthDate: "2007-03-02" });
+
+    await call("volunteer", "updateProfile", { zip: "10001" }, user("newbie"));
+    expect(await profileOf("newbie")).toMatchObject({ zip: "10001", homeGeohash: null });
+    await call("volunteer", "updateProfile", { zip: null, availability: null }, user("newbie"));
+    expect(await profileOf("newbie")).toMatchObject({ zip: null, homeGeohash: null, availability: null, interests: ["environment", "seniors"] });
+  });
+
+  it("a name change refreshes fullName and the public display name", async () => {
+    await call("volunteer", "completeProfile", profileInput, user("newbie"));
+    await expect(call("volunteer", "updateProfile", { lastName: "Santos" }, user("newbie"))).resolves.toMatchObject({ displayName: "Jordan S." });
+    expect((await profileOf("newbie")).fullName).toBe("Jordan Santos");
+    expect(((await db.collection(COLLECTIONS.users).doc("newbie").get()).data() as UserPublicDoc).displayName).toBe("Jordan S.");
+  });
+
+  it("refuses birth dates, bad fields, another user's avatar, incomplete profiles, and kiosk tokens", async () => {
+    await call("volunteer", "completeProfile", profileInput, user("newbie"));
+    await expectCode(call("volunteer", "updateProfile", { birthDate: "2001-01-01" }, user("newbie")), "INVALID_INPUT");
+    await expectCode(call("volunteer", "updateProfile", { zip: "7820" }, user("newbie")), "INVALID_INPUT");
+    await expectCode(call("volunteer", "updateProfile", { interests: ["crypto"] }, user("newbie")), "INVALID_INPUT");
+    await expectCode(call("volunteer", "updateProfile", { avatarPath: "avatars/someoneElse/me.png" }, user("newbie")), "PERMISSION_DENIED");
+    await expect(call("volunteer", "updateProfile", { avatarPath: "avatars/newbie/me.png" }, user("newbie"))).resolves.toMatchObject({ displayName: "Jordan R." });
+    expect(((await db.collection(COLLECTIONS.users).doc("newbie").get()).data() as UserPublicDoc).avatarPath).toBe("avatars/newbie/me.png");
+    await expectCode(call("volunteer", "updateProfile", { skills: [] }, user("stranger")), "PROFILE_INCOMPLETE");
+    await expectCode(call("volunteer", "updateProfile", { skills: [] }, kioskUser("inst1")), "PERMISSION_DENIED");
   });
 });
 

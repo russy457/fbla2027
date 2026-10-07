@@ -1,14 +1,14 @@
 /**
  * AccountControls.tsx
  * Right side of the header (SPEC#screen-nav D2): role links and the account
- * action. Tier 1 adds the notification badge and Saved. Shows "Coordinator" only when the person has at least one
+ * action. Tier 1 adds the notification badge, Saved, and Profile. Shows "Coordinator" only when the person has at least one
  * organization membership, "Admin" only with the admin claim, then Sign in
  * or Sign out. Sign-out returns to Explore and clears cached personal data.
  */
 import { useState, type ReactElement } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookmarkSimple, Buildings, ShieldCheck, SignIn, SignOut } from "@phosphor-icons/react";
+import { BookmarkSimple, Buildings, ShieldCheck, SignIn, SignOut, UserCircle } from "@phosphor-icons/react";
 import { NotificationBadge } from "@/components/notifications/NotificationBadge";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { signOutUser } from "@/lib/authClient";
@@ -64,6 +64,11 @@ export const AccountControls = (): ReactElement | null => {
         <BookmarkSimple aria-hidden="true" size={18} />
         <span className="hidden sm:inline">Saved</span>
         <span className="sr-only sm:hidden">Saved</span>
+      </NavLink>
+      {/* Below md the header is full at 150% text on a phone; the footer carries Profile there (AppLayout). */}
+      <NavLink to="/me/profile" className={(state) => cn(linkClass(state), "hidden md:inline-flex")}>
+        <UserCircle aria-hidden="true" size={18} />
+        Profile
       </NavLink>
       {firstOrg ? (
         <NavLink to={`/org/${firstOrg.orgId}/dashboard`} className={linkClass}>

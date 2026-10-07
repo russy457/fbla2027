@@ -36,7 +36,13 @@ const EVAL_SET: ReadonlyArray<readonly [string, string]> = [
   ["How do I add another coordinator to my organization?", "coordinator-invites"],
   ["Where do I approve hours that need review?", "coordinator-needs-attention"],
   ["How do I start the check-in tablet for my shift?", "coordinator-start-kiosk"],
-  ["What does my reliability score mean?", "track-record"]
+  ["What does my reliability score mean?", "track-record"],
+  // Tier 1 lane A and B features
+  ["Where do I change my ZIP code or my interests?", "edit-profile"],
+  ["Where can I see every upcoming shift one nonprofit has?", "organization-page"],
+  ["If the coordinator adds more seats, do people on the waitlist get in?", "waitlist-and-promotion"],
+  ["Can I type the shift in plain English and have the form filled in?", "coordinator-create-shifts"],
+  ["Where are the shifts I bookmarked for later?", "saved-items"]
 ];
 
 describe("assistant retrieval eval (SPEC 8.4 grounding)", () => {

@@ -12,7 +12,10 @@
  *                            counting it (G19)
  *   keep                     no-show with an open dispute: close it, no change
  * Every change closes an open dispute, records attendance {by, at, note},
- * and appends history. Asking for the current status is a no-op.
+ * appends history, and sends the volunteer an "attendance-changed"
+ * notification (SPEC 8.3) in the same transaction, keyed by signupId (the
+ * latest change rewrites it as unread). Asking for the current status is a
+ * no-op and alerts no one.
  */
 import type { DocumentReference, Timestamp, Transaction } from "firebase-admin/firestore";
 import {
@@ -20,6 +23,7 @@ import {
   COLLECTIONS,
   MINUTE_MS,
   assertTransition,
+  attendanceChangedNotification,
   type AttendanceTarget,
   type HoursLogDoc,
   type InstanceDoc,
@@ -29,6 +33,7 @@ import { coordinatorOf } from "../lib/auth";
 import { defineCallable } from "../lib/defineCallable";
 import { msOf, readDoc, runTx, ts } from "../lib/firestore";
 import { signupResource } from "../lib/orgAuth";
+import { queueNotification } from "../notifications/notify";
 import { withHistory } from "../shifts/signupRecords";
 
 interface AttendanceInput {
@@ -99,10 +104,20 @@ export const setAttendance = defineCallable({
         ? { disputeOpen: false, dispute: { ...signup.dispute, resolvedAt: at, resolvedBy: caller.uid } }
         : {};
       const attendance = { attendance: { by: caller.uid, at, note: input.note }, updatedAt: at };
+      const notifyVolunteer = () =>
+        queueNotification(
+          tx,
+          db,
+          signup.uid,
+          attendanceChangedNotification({ instanceId: signup.instanceId, signupId: input.signupId, title: instance.title, orgName: instance.orgName, startMs: msOf(instance.start), timeZone: instance.timeZone }),
+          input.signupId,
+          nowMs
+        );
 
       if (input.to === "keep") {
         if (signup.status !== "no-show" || !signup.disputeOpen) throw new AppError("INVALID_TRANSITION", { from: signup.status, to: "keep" });
         tx.update(signupRef, { ...closeDispute, ...attendance });
+        notifyVolunteer();
         return { status: signup.status, logId: null, changed: true };
       }
 
@@ -115,7 +130,7 @@ export const setAttendance = defineCallable({
         ...attendance,
         history: withHistory(signup.history, signup.status, input.to, caller.uid, "setAttendance", nowMs)
       });
-      // TODO(lane A notify): "attendance-changed" notification to the volunteer.
+      notifyVolunteer();
       return { status: input.to, logId, changed: true };
     });
   }

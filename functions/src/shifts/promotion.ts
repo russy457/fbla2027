@@ -1,9 +1,8 @@
 /**
  * promotion.ts
  * Waitlist promotion inside a caller's transaction (SPEC 5.3 step 4,
- * SPEC 6.1 row 3). Used by cancelSignup when a confirmed seat frees up, and
- * meant for coordinator.updateInstance when capacity grows (lane B calls
- * readPromotion + applyPromotion the same way).
+ * SPEC 6.1 row 3). Used by cancelSignup when a confirmed seat frees up and
+ * by coordinator.updateInstance when capacity grows before the cutoff.
  *
  * Firestore transactions need every read before the first write, so it is
  * two steps:

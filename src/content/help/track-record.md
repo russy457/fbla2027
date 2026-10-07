@@ -36,9 +36,9 @@ Only you, and coordinators of organizations where you have signed up. It never a
 
 If you were marked a no-show by mistake, for example you were there but forgot to check in:
 
-1. Find the no-show under **Your track record** or in your past shifts on **My Shifts**.
+1. Find the no-show under **Past shifts** on **My Shifts**.
 2. Press **Request review**.
-3. Explain what happened in 10 to 500 characters and send it.
+3. Explain what happened in 10 to 500 characters and press **Send request**.
 
 You can ask within **30 days** of the shift. After that you'll see "Reviews can be requested within 30 days of the shift." Contact the organization instead. A coordinator looks at your request and either updates your attendance or keeps it, and you get an alert either way.
 

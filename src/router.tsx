@@ -48,6 +48,9 @@ const NotificationsPage = lazyWithReload(() => import("./pages/NotificationsPage
 const SavedPage = lazyWithReload(() => import("./pages/SavedPage"));
 const CheckinPage = lazyWithReload(() => import("./pages/CheckinPage"));
 // End Tier 1 lane A
+// Tier 1 integration
+const ProfilePage = lazyWithReload(() => import("./pages/volunteer/ProfilePage"));
+const OrganizationPage = lazyWithReload(() => import("./pages/OrganizationPage"));
 
 export const routes: RouteObject[] = [
   {
@@ -57,6 +60,8 @@ export const routes: RouteObject[] = [
       { index: true, element: <ExplorePage /> },
       { path: "explore", element: <ExplorePage /> },
       { path: "opportunity/:instanceId", element: <OpportunityPage /> },
+      // Tier 1 integration: public organization page (SPEC 9.2 "Organization")
+      { path: "organizations/:orgId", element: <OrganizationPage /> },
       { path: "help", element: <HelpPage /> },
       { path: "help/:slug", element: <HelpPage /> },
       { path: "verify", element: <VerifyPage /> },
@@ -73,6 +78,8 @@ export const routes: RouteObject[] = [
           { path: "me/saved", element: <SavedPage /> },
           { path: "checkin", element: <CheckinPage /> },
           // End Tier 1 lane A
+          // Tier 1 integration
+          { path: "me/profile", element: <ProfilePage /> },
           { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "dashboard", element: <OrgDashboardPage /> }] },
           { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] },
           // Tier 1 lane B

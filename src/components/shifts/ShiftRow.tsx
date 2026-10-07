@@ -4,12 +4,14 @@
  * chip, D23), time in the organization's zone with a zone label (D24), seats
  * left, minimum age, and the signup action (D5). Rows sit in a divided list
  * rather than a card grid, so time and action line up when scanning a day.
- * The title links to the shift's Opportunity page (/opportunity/:instanceId).
+ * The title links to the shift's Opportunity page (/opportunity/:instanceId)
+ * and the organization name to its page (/organizations/:orgId).
  */
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { formatInTimeZone } from "date-fns-tz";
 import { MapPin, UsersThree } from "@phosphor-icons/react";
+import { OrgLink } from "@/components/ui/OrgLink";
 import { UnverifiedChip } from "@/components/ui/UnverifiedChip";
 import type { Instance } from "@/lib/data/instances";
 import type { Signup } from "@/lib/data/signups";
@@ -53,7 +55,7 @@ export const ShiftRow = ({ instance, signup, birthDate, signedIn, nowMs }: Shift
         <p className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
           <span className="inline-flex items-center gap-1">
             <MapPin aria-hidden="true" size={16} />
-            {instance.orgName}
+            <OrgLink orgId={instance.orgId} name={instance.orgName} />
           </span>
           {instance.orgVerified ? null : <UnverifiedChip />}
         </p>
