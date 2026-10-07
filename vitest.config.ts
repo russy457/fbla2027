@@ -22,7 +22,10 @@ export default mergeConfig(
             environment: "jsdom",
             globals: true,
             setupFiles: ["./vitest.setup.ts"],
-            include: ["src/**/*.test.{ts,tsx}"]
+            include: ["src/**/*.test.{ts,tsx}"],
+            // jsdom component tests with userEvent run slowly when the whole suite
+            // competes for CPU (coverage on, CI runners); 5 s caused load-only flakes.
+            testTimeout: 20_000
           }
         },
         {
