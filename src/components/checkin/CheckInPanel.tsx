@@ -7,17 +7,25 @@
  * "Checked in at 9:02 AM, check-out opens 9:17 AM". Check-out is a separate,
  * explicit action with its own code entry; its result is handed to the page
  * so it can show the demo arc (D11).
+ * Tier 1 QR: in a secure context the code entry offers "Scan QR" (QrScanner).
+ * Camera blocked, or no readable code within 10 s, returns to typing with
+ * the message shown and focus in the code field (D20); a scanned code that
+ * the server refuses comes back the same way with the catalog message.
+ * /checkin passes initialCode and startOpen from the kiosk QR link.
  */
 import { useState, type ReactElement } from "react";
+import { Camera } from "@phosphor-icons/react";
 import { formatInTimeZone } from "date-fns-tz";
 import { CheckCircle } from "@phosphor-icons/react";
-import { formatClockTime, type OpOutput } from "@fbla/shared";
+import { formatClockTime, type OpOutput, type UserError } from "@fbla/shared";
 import { buttonClassName } from "@/components/ui/buttonStyles";
-import { api } from "@/lib/api";
+import { ApiError, NETWORK_USER_ERROR, api } from "@/lib/api";
 import { checkInPhase } from "@/lib/checkInPhase";
 import type { Instance } from "@/lib/data/instances";
 import type { Signup } from "@/lib/data/signups";
+import { isQrAvailable } from "@/lib/qr";
 import { CodeEntryForm } from "./CodeEntryForm";
+import { QrScanner } from "./QrScanner";
 
 export type CheckOutResult = OpOutput<"kiosk", "checkOut">;
 
@@ -26,6 +34,8 @@ interface CheckInPanelProps {
   readonly signup: Signup;
   readonly nowMs: number;
   readonly onCheckedOut: (result: CheckOutResult) => void;
+  /** Tier 1: open code entry right away with this code (from a /checkin link). */
+  readonly initialCode?: string;
 }
 
 /** "9:02 AM" in the shift's zone, as in the SPEC success line. */
@@ -33,8 +43,14 @@ const clockOnly = (ms: number, timeZone: string): string => formatInTimeZone(new
 
 const Notice = ({ children }: { children: string }): ReactElement => <p className="text-fg-muted">{children}</p>;
 
-export const CheckInPanel = ({ instance, signup, nowMs, onCheckedOut }: CheckInPanelProps): ReactElement => {
-  const [entryOpen, setEntryOpen] = useState(false);
+/** A notice shown when typing takes over from the scanner (no code, catalog-free). */
+const scanNotice = (message: string): UserError => ({ ...NETWORK_USER_ERROR, title: "Type the code", message, fix: "Type the 6-digit code shown on the kiosk." });
+
+export const CheckInPanel = ({ instance, signup, nowMs, onCheckedOut, initialCode }: CheckInPanelProps): ReactElement => {
+  const [entryOpen, setEntryOpen] = useState(initialCode !== undefined);
+  const [scanning, setScanning] = useState(false);
+  const [entryError, setEntryError] = useState<UserError | null>(null);
+  const [prefill, setPrefill] = useState(initialCode ?? "");
   const zone = instance.timeZone;
   const phase = checkInPhase({
     nowMs,
@@ -42,15 +58,56 @@ export const CheckInPanel = ({ instance, signup, nowMs, onCheckedOut }: CheckInP
     signup: { status: signup.status, checkInAtMs: signup.checkInAt?.toMillis() ?? null }
   });
 
+  const closeEntry = (): void => {
+    setEntryOpen(false);
+    setScanning(false);
+    setEntryError(null);
+    setPrefill("");
+  };
   const checkIn = async (code: string): Promise<void> => {
     await api.kiosk.checkIn({ instanceId: instance.id, code });
-    setEntryOpen(false);
+    closeEntry();
   };
   const checkOut = async (code: string): Promise<void> => {
     const result = await api.kiosk.checkOut({ instanceId: instance.id, code });
-    setEntryOpen(false);
+    closeEntry();
     onCheckedOut(result);
   };
+
+  /** Back to typing: the form remounts, shows the message, and focuses the code field. */
+  const fallBackToTyping = (message: string): void => {
+    setScanning(false);
+    setEntryError(message === "" ? null : scanNotice(message));
+  };
+  const submitScanned = (submit: (code: string) => Promise<void>) => (code: string): void => {
+    void submit(code).catch((error: unknown) => {
+      setPrefill("");
+      setScanning(false);
+      setEntryError(error instanceof ApiError ? error.userError : NETWORK_USER_ERROR);
+    });
+  };
+
+  const entry = (actionLabel: string, submit: (code: string) => Promise<void>): ReactElement =>
+    scanning ? (
+      <QrScanner instanceId={instance.id} onCode={submitScanned(submit)} onFallback={fallBackToTyping} />
+    ) : (
+      <CodeEntryForm
+        key={entryError?.message ?? "typed"}
+        actionLabel={actionLabel}
+        onSubmitCode={submit}
+        onCancel={closeEntry}
+        initialCode={prefill}
+        initialError={entryError}
+        extraAction={
+          isQrAvailable() ? (
+            <button type="button" onClick={() => setScanning(true)} className={buttonClassName("secondary")}>
+              <Camera aria-hidden="true" size={18} />
+              Scan QR
+            </button>
+          ) : null
+        }
+      />
+    );
 
   const checkedInLine =
     "checkInAtMs" in phase && phase.kind !== "check-out-closed"
@@ -77,7 +134,7 @@ export const CheckInPanel = ({ instance, signup, nowMs, onCheckedOut }: CheckInP
 
       {phase.kind === "check-in-open" ? (
         entryOpen ? (
-          <CodeEntryForm actionLabel="Check in" onSubmitCode={checkIn} onCancel={() => setEntryOpen(false)} />
+          entry("Check in", checkIn)
         ) : (
           <button type="button" onClick={() => setEntryOpen(true)} className={buttonClassName("primary", "w-fit")}>
             Check in
@@ -96,7 +153,7 @@ export const CheckInPanel = ({ instance, signup, nowMs, onCheckedOut }: CheckInP
 
       {phase.kind === "check-out-open" ? (
         entryOpen ? (
-          <CodeEntryForm actionLabel="Check out" onSubmitCode={checkOut} onCancel={() => setEntryOpen(false)} />
+          entry("Check out", checkOut)
         ) : (
           <button type="button" onClick={() => setEntryOpen(true)} className={buttonClassName("primary", "w-fit")}>
             Check out

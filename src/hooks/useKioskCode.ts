@@ -16,7 +16,7 @@ import { useClockStore } from "./useNow";
 
 export type KioskCodeState =
   | { readonly kind: "loading" }
-  | { readonly kind: "live"; readonly code: string; readonly expiresAtMs: number }
+  | { readonly kind: "live"; readonly code: string; readonly expiresAtMs: number; readonly qrPayload: string }
   | { readonly kind: "paused"; readonly lastCode: string | null }
   | { readonly kind: "not-open" }
   | { readonly kind: "cancelled" }
@@ -48,7 +48,7 @@ export const useKioskCode = (instanceId: string, enabled: boolean): KioskCodeSta
     try {
       const out = await api.kiosk.issueKioskCode({ instanceId });
       const expiresAtMs = Date.now() + out.secondsRemaining * 1000;
-      setState({ kind: "live", code: out.code, expiresAtMs });
+      setState({ kind: "live", code: out.code, expiresAtMs, qrPayload: out.qrPayload });
       schedule(out.secondsRemaining * 1000 + BOUNDARY_DELAY_MS, () => void fetchCode());
     } catch (error) {
       const code = error instanceof ApiError ? error.userError.code : null;

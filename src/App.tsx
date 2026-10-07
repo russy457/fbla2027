@@ -10,6 +10,7 @@ import { RouterProvider } from "react-router-dom";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { useDemoClockSync } from "./hooks/useDemoClockSync";
+import { usePreferenceSync } from "./hooks/usePreferenceSync";
 import { createAppRouter } from "./router";
 
 const QUERY_STALE_TIME_MS = 30_000;
@@ -25,6 +26,8 @@ const createQueryClient = (): QueryClient =>
 const SessionSync = (): null => {
   useAuthListener();
   useDemoClockSync();
+  // Tier 1 lane A: E3 display preferences follow the signed-in account.
+  usePreferenceSync();
   return null;
 };
 

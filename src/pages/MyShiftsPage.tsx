@@ -10,9 +10,11 @@ import { Link } from "react-router-dom";
 import { formatShiftTime } from "@fbla/shared";
 import { CheckInPanel, type CheckOutResult } from "@/components/checkin/CheckInPanel";
 import { DemoArc } from "@/components/checkin/DemoArc";
+import { CalendarButton } from "@/components/shifts/CalendarButton";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { MyShiftRow } from "@/components/shifts/MyShiftRow";
+import { PromotionBanner } from "@/components/shifts/PromotionBanner";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { UnverifiedChip } from "@/components/ui/UnverifiedChip";
@@ -42,6 +44,7 @@ const NextShift = ({ signup, nowMs, onCheckedOut }: { signup: Signup; nowMs: num
         <p className="font-mono text-sm text-fg">{formatShiftTime(shift.start.toDate(), shift.timeZone)}</p>
       </div>
       <CheckInPanel instance={shift} signup={signup} nowMs={nowMs} onCheckedOut={onCheckedOut} />
+      {signup.status === "confirmed" ? <CalendarButton instance={shift} signupId={signup.id} cancelled={false} /> : null}
     </section>
   );
 };
@@ -62,6 +65,8 @@ const MyShiftsPage = (): ReactElement => {
     <div className="flex flex-col gap-10">
       <PageHeader title="My Shifts">Check in at the kiosk, check out when you leave, and see where you have helped.</PageHeader>
 
+      {/* Tier 1 lane A: promotion banner (Confirm / Can't make it) and reminders. */}
+      {user ? <PromotionBanner uid={user.uid} signups={signups.data ?? []} nowMs={nowMs} /> : null}
       {checkedOut ? <DemoArc result={checkedOut} onDismiss={() => setCheckedOut(null)} /> : null}
       {groups.next ? <NextShift signup={groups.next} nowMs={nowMs} onCheckedOut={setCheckedOut} /> : null}
 
@@ -82,7 +87,7 @@ const MyShiftsPage = (): ReactElement => {
           </h2>
           <ul className="divide-y divide-border">
             {groups.upcoming.map((signup) => (
-              <MyShiftRow key={signup.id} signup={signup} />
+              <MyShiftRow key={signup.id} signup={signup} withCalendar />
             ))}
           </ul>
         </section>

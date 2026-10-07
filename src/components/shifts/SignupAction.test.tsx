@@ -87,4 +87,29 @@ describe("SignupAction", () => {
     fireEvent.click(screen.getByRole("button", { name: /Sign up/ }));
     expect(signup).not.toHaveBeenCalled();
   });
+
+  // Tier 1 lane A: waitlist and calendar rows of D5.
+  it("joins the waitlist when full before the cutoff", async () => {
+    signup.mockResolvedValue({ signupId: "shift-1_uid-1", status: "waitlisted", waitlistPosition: 2, waitlistSize: 2 });
+    const full = makeInstance({ signupCount: 3, waitlist: [{ uid: "u0", signupId: "shift-1_u0", seq: 0 }], waitlistSeq: 1 });
+    renderAction({ instance: full, nowMs: SHIFT_START_MS - 5 * 60 * MINUTE });
+    fireEvent.click(screen.getByRole("button", { name: "Join waitlist (#2): Sort and pack food boxes" }));
+    await waitFor(() => expect(signup).toHaveBeenCalledWith({ instanceId: "shift-1" }));
+  });
+
+  it("shows a waitlisted place with Leave waitlist", () => {
+    const instance = makeInstance({ signupCount: 3, waitlist: [{ uid: "u0", signupId: "shift-1_u0", seq: 0 }, { uid: "uid-1", signupId: "shift-1_uid-1", seq: 1 }] });
+    renderAction({ instance, signup: makeSignup({ status: "waitlisted", waitlistSeq: 1 }), nowMs: SHIFT_START_MS - 5 * 60 * MINUTE });
+    expect(screen.getByText("Waitlisted #2 of 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Leave waitlist: Sort and pack food boxes" }));
+    expect(screen.getByRole("button", { name: "Yes, leave the waitlist" })).toBeInTheDocument();
+  });
+
+  it("offers Add to calendar once signed up and Download cancellation after cancelling", () => {
+    renderAction({ signup: makeSignup() });
+    expect(screen.getByRole("button", { name: "Add to calendar: Sort and pack food boxes" })).toBeInTheDocument();
+    renderAction({ signup: makeSignup({ status: "cancelled" }) });
+    expect(screen.getByRole("button", { name: "Download cancellation: Sort and pack food boxes" })).toBeInTheDocument();
+    expect(screen.getByText("If your calendar still shows this shift, delete the event.")).toBeInTheDocument();
+  });
 });

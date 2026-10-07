@@ -28,6 +28,11 @@ const OrgDashboardPage = lazyWithReload(() => import("./pages/OrgDashboardPage")
 const KioskPage = lazyWithReload(() => import("./pages/KioskPage"));
 const AdminPage = lazyWithReload(() => import("./pages/AdminPage"));
 const NotFoundPage = lazyWithReload(() => import("./pages/NotFoundPage"));
+// Tier 1 lane A
+const NotificationsPage = lazyWithReload(() => import("./pages/NotificationsPage"));
+const SavedPage = lazyWithReload(() => import("./pages/SavedPage"));
+const CheckinPage = lazyWithReload(() => import("./pages/CheckinPage"));
+// End Tier 1 lane A
 
 export const routes: RouteObject[] = [
   {
@@ -48,6 +53,11 @@ export const routes: RouteObject[] = [
         children: [
           { path: "me/shifts", element: <MyShiftsPage /> },
           { path: "impact", element: <ImpactPage /> },
+          // Tier 1 lane A
+          { path: "me/notifications", element: <NotificationsPage /> },
+          { path: "me/saved", element: <SavedPage /> },
+          { path: "checkin", element: <CheckinPage /> },
+          // End Tier 1 lane A
           { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "dashboard", element: <OrgDashboardPage /> }] },
           { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] }
         ]

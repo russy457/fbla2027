@@ -98,3 +98,35 @@ describe("signupButtonState (D5)", () => {
     expect(seatsLeft(3, 5)).toBe(0);
   });
 });
+
+// Tier 1 lane A: waitlist rows of D5.
+describe("signupButtonState waitlist (D5, SPEC 5.3)", () => {
+  const early = { ...base, nowMs: START - 5 * 60 * 60 * 1000 };
+  const full = { ...early.instance, signupCount: 3 };
+
+  it("offers Join waitlist (#N) before the cutoff while the waitlist has room", () => {
+    expect(signupButtonState({ ...early, instance: { ...full, waitlistLength: 1 } })).toMatchObject({
+      kind: "join-waitlist",
+      label: "Join waitlist (#2)",
+      actionable: true
+    });
+  });
+
+  it("is Full when the waitlist is full, or closed after the cutoff", () => {
+    expect(signupButtonState({ ...early, instance: { ...full, waitlistLength: 3 } })).toMatchObject({
+      kind: "full",
+      reason: "This shift and its waitlist are full."
+    });
+    expect(signupButtonState({ ...base, instance: full })).toMatchObject({ kind: "full", reason: "This shift is full and its waitlist has closed." });
+  });
+
+  it("adds the walk-up note to a free seat after the cutoff only", () => {
+    expect(signupButtonState(base).reason).toMatch(/^Walk-up spot/);
+    expect(signupButtonState(early).reason).toBeNull();
+  });
+
+  it("lets a waitlisted volunteer leave the waitlist", () => {
+    expect(signupButtonState({ ...base, signup: own("waitlisted") })).toMatchObject({ canCancel: true, cancelLabel: "Leave waitlist" });
+    expect(signupButtonState({ ...base, signup: own("confirmed") })).toMatchObject({ canCancel: true, cancelLabel: "Cancel" });
+  });
+});

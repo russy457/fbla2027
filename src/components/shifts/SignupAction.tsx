@@ -6,11 +6,14 @@
  * error notice when the server refuses. No optimistic UI: the button shows
  * pending until the Function returns, and the label then comes from the live
  * signup snapshot. Focus returns to the action button after each submit (D20).
+ * Tier 1: Join waitlist (#N), "Waitlisted #N of M" with Leave waitlist (the
+ * place comes from the public instance waitlist), Add to calendar once signed
+ * up, and Download cancellation for a cancelled signup (E2).
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle } from "@phosphor-icons/react";
-import { DEFAULT_CONFIG, checkInWindow, formatClockTime, type UserError } from "@fbla/shared";
+import { CheckCircle, Clock } from "@phosphor-icons/react";
+import { DEFAULT_CONFIG, checkInWindow, formatClockTime, waitlistPosition, type UserError } from "@fbla/shared";
 import { ErrorNotice } from "@/components/errors/ErrorNotice";
 import { loginPathFor } from "@/components/guards/RouteGuards";
 import { buttonClassName } from "@/components/ui/buttonStyles";
@@ -18,6 +21,7 @@ import { ApiError, api } from "@/lib/api";
 import type { Instance } from "@/lib/data/instances";
 import type { Signup } from "@/lib/data/signups";
 import { signupButtonState } from "@/lib/signupButtonState";
+import { CalendarButton } from "./CalendarButton";
 
 interface SignupActionProps {
   readonly instance: Instance;
@@ -51,9 +55,17 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
       orgVerified: instance.orgVerified,
       capacity: instance.capacity,
       signupCount: instance.signupCount,
-      timeZone: instance.timeZone
+      timeZone: instance.timeZone,
+      cutoffAtMs: instance.cutoffAt.toMillis(),
+      waitlistLength: instance.waitlist.length
     },
-    signup: signup ? { status: signup.status, waitlistPosition: null, waitlistSize: null } : null,
+    signup: signup
+      ? {
+          status: signup.status,
+          waitlistPosition: signup.waitlistSeq === null ? null : waitlistPosition(instance.waitlist, signup.waitlistSeq),
+          waitlistSize: signup.status === "waitlisted" ? instance.waitlist.length : null
+        }
+      : null,
     birthDate,
     signedIn
   });
@@ -85,12 +97,15 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
       navigate(loginPathFor(returnPath ?? `/?shift=${encodeURIComponent(instance.id)}`));
       return;
     }
-    if (state.kind === "available") void run("signup", () => api.volunteer.signup({ instanceId: instance.id }));
+    if (state.kind === "available" || state.kind === "join-waitlist") void run("signup", () => api.volunteer.signup({ instanceId: instance.id }));
   };
 
   const opensAt = formatClockTime(new Date(checkInWindow(instance.start.toMillis(), instance.end.toMillis(), DEFAULT_CONFIG).fromMs), instance.timeZone);
   const shiftLabel = instance.title;
-  const primaryText = pending === "signup" ? "Signing up..." : state.label;
+  const primaryText = pending === "signup" ? (state.kind === "join-waitlist" ? "Joining..." : "Signing up...") : state.label;
+  const isWaitlisted = state.kind === "waitlisted";
+  const showCalendar = signup !== null && state.kind === "signed-up";
+  const showCancellation = signup !== null && (state.kind === "own-cancelled" || state.kind === "cancelled-by-org");
 
   return (
     <div className="flex flex-col items-start gap-2 md:items-end">
@@ -98,6 +113,11 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
         <p className="inline-flex min-h-touch items-center gap-2 font-semibold text-status-success">
           <CheckCircle aria-hidden="true" size={20} weight="bold" />
           Signed up
+        </p>
+      ) : isWaitlisted ? (
+        <p className="inline-flex min-h-touch items-center gap-2 font-semibold text-status-warning">
+          <Clock aria-hidden="true" size={20} weight="bold" />
+          {state.label}
         </p>
       ) : (
         <button
@@ -124,10 +144,10 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
               onClick={() => void run("cancel", () => api.volunteer.cancelSignup({ signupId: signup.id }))}
               className={buttonClassName("secondary")}
             >
-              {pending === "cancel" ? "Cancelling..." : "Yes, cancel my spot"}
+              {pending === "cancel" ? "Cancelling..." : isWaitlisted ? "Yes, leave the waitlist" : "Yes, cancel my spot"}
             </button>
             <button type="button" onClick={() => setConfirmingCancel(false)} className={buttonClassName("quiet")}>
-              Keep my spot
+              {isWaitlisted ? "Stay on it" : "Keep my spot"}
             </button>
           </div>
         ) : (
@@ -135,13 +155,15 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
             ref={buttonRef}
             type="button"
             onClick={() => setConfirmingCancel(true)}
-            aria-label={`Cancel: ${shiftLabel}`}
+            aria-label={`${state.cancelLabel}: ${shiftLabel}`}
             className={buttonClassName("quiet")}
           >
-            Cancel
+            {state.cancelLabel}
           </button>
         )
       ) : null}
+      {showCalendar ? <CalendarButton instance={instance} signupId={signup.id} cancelled={false} /> : null}
+      {showCancellation ? <CalendarButton instance={instance} signupId={signup.id} cancelled /> : null}
       {error ? <ErrorNotice error={error} className="w-full max-w-sm" /> : null}
     </div>
   );
