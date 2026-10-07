@@ -57,7 +57,12 @@ export const EditOpportunityPanel = ({ opportunity }: { opportunity: Opportunity
   const queryClient = useQueryClient();
   const save = async (fields: OpportunityFields): Promise<void> => {
     const result = await runner.run("save", () => api.coordinator.upsertOpportunity({ opportunityId: opportunity.id, fields }), () => "Opportunity details saved.");
-    if (result) await queryClient.invalidateQueries({ queryKey: ["opportunity", opportunity.id] });
+    if (!result) return;
+    // The single listing (useOpportunity) and the org's list (useOrgOpportunities, shift creation) are both plain queries.
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["opportunity", opportunity.id] }),
+      queryClient.invalidateQueries({ queryKey: ["orgOpportunities", opportunity.orgId] })
+    ]);
   };
   return (
     <details className="flex flex-col gap-3 rounded-lg border border-border p-4">

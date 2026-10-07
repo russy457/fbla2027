@@ -484,8 +484,9 @@ Allowlisted projection, written only by Functions through a strict zod schema.
 | rateLimits/{uid}_{bucket} | windowStart, count | 0 |
 | turnstileTokens/{sha256} | consumedAt, expiresAt (10 min) | 1 |
 | jobLeases/runDueJobs | holder (runId), expiresAt (now + 4 min) | 0 |
-| jobRuns/{runId} | trigger `schedule` or `admin`, startedAt, finishedAt, processed {cutoffs, finalized, seriesExtended}, more bool, errors [{id, code}], outcome `ok`, `partial`, `error`, `skipped-lease` | 0 (admin read) |
+| jobRuns/{runId} | trigger `schedule` or `admin`, startedAt, finishedAt, processed {cutoffs, finalized, seriesExtended, contactRefreshes}, more bool, errors [{id, code}], outcome `ok`, `partial`, `error`, `skipped-lease` | 0 (admin read) |
 | demoClock/global | offsetMs, setBy, setAt | 0 (signed-in read) |
+| contactRefreshJobs/{orgId} | orgId, token, requestedAt, nextActionAt; written in the same batch as the org's verified change, deleted by the pass that finishes T4 hiding (only while token is unchanged) | 1 |
 | reports/{reportId} | ownerUid, kind `volunteer-hours` or `org-participation`, orgId or null, params {from, to, sections[], themeId}, status `generating`, `ready`, `failed`, pdfPath | 1 (owner read) |
 
 Seed data carries `meta/seed.schemaVersion`; `demo:reset` rebuilds when it differs.
@@ -498,6 +499,8 @@ Seed data carries `meta/seed.schemaVersion`; `demo:reset` rebuilds when it diffe
 | `avatars/{uid}/{file}` | signed-in | self | `image/*`, < 5 MB |
 | `letters/{uid}/{letterId}.pdf` | owner uid | Functions only | `application/pdf` |
 | `reports/{uid}/{reportId}.pdf` | owner uid | Functions only | `application/pdf` |
+
+Clients never call `getDownloadURL` on letter or report PDFs (its token never expires). Download asks `volunteer.getPdfUrl` or `coordinator.getOrgReportUrl` for a 5-minute link after an ownership re-check; the owner-read rules above stay as defense in depth (Appendix B 48).
 
 ---
 
@@ -558,7 +561,7 @@ Helpers: `signedIn()` (has auth and no kiosk claim), `isAdmin()` (`token.admin =
 | users/{uid}/saved/{id} | self | self; id == `{kind}_{refId}`; schema check | none | self |
 | collections | `published == true`; or isMember(orgId); or isAdmin() | signedIn author; orgId != null requires isMember(orgId); orgId == null requires isAdmin(); schema check | same as create, authorUid unchanged | isMember(orgId) or isAdmin() |
 | reviews/{signupId} | public | author: `get(signups/{signupId})` has uid == auth.uid, status == completed, orgId == request.orgId; doc id is the signupId so one review per signup | author: only rating, tags, text, updatedAt; or isMember(orgId): only response | author; isAdmin() |
-| aiUsage, rateLimits, turnstileTokens, jobLeases | none | none | none | none |
+| aiUsage, rateLimits, turnstileTokens, jobLeases, contactRefreshJobs | none | none | none | none |
 | jobRuns | isAdmin() | none | none | none |
 | demoClock | signed in (incl. kiosk) | none | none | none |
 | reports | ownerUid == auth.uid | none | none | ownerUid == auth.uid |
@@ -620,13 +623,14 @@ Errors list op-specific codes; every op can also return `AUTH_REQUIRED`, `PROFIL
 | <a id="fn-issueletter"></a>volunteer.issueLetter | signedIn | scope {orgId or ALL, from, to}, requestNonce | letterId, verifyCode, pdfStatus, totalMinutes, excludedUnverifiedMinutes | letterId = hash(uid, scopeKey, requestNonce); existing letter returned, PDF re-rendered if `failed` | letter (none) to valid; previous same-scope valid to superseded | NO_APPROVED_HOURS | issuedAt, rendererVersion | 0 (one template, scope ALL only in Tier 0) |
 | volunteer.generateVolunteerReport | signedIn | from, to, sections[], themeId, requestNonce | reportId, status | reportId from nonce | none | none extra | createdAt | 1 |
 | volunteer.markNotificationsRead | signedIn | itemIds (<= 100) or all: true | updated | Set semantics | none | none extra | none | 1 |
+| volunteer.getPdfUrl | signedIn; path uid == caller | path (`letters/{uid}/{letterId}.pdf` or `reports/{uid}/{reportId}.pdf` only) | url (5-minute link), expiresAt | Read-only | none | none extra (org reports: PERMISSION_DENIED, use getOrgReportUrl) | log | 1 |
 | <a id="fn-issuekioskcode"></a>kiosk.issueKioskCode | kioskOrCoordinator(instanceId) | instanceId | code, windowEndsAt, secondsRemaining, qrPayload | Pure function of the 30 s window | none | KIOSK_NOT_OPEN, SHIFT_CANCELLED, KIOSK_SESSION_EXPIRED | log only | 0 (qrPayload: 1) |
 | <a id="fn-checkin"></a>kiosk.checkIn | signedIn volunteer | instanceId, code | status, checkInAt, checkOutOpensAt | Already checked in: returns existing checkInAt | confirmed to checked-in | CHECKIN_NOT_OPEN, KIOSK_CODE_INVALID, NOT_SIGNED_UP, RATE_LIMITED, SHIFT_CANCELLED | history | 0 |
 | <a id="fn-checkout"></a>kiosk.checkOut | signedIn volunteer | instanceId, code | status, minutes, orgName, totalApprovedHours | Already completed: returns the existing log (log id = signupId) | checked-in to completed | CHECKOUT_NOT_OPEN, CHECKOUT_CLOSED, NOT_CHECKED_IN, KIOSK_CODE_INVALID, RATE_LIMITED | history | 0 |
 | <a id="fn-registerorganization"></a>coordinator.registerOrganization | signedIn; adult; email verified | name, mission, causeAreas, ein, address, contactEmail, contactPhone?, website?, timeZone, requestNonce | orgId | orgId from hash(uid, nonce) | none | ADULT_REQUIRED, EIN_INVALID, EMAIL_NOT_VERIFIED | createdAt, ownerUid | 1 |
 | coordinator.updateOrganization | ownerOfOrg(orgId) | orgId, action `update` (patch of editable fields), `archive`, or `delete` | orgId, verified | Set semantics; archive is one-way | none | ORG_HAS_ACTIVITY (delete), ORG_HAS_UPCOMING_SHIFTS (archive), EIN_INVALID | updatedAt, archivedAt | 1 |
-| coordinator.createInvite | ownerOfOrg(orgId) | orgId | code (10 chars base32, shown once), expiresAt | Each call issues a new code | none | none extra | createdBy | 1 |
-| coordinator.redeemInvite | signedIn | code | orgId, role | Redeemed by caller: returns ok | none | INVITE_INVALID, ALREADY_MEMBER | redeemedBy, redeemedAt | 1 |
+| coordinator.createInvite | ownerOfOrg(orgId) | orgId | code (10 chars base32, shown once), expiresAt | Each call issues a new code | none | RATE_LIMITED (bucket `createInvite`, 20 per hour) | createdBy | 1 |
+| coordinator.redeemInvite | signedIn | code | orgId, role | Redeemed by caller: returns ok | none | INVITE_INVALID, ALREADY_MEMBER, RATE_LIMITED (bucket `redeemInvite`, 10 per 10 minutes, every attempt counts) | redeemedBy, redeemedAt | 1 |
 | coordinator.removeMember | ownerOfOrg(orgId) | orgId, uid | none | Missing member: ok | none | CANNOT_REMOVE_OWNER | log | 1 |
 | coordinator.upsertOpportunity | create: coordinatorOfOrg(orgId); update: coordinatorOfOpportunity | opportunity fields, requestNonce on create | opportunityId | Create id from nonce | none | none extra | createdBy, updatedAt | 1 |
 | coordinator.createInstance | coordinatorOfOpportunity | opportunityId, start, end, capacity (1-200), requestNonce | instanceId | instanceId from nonce; also writes instanceSecrets | none | INSTANCE_TIME_INVALID | createdAt | 1 |
@@ -641,6 +645,7 @@ Errors list op-specific codes; every op can also return `AUTH_REQUIRED`, `PROFIL
 | coordinator.rejectHours | coordinatorOfLog | logId, reason (3-500) | none | Already rejected: no-op | log pending to rejected | INVALID_TRANSITION | reviewedBy, reviewedAt, rejectReason | 1 |
 | <a id="fn-revokeletter"></a>coordinator.revokeLetter | letterRevoker(letterId) | letterId, reason enum, note? | none | Already revoked: no-op | letter valid or superseded to revoked | none extra | revokedAt, revokedBy, revokeReason | 1 |
 | coordinator.generateOrgReport | coordinatorOfOrg(orgId) | orgId, from, to, sections[], themeId, requestNonce | reportId, status | reportId from nonce | none | none extra | createdAt | 1 |
+| coordinator.getOrgReportUrl | coordinatorOfOrg(orgId); report owner == caller | orgId, reportId | url (5-minute link), expiresAt | Read-only | none | none extra | log | 1 |
 | coordinator.rankVolunteers | coordinatorOfInstance, or coordinatorOfOrg for a draft | instanceId, or orgId + draft {causeArea, skills, start, end} | candidates [{ref, displayName, score, why[]}] (<= 20) | Read-only | none | none extra | log | 2 |
 | coordinator.inviteVolunteers | coordinatorOfInstance | instanceId, refs (<= 20) | sent | Notification id `invite_{instanceId}_{uid}` | none | REF_EXPIRED | log | 2 |
 | admin.verifyOrganization | admin | orgId, verified, note | none | Set semantics | none | none extra | verifiedAt, verifiedBy, note | 1 |
@@ -758,8 +763,9 @@ updateOrganization (owner only):
 1. Lease: transaction on `jobLeases/runDueJobs`; if `expiresAt > now` and another run holds it, write a jobRuns doc with `outcome skipped-lease` and stop. Otherwise take it for 4 minutes.
 2. Query `instances where nextActionAt <= now orderBy nextActionAt limit 200`.
 3. For each instance: if `cutoffDoneAt == null` and `now >= cutoffAt`, run the cutoff handler (one transaction: every waitlisted signup becomes cancelled with `cancelReason waitlist-cutoff`, `lateCancel false`, plus a `waitlist-closed` notification; `waitlist = []`; `cutoffDoneAt = now`). Then, if `finalizedAt == null` and `now >= finalizeAt`, run finalizeShift. Set `nextActionAt` to `finalizeAt`, or null when finalized.
-4. Tier 2: `series where nextExtendAt <= now limit 50`; run extendSeries for each.
-5. Write `jobRuns/{runId}` (counts, errors, `more` when a page was full) and release the lease. Per-instance failures are logged and retried on the next tick.
+4. `contactRefreshJobs where nextActionAt <= now orderBy nextActionAt limit 200`: for each, re-apply T4 contact hiding and the listing copies from the org's current `verified` flag (snapshots that already match are skipped), then delete the job if its token is unchanged. See Appendix B 49.
+5. Tier 2: `series where nextExtendAt <= now limit 50`; run extendSeries for each.
+6. Write `jobRuns/{runId}` (counts, errors, `more` when a page was full) and release the lease. Per-instance and per-job failures are logged and retried on the next tick.
 
 Schedule: every 5 minutes. Admins can run it any time ("Run due jobs now" on the admin page; also shown as a labeled demo control on the coordinator dashboard when DEMO_MODE is on). Overlapping runs cannot double-process: the lease serializes runs, and the per-instance markers make each step a no-op on repeat. Scheduled functions do not fire on the emulator, so local runs use the admin action.
 
@@ -1917,3 +1923,6 @@ Each item names the competing wording and the final behavior. Later obligations 
 44. **Demo shift length.** SPEC 10.7 fixes the demo shift's start and seats but not its length. Final: 3 hours, so a full check-in to check-out takes Jordan from 22.5 past the 25-hour milestone.
 45. **Profile ZIP areas.** SPEC 5.9 names a bundled San Antonio ZIP table without its contents. Final: `shared/src/zipAreas.ts` holds approximate ZIP centroids with their geohash-5; unknown ZIPs store `homeGeohash: null`. `updateProfile` returns `{displayName, homeGeohash}` so the page can say when distance filters stay off; seeded orgs sit at their ZIP centroid.
 46. **Alert ids and coverage.** Final: ids are `{type}_{key}` with the signup, log, or letter id as key (`shift-changed` adds the instance `sequence`, so each time change is its own alert), written in the same transaction or batch as the change. SPEC 8.3 has no type for org verification or invites, so those ops send none.
+47. **Invite rate limits.** SPEC 5.2 gives createInvite and redeemInvite no limit, which lets a signed-in user guess 50-bit codes at speed and an owner mint codes in bulk. Final: rate limits through defineCallable like check-in: `redeemInvite` 10 attempts per user per 10 minutes (bucket `redeemInvite`, wrong codes included), `createInvite` 20 per user per hour (bucket `createInvite`); excess gives `RATE_LIMITED` with `retryAfterSec`.
+48. **PDF download links.** SPEC 3.22 lets the owner read letter and report PDFs through Storage rules, and the client used `getDownloadURL`, whose token is a permanent bearer link. Final: `volunteer.getPdfUrl` (path `letters/{uid}/{letterId}.pdf` or `reports/{uid}/{reportId}.pdf` only, uid == caller, document ready; org reports refused) and `coordinator.getOrgReportUrl` (coordinatorOfOrg plus report owner == caller) return a V4 signed URL valid 5 minutes, measured on the real clock. On the emulator, which cannot sign or verify signed URLs, the same checks run and the link is the Storage emulator download path. The Functions service account needs Service Account Token Creator on itself to sign. Storage rules stay owner-read.
+49. **Durable contact hiding.** SPEC 5.8 refreshes T4 contact hiding after a verified change, but in several non-atomic batches; a failure partway left minors' contacts visible at an unverified org. Final: the verified change and `contactRefreshJobs/{orgId}` {token, nextActionAt} are one batch; the op still runs the pass immediately, runDueJobs finishes any job left behind, each pass reads the org's current flag and skips snapshots that already match, each chunk commits only while the org still has that flag, and the job is deleted only after a complete pass with an unchanged token.

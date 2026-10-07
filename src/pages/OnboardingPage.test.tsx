@@ -57,7 +57,9 @@ describe("Onboarding 13+ gate", () => {
     completeProfile.mockReset();
     useAuthStore.setState({ session: { status: "signed-out" } });
   });
-  afterEach(() => useAuthStore.setState({ session: { status: "loading" } }));
+  afterEach(() => {
+    useAuthStore.setState({ session: { status: "loading" } });
+  });
 
   it("asks for the birth date first", () => {
     renderOnboarding();

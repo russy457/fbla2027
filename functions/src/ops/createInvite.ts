@@ -3,13 +3,15 @@
  * coordinator.createInvite (SPEC 3.5, 5.2), owner only. Each call issues a
  * new 10-character base32 code (50 random bits), valid 7 days. Only the
  * SHA-256 of the code is stored (as the invite id); the code itself is
- * returned once and never logged.
+ * returned once and never logged. Rate limited (bucket "createInvite",
+ * 20 per hour per user).
  */
 import { randomBytes } from "node:crypto";
 import { COLLECTIONS, DAY_MS, INVITE_CODE_LENGTH, INVITE_TTL_DAYS, base32Encode, type InviteDoc } from "@fbla/shared";
 import { defineCallable } from "../lib/defineCallable";
 import { ts } from "../lib/firestore";
 import { orgResource, ownerOf } from "../lib/orgAuth";
+import { CREATE_INVITE_RATE_LIMIT } from "../lib/rateLimit";
 import { sha256Hex } from "../lib/requestIds";
 
 /** 7 random bytes give 56 bits; the first 10 base32 characters keep 50 of them. */
@@ -21,6 +23,7 @@ export const createInvite = defineCallable({
   endpoint: "coordinator",
   op: "createInvite",
   auth: ownerOf(orgResource((input: { orgId: string }) => input.orgId)),
+  rateLimit: CREATE_INVITE_RATE_LIMIT,
   handler: async ({ input, caller, clock, deps }) => {
     const nowMs = clock.nowMs();
     const code = newInviteCode();

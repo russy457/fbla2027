@@ -16,7 +16,7 @@ import {
   type OrganizationDoc,
   type SignupContactDoc
 } from "@fbla/shared";
-import { BASE_MS, HOUR, adminUser, call, db, expectCode, kioskUser, resetEmulators, testClock, tsAt, user } from "./harness";
+import { BASE_MS, HOUR, MINUTE, adminUser, call, db, expectCode, kioskUser, resetEmulators, testClock, tsAt, user } from "./harness";
 import { MINOR_BIRTH, profile, seedInstance, seedSignup, seedWorld } from "./fixtures";
 
 const NONCE = "33333333-3333-4333-8333-333333333333";
@@ -147,6 +147,34 @@ describe("invites and members", () => {
     const second = await call<{ code: string }>("coordinator", "createInvite", { orgId: "orgA" }, user("coordA"));
     testClock.advance(8 * DAY);
     await expectCode(call("coordinator", "redeemInvite", { code: second.code }, user("vol2")), "INVITE_INVALID");
+  });
+
+  it("rate-limits redeemInvite to 10 attempts per user per 10 minutes, wrong codes included", async () => {
+    const { code } = await call<{ code: string }>("coordinator", "createInvite", { orgId: "orgA" }, user("coordA"));
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      await expectCode(call("coordinator", "redeemInvite", { code: "AAAAAAAAAA" }, user("vol1")), "INVITE_INVALID");
+    }
+    // The 11th attempt is refused before the code is looked at, even with the right code.
+    const error = await expectCode(call("coordinator", "redeemInvite", { code }, user("vol1")), "RATE_LIMITED");
+    const { retryAfterSec } = (error.details as { params: { retryAfterSec: number } }).params;
+    expect(retryAfterSec).toBeGreaterThan(0);
+    expect(retryAfterSec).toBeLessThanOrEqual(600);
+    expect(await memberDoc("orgA", "vol1")).toBeUndefined();
+    // The bucket is per user: someone else can still redeem.
+    await expectCode(call("coordinator", "redeemInvite", { code: "AAAAAAAAAA" }, user("vol2")), "INVITE_INVALID");
+    testClock.advance(10 * MINUTE);
+    await expect(call("coordinator", "redeemInvite", { code }, user("vol1"))).resolves.toEqual({ orgId: "orgA", role: "coordinator" });
+  });
+
+  it("rate-limits createInvite to 20 codes per user per hour", async () => {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      await call("coordinator", "createInvite", { orgId: "orgA" }, user("coordA"));
+    }
+    const error = await expectCode(call("coordinator", "createInvite", { orgId: "orgA" }, user("coordA")), "RATE_LIMITED");
+    expect((error.details as { params: { retryAfterSec: number } }).params.retryAfterSec).toBeLessThanOrEqual(3600);
+    expect((await db.collection(COLLECTIONS.invites).get()).size).toBe(20);
+    testClock.advance(HOUR);
+    await expect(call("coordinator", "createInvite", { orgId: "orgA" }, user("coordA"))).resolves.toMatchObject({ code: expect.any(String) });
   });
 
   it("only the owner invites and removes; the owner cannot be removed", async () => {

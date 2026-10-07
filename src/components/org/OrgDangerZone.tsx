@@ -47,9 +47,17 @@ export const OrgDangerZone = ({ orgId, hasActivity, isArchived }: OrgDangerZoneP
       action === "archive" ? "The organization is archived." : "The organization was deleted."
     );
     setConfirming(null);
-    if (result) await queryClient.invalidateQueries({ queryKey: ["organization", orgId] });
-    if (result?.deleted) {
-      await queryClient.invalidateQueries({ queryKey: ["myMemberships"] });
+    if (!result) return;
+    // Archive and delete both drop the org from the cached public list (Explore, Impact, Saved).
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["organization", orgId] }),
+      queryClient.invalidateQueries({ queryKey: ["organizations"] })
+    ]);
+    if (result.deleted) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["myMemberships"] }),
+        queryClient.invalidateQueries({ queryKey: ["membership", orgId] })
+      ]);
       navigate("/", { replace: true });
     }
   };

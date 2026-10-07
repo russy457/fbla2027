@@ -34,7 +34,9 @@ const renderPanel = () =>
   );
 
 describe("QR check-in", () => {
-  beforeEach(() => setSecure(true));
+  beforeEach(() => {
+    setSecure(true);
+  });
   afterEach(() => {
     vi.useRealTimers();
     setCamera(undefined);

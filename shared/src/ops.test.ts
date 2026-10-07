@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ENDPOINTS, OPS, OP_NAMES, isOpName } from "./ops";
 import {
   NEW_VOLUNTEER_RELIABILITY,
+  PDF_URL_TTL_MS,
+  parsePdfPath,
   REVOKE_REASON_LABELS,
   REVOKE_REASONS,
   hoursLogDocSchema,
@@ -97,5 +99,25 @@ describe("schema refinements", () => {
   it("labels every revoke reason and starts volunteers as new", () => {
     expect(REVOKE_REASONS.every((reason) => REVOKE_REASON_LABELS[reason].length > 0)).toBe(true);
     expect(NEW_VOLUNTEER_RELIABILITY).toMatchObject({ isNew: true, score: null });
+  });
+});
+
+// Tier 1 review fixes
+describe("PDF link ops (Appendix B 48)", () => {
+  it("are registered on the volunteer and coordinator endpoints", () => {
+    expect(OP_NAMES.volunteer).toContain("getPdfUrl");
+    expect(OP_NAMES.coordinator).toContain("getOrgReportUrl");
+  });
+
+  it("parse only letters/{uid}/{id}.pdf and reports/{uid}/{id}.pdf", () => {
+    expect(parsePdfPath("letters/u_1/abc-123.pdf")).toEqual({ folder: "letters", uid: "u_1", id: "abc-123" });
+    expect(parsePdfPath("reports/u1/r1.pdf")).toEqual({ folder: "reports", uid: "u1", id: "r1" });
+    for (const path of ["reports/u1/../u2/r.pdf", "reports/u1/r.pdf/", "avatars/u1/r.pdf", "reports/u1/r", "/reports/u1/r.pdf", "reports/u1/a/b.pdf", "reports/u1/r.pdf\n"]) {
+      expect(parsePdfPath(path)).toBeNull();
+      expect(OPS.volunteer.getPdfUrl.input.safeParse({ path }).success).toBe(false);
+    }
+    expect(OPS.volunteer.getPdfUrl.input.safeParse({ path: "reports/u1/r1.pdf" }).success).toBe(true);
+    expect(OPS.coordinator.getOrgReportUrl.input.safeParse({ orgId: "o1", reportId: "../r" }).success).toBe(false);
+    expect(PDF_URL_TTL_MS).toBe(300_000);
   });
 });

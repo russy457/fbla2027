@@ -18,7 +18,7 @@
  * this file. Without the emulators (plain `npm run test:e2e`) it is skipped.
  */
 import { expect as baseExpect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
-import { ACCOUNTS, DEMO_PASSWORD, INSTANCE_ID, ORG_ID, advanceDemoClock, enterKioskCode, seriousAxeViolations, signInWithForm, snap } from "./support/tier0Helpers";
+import { ACCOUNTS, DEMO_PASSWORD, INSTANCE_ID, ORG_ID, advanceDemoClock, enterKioskCode, openedPdfHead, seriousAxeViolations, signInWithForm, snap } from "./support/tier0Helpers";
 
 /** Cloud Functions on the emulator cold-start slowly on the first call, so UI waits get 30 s. */
 const expect = baseExpect.configure({ timeout: 30_000 });
@@ -157,6 +157,10 @@ test("volunteer checks in and out, issues a letter, and verify shows Valid", asy
   await snap(phone.page, "impact-letter-builder-390");
   await phone.page.getByRole("button", { name: "Issue letter" }).click();
   await expect(phone.page.getByRole("heading", { name: "Your letter is issued" })).toBeVisible({ timeout: 60_000 });
+  // The PDF opens through volunteer.getPdfUrl's short-lived link, not a Storage download token.
+  const downloadPdf = phone.page.getByRole("button", { name: "Download PDF" });
+  await expect(downloadPdf).toBeVisible({ timeout: 60_000 });
+  expect(await openedPdfHead(phone.page, downloadPdf, /letters%2F.*\.pdf/)).toBe("%PDF-");
   await phone.page.getByRole("link", { name: "Open verify page" }).click();
   await expect(phone.page).toHaveURL(/\/verify\/[A-Z2-7]{26}$/);
   await expect(phone.page.getByRole("status").filter({ hasText: "Valid" })).toBeVisible();

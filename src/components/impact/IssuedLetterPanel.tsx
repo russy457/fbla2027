@@ -5,15 +5,16 @@
  *   failed      "We couldn't create the PDF." with Retry (same request nonce),
  *   ready       Download PDF, Copy verify link, and the letter code.
  * The verify link works in every state because /verify reads the public
- * projection, not the PDF.
+ * projection, not the PDF. Download PDF asks volunteer.getPdfUrl for a
+ * 5-minute link (ownership re-checked server side), never a permanent
+ * Storage download URL.
  */
 import { useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { getDownloadURL, ref } from "firebase/storage";
 import { DownloadSimple, LinkSimple } from "@phosphor-icons/react";
 import { formatVerifyCode, type PdfStatus } from "@fbla/shared";
 import { buttonClassName } from "@/components/ui/buttonStyles";
-import { getFirebase } from "@/lib/firebase";
+import { api } from "@/lib/api";
 
 interface IssuedLetterPanelProps {
   readonly verifyCode: string;
@@ -43,7 +44,7 @@ export const IssuedLetterPanel = ({ verifyCode, pdfStatus, pdfPath, onRetry, isR
   const downloadPdf = async (): Promise<void> => {
     if (!pdfPath) return;
     try {
-      const url = await getDownloadURL(ref(getFirebase().storage, pdfPath));
+      const { url } = await api.volunteer.getPdfUrl({ path: pdfPath });
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setFeedback({ kind: "message", text: "We couldn't open the PDF. Try again in a moment." });
@@ -64,7 +65,7 @@ export const IssuedLetterPanel = ({ verifyCode, pdfStatus, pdfPath, onRetry, isR
         Letter code <span className="font-mono font-semibold text-fg">{formatVerifyCode(verifyCode)}</span>
       </p>
       <div className="flex flex-wrap gap-2">
-        {pdfStatus === "ready" ? (
+        {pdfStatus === "ready" && pdfPath !== null ? (
           <button type="button" onClick={() => void downloadPdf()} className={buttonClassName("primary")}>
             <DownloadSimple aria-hidden="true" size={18} />
             Download PDF

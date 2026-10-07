@@ -36,7 +36,9 @@ describe("attendanceTargetsFor", () => {
 });
 
 describe("AttendanceEditor", () => {
-  beforeEach(() => setAttendance.mockReset());
+  beforeEach(() => {
+    setAttendance.mockReset();
+  });
 
   it("offers Keep only with an open review request", () => {
     renderEditor({ disputeOpen: true });

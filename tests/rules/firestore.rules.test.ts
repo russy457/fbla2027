@@ -62,6 +62,7 @@ beforeEach(async () => {
   await seed("demoClock/global", { offsetMs: 0 });
   await seed("rateLimits/vol1_checkin", { count: 1 });
   await seed("jobLeases/runDueJobs", { holder: "x" });
+  await seed("contactRefreshJobs/orgA", { orgId: "orgA", token: "t" });
 });
 
 describe("organizations, opportunities, instances (public catalog)", () => {
@@ -261,12 +262,15 @@ describe("system collections", () => {
     await assertFails(setDoc(doc(as("admin1", { admin: true }), "demoClock/global"), { offsetMs: 900000 }));
   });
 
-  it("rateLimits, jobLeases, and unknown collections: no client access", async () => {
+  it("rateLimits, jobLeases, contactRefreshJobs, and unknown collections: no client access", async () => {
     await assertFails(getDoc(doc(as("vol1"), "rateLimits/vol1_checkin")));
     await assertFails(setDoc(doc(as("vol1"), "rateLimits/vol1_checkin"), { count: 0 }));
     await assertFails(getDoc(doc(as("admin1", { admin: true }), "jobLeases/runDueJobs")));
     await assertFails(setDoc(doc(as("vol1"), "somethingElse/x"), { a: 1 }));
     await assertFails(getDoc(doc(as("vol1"), "turnstileTokens/abc")));
+    await assertFails(getDoc(doc(as("coordA"), "contactRefreshJobs/orgA")));
+    await assertFails(getDoc(doc(as("admin1", { admin: true }), "contactRefreshJobs/orgA")));
+    await assertFails(setDoc(doc(as("coordA"), "contactRefreshJobs/orgA"), { token: "x" }));
   });
 
   // Tier 1 lane C

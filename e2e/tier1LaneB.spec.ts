@@ -11,7 +11,7 @@
  * emulators, seeds the demo, runs this file). Skipped without the emulators.
  */
 import { expect as baseExpect, test, type Browser, type Page } from "@playwright/test";
-import { ACCOUNTS, ORG_ID, signInWithForm } from "./support/tier0Helpers";
+import { ACCOUNTS, ORG_ID, openedPdfHead, signInWithForm } from "./support/tier0Helpers";
 import { adminDb, callOpAs, logStatus, seedPendingHours } from "./support/laneBHelpers";
 
 /** Functions on the emulator cold-start slowly, so UI waits get 30 s. */
@@ -146,21 +146,8 @@ test("org report: preview, PDF download, and CSV export", async ({ browser }) =>
   await page.getByRole("button", { name: "Generate PDF" }).click();
   const download = page.getByRole("button", { name: "Download PDF" });
   await expect(download).toBeVisible({ timeout: 60_000 });
-  // Headless Chromium downloads a PDF instead of showing it, so record the URL the app opens and fetch it.
-  await page.evaluate(() => {
-    const opened: string[] = [];
-    (globalThis as unknown as { __opened: string[] }).__opened = opened;
-    (globalThis as unknown as { open: (url: string) => null }).open = (url: string) => {
-      opened.push(url);
-      return null;
-    };
-  });
-  await download.click();
-  const openedUrl = () => page.evaluate(() => (globalThis as unknown as { __opened: string[] }).__opened[0] ?? "");
-  await expect.poll(openedUrl).toMatch(/reports%2F.*\.pdf/);
-  const pdf = await page.request.get(await openedUrl());
-  expect(pdf.ok()).toBe(true);
-  expect((await pdf.body()).subarray(0, 5).toString()).toBe("%PDF-");
+  // The link comes from coordinator.getOrgReportUrl (short-lived), not a Storage download token.
+  expect(await openedPdfHead(page, download, /reports%2F.*\.pdf/)).toBe("%PDF-");
 
   const [csv] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export CSV" }).click()]);
   expect(csv.suggestedFilename()).toMatch(/^org-participation-\d{4}-\d{2}-\d{2}-to-\d{4}-\d{2}-\d{2}\.csv$/);

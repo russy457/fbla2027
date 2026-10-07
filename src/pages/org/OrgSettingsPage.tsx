@@ -72,7 +72,13 @@ const OrgSettingsPage = (): ReactElement => {
     const result = await runner.run("save", () => api.coordinator.updateOrganization({ orgId, action: "update", patch }), (out) =>
       out.verified ? "Changes saved." : "Changes saved. The organization is waiting for verification."
     );
-    if (result) await queryClient.invalidateQueries({ queryKey: ["organization", orgId] });
+    if (!result) return;
+    // A name or verification change also shows in the public org list and in the org's opportunity copies (orgName).
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["organization", orgId] }),
+      queryClient.invalidateQueries({ queryKey: ["organizations"] }),
+      queryClient.invalidateQueries({ queryKey: ["orgOpportunities", orgId] })
+    ]);
   };
 
   return (

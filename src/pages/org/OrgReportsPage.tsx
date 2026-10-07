@@ -13,7 +13,7 @@ import { DEFAULT_TIME_ZONE, localDateIn } from "@fbla/shared";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { defaultReportRange } from "@/components/reports/DateRangeFields";
-import { ReportBuilder, type GenerateArgs, type PreviewState, type ReportFilters } from "@/components/reports/ReportBuilder";
+import { ReportBuilder, type GenerateArgs, type GeneratedReport, type PreviewState, type ReportFilters } from "@/components/reports/ReportBuilder";
 import { OrgPageShell } from "@/components/org/OrgPageShell";
 import { useNow } from "@/hooks/useNow";
 import { useOrgReportPreview } from "@/hooks/useReportPreview";
@@ -46,6 +46,7 @@ const OrgReportsPage = (): ReactElement => {
       opportunityId: args.opportunityId,
       requestNonce: args.requestNonce
     });
+  const pdfUrl = async (report: GeneratedReport) => (await api.coordinator.getOrgReportUrl({ orgId, reportId: report.reportId })).url;
 
   return (
     <OrgPageShell
@@ -58,6 +59,7 @@ const OrgReportsPage = (): ReactElement => {
         maxDate={localDateIn(new Date(nowMs), timeZone)}
         usePreview={usePreview}
         generate={generate}
+        pdfUrl={pdfUrl}
         expandErrorDetails
       />
     </OrgPageShell>

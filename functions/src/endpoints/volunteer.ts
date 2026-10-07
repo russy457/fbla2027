@@ -1,7 +1,7 @@
 /**
  * volunteer.ts
  * The "volunteer" callable endpoint (SPEC 2.3, G4): profile (complete and
- * update), signup, cancel, and letters. 512 MB because issueLetter renders a PDF.
+ * update), signup, cancel, letters, and short-lived PDF links. 512 MB because issueLetter renders a PDF.
  * Add an op: schema in shared/src/schemas/ops, entry in shared/src/ops.ts,
  * handler in functions/src/ops/<op>.ts, then list it here.
  */
@@ -9,6 +9,7 @@ import { defineEndpoint, type RegisteredOp } from "../lib/defineCallable";
 import { deploySecrets } from "../lib/secrets";
 import { cancelSignup } from "../ops/cancelSignup";
 import { completeProfile } from "../ops/completeProfile";
+import { getPdfUrl } from "../ops/getPdfUrl";
 import { issueLetter } from "../ops/issueLetter";
 // Tier 1 lane A
 import { markNotificationsRead } from "../ops/markNotificationsRead";
@@ -31,7 +32,9 @@ export const volunteerOps: readonly RegisteredOp[] = [
   // End Tier 1 lane A
   ...laneBVolunteerOps,
   // Tier 1 integration
-  updateProfile
+  updateProfile,
+  // Tier 1 review fixes
+  getPdfUrl
 ];
 
 export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: deploySecrets("TURNSTILE_SECRET") });

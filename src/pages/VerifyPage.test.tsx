@@ -46,7 +46,9 @@ const renderAt = (path: string) =>
   );
 
 describe("VerifyPage", () => {
-  beforeEach(() => getLetterVerification.mockReset());
+  beforeEach(() => {
+    getLetterVerification.mockReset();
+  });
 
   it("shows Valid first, then the letter facts", async () => {
     getLetterVerification.mockResolvedValue(verification());

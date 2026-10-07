@@ -31,6 +31,8 @@ export const COLLECTIONS = Object.freeze({
   invites: "invites",
   reports: "reports",
   orgVerificationLog: "orgVerificationLog",
+  // Tier 1 review fix: pending T4 contact repairs after a verified change (runDueJobs).
+  contactRefreshJobs: "contactRefreshJobs",
   // End Tier 1 lane B
   // Tier 1 lane A: in-app notifications (notifications/{uid}/items) and saved items (users/{uid}/saved).
   notifications: "notifications",

@@ -3,18 +3,18 @@
  * The PDF states after "Generate PDF" (SPEC 8.6: generating, failed with
  * Retry using the same nonce, ready with Download; port of the old
  * ReportBuilder/DownloadButton with the D8 states added). The PDF is private
- * to its owner, so the download URL comes from Storage under the owner rules.
+ * to its owner: Download asks a Function for a 5-minute link (getUrl, which
+ * re-checks ownership server side), never a permanent Storage download URL.
  */
 import { useState, type ReactElement } from "react";
-import { getDownloadURL, ref } from "firebase/storage";
 import { DownloadSimple } from "@phosphor-icons/react";
 import type { ReportStatus } from "@fbla/shared";
 import { buttonClassName } from "@/components/ui/buttonStyles";
-import { getFirebase } from "@/lib/firebase";
 
 interface DownloadButtonProps {
   readonly status: ReportStatus;
-  readonly pdfPath: string;
+  /** Resolves a short-lived link to the ready PDF. */
+  readonly getUrl: () => Promise<string>;
   readonly onRetry: () => void;
   readonly isRetrying: boolean;
 }
@@ -25,13 +25,13 @@ const STATUS_TEXT: Readonly<Record<ReportStatus, string>> = {
   ready: "Your PDF is ready."
 };
 
-export const DownloadButton = ({ status, pdfPath, onRetry, isRetrying }: DownloadButtonProps): ReactElement => {
+export const DownloadButton = ({ status, getUrl, onRetry, isRetrying }: DownloadButtonProps): ReactElement => {
   const [message, setMessage] = useState<string | null>(null);
 
   const download = async (): Promise<void> => {
     setMessage(null);
     try {
-      const url = await getDownloadURL(ref(getFirebase().storage, pdfPath));
+      const url = await getUrl();
       window.open(url, "_blank", "noopener,noreferrer");
     } catch {
       setMessage("We couldn't open the PDF. Try again in a moment.");

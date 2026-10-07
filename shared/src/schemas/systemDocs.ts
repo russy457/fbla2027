@@ -21,7 +21,9 @@ export type JobOutcome = (typeof JOB_OUTCOMES)[number];
 export const jobProcessedSchema = z.object({
   cutoffs: z.number().int().min(0),
   finalized: z.number().int().min(0),
-  seriesExtended: z.number().int().min(0)
+  seriesExtended: z.number().int().min(0),
+  /** contactRefreshJobs finished this run; absent on runs recorded before the job existed. */
+  contactRefreshes: z.number().int().min(0).optional()
 });
 export type JobProcessed = z.infer<typeof jobProcessedSchema>;
 
@@ -36,6 +38,19 @@ export const jobRunDocSchema = z.object({
   outcome: z.enum(JOB_OUTCOMES)
 });
 export type JobRunDoc = z.infer<typeof jobRunDocSchema>;
+
+/**
+ * contactRefreshJobs/{orgId}: a pending T4 contact repair for one org,
+ * written in the same batch as its verified change and deleted by the pass
+ * that finishes it, only while `token` is unchanged (SPEC 3.21).
+ */
+export const contactRefreshJobDocSchema = z.object({
+  orgId: z.string(),
+  token: z.string(),
+  requestedAt: timestampSchema,
+  nextActionAt: timestampSchema
+});
+export type ContactRefreshJobDoc = z.infer<typeof contactRefreshJobDocSchema>;
 
 /** demoClock/global: offset honored only in demo mode (SPEC#clock). */
 export const demoClockDocSchema = z.object({ offsetMs: z.number().int(), setBy: z.string(), setAt: timestampSchema });

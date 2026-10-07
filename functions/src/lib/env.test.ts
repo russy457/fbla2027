@@ -18,6 +18,7 @@ describe("readFunctionsEnv", () => {
       kioskMasterSecret: EMULATOR_KIOSK_MASTER_SECRET,
       appBaseUrl: "http://localhost:5173",
       storageBucket: "demo-fbla2027.appspot.com",
+      storageEmulatorHost: "127.0.0.1:9199",
       version: "dev"
     });
   });
@@ -42,6 +43,7 @@ describe("readFunctionsEnv", () => {
       kioskMasterSecret: null,
       appBaseUrl: "https://pitch.example",
       storageBucket: "fbla-prod.firebasestorage.app",
+      storageEmulatorHost: null,
       version: "rev-7"
     });
     expect(env.config.checkinRateMax).toBe(5);
@@ -54,5 +56,7 @@ describe("readFunctionsEnv", () => {
     expect(readFunctionsEnv({ FIREBASE_CONFIG: "{not json" }).projectId).toBe("demo-fbla2027");
     expect(readFunctionsEnv({ FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080" }).isEmulator).toBe(true);
     expect(readFunctionsEnv({ FUNCTIONS_EMULATOR: "true", DEMO_MODE: "false" }).demoMode).toBe(false);
+    expect(readFunctionsEnv({ FUNCTIONS_EMULATOR: "true", STORAGE_EMULATOR_HOST: "http://localhost:9300/" }).storageEmulatorHost).toBe("localhost:9300");
+    expect(readFunctionsEnv({ STORAGE_EMULATOR_HOST: "http://localhost:9300" }).storageEmulatorHost).toBeNull();
   });
 });

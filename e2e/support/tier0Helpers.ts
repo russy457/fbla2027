@@ -6,7 +6,7 @@
  * expect.poll on real conditions); there are no fixed sleeps.
  */
 import AxeBuilder from "@axe-core/playwright";
-import { expect as baseExpect, type Page } from "@playwright/test";
+import { expect as baseExpect, type Locator, type Page } from "@playwright/test";
 
 /** Cloud Functions on the emulator cold-start slowly on the first call, so UI waits get 30 s. */
 const expect = baseExpect.configure({ timeout: 30_000 });
@@ -144,6 +144,32 @@ export const seriousAxeViolations = async (page: Page): Promise<string[]> => {
   return results.violations
     .filter((violation) => violation.impact === "serious" || violation.impact === "critical")
     .map((violation) => `${violation.id}: ${violation.help} (${violation.nodes.map((node) => node.target.join(" ")).join(", ")})`);
+};
+
+/**
+ * Clicks a "Download PDF" button and returns the first bytes of what it opens.
+ * Headless Chromium downloads a PDF instead of showing it, so window.open is
+ * stubbed to record the short-lived link the app got from volunteer.getPdfUrl
+ * or coordinator.getOrgReportUrl. The link must match `pathPattern` and must
+ * not be a Firebase download-token URL (those never expire).
+ */
+export const openedPdfHead = async (page: Page, button: Locator, pathPattern: RegExp): Promise<string> => {
+  await page.evaluate(() => {
+    const opened: string[] = [];
+    (globalThis as unknown as { __opened: string[] }).__opened = opened;
+    (globalThis as unknown as { open: (url: string) => null }).open = (url: string) => {
+      opened.push(url);
+      return null;
+    };
+  });
+  await button.click();
+  const openedUrl = () => page.evaluate(() => (globalThis as unknown as { __opened: string[] }).__opened[0] ?? "");
+  await expect.poll(openedUrl).toMatch(pathPattern);
+  const url = await openedUrl();
+  expect(url).not.toContain("token=");
+  const pdf = await page.request.get(url);
+  expect(pdf.ok()).toBe(true);
+  return (await pdf.body()).subarray(0, 5).toString();
 };
 
 /** Saves a full-page screenshot for human review (test-results/ is git-ignored). */

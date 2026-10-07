@@ -179,6 +179,8 @@ service cloud.firestore {
     match /turnstileTokens/{id} { allow read, write: if false; }
     // Tier 1 lane C: AI usage counters (askAssistant limits) are server-only.
     match /aiUsage/{id} { allow read, write: if false; }
+    // Tier 1 review fix: pending T4 contact repairs (runDueJobs) are server-only.
+    match /contactRefreshJobs/{orgId} { allow read, write: if false; }
 
     // Tier 1 lane B
     // Owner of the org (SPEC 4.3 isOwner).

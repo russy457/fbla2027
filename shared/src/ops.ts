@@ -95,6 +95,8 @@ import { markNotificationsReadInput, markNotificationsReadOutput } from "./schem
 // End Tier 1 lane A
 // Tier 1 integration
 import { updateProfileInput, updateProfileOutput } from "./schemas/ops/profileOps";
+// Tier 1 review fixes
+import { getOrgReportUrlInput, getPdfUrlInput, pdfUrlOutput } from "./schemas/ops/pdfOps";
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -114,7 +116,9 @@ export const OPS = {
     markNotificationsRead: op(markNotificationsReadInput, markNotificationsReadOutput),
     // End Tier 1 lane A
     // Tier 1 integration
-    updateProfile: op(updateProfileInput, updateProfileOutput)
+    updateProfile: op(updateProfileInput, updateProfileOutput),
+    // Tier 1 review fixes
+    getPdfUrl: op(getPdfUrlInput, pdfUrlOutput)
   },
   kiosk: {
     ping: op(pingInput, pingOutput),
@@ -140,8 +144,10 @@ export const OPS = {
     approveHours: op(approveHoursInput, approveHoursOutput),
     rejectHours: op(rejectHoursInput, rejectHoursOutput),
     setAttendance: op(setAttendanceInput, setAttendanceOutput),
-    generateOrgReport: op(generateOrgReportInput, generateReportOutput)
+    generateOrgReport: op(generateOrgReportInput, generateReportOutput),
     // End Tier 1 lane B
+    // Tier 1 review fixes
+    getOrgReportUrl: op(getOrgReportUrlInput, pdfUrlOutput)
   },
   admin: {
     ping: op(pingInput, pingOutput),

@@ -6,6 +6,8 @@
  * invite is INVITE_INVALID. Redeeming your own invite again returns ok.
  * One transaction creates the coordinator membership and marks the invite
  * redeemed. A minor coordinator gets canViewContacts false (G14).
+ * Rate limited (bucket "redeemInvite", 10 per 10 minutes per user) so codes
+ * cannot be brute-forced; every attempt counts, wrong codes included.
  */
 import {
   AppError,
@@ -22,6 +24,7 @@ import {
 import { profileComplete } from "../lib/auth";
 import { defineCallable } from "../lib/defineCallable";
 import { msOf, readDoc, runTx, ts } from "../lib/firestore";
+import { REDEEM_INVITE_RATE_LIMIT } from "../lib/rateLimit";
 import { sha256Hex } from "../lib/requestIds";
 
 const ADULT_AGE = 18;
@@ -30,6 +33,7 @@ export const redeemInvite = defineCallable({
   endpoint: "coordinator",
   op: "redeemInvite",
   auth: profileComplete(),
+  rateLimit: REDEEM_INVITE_RATE_LIMIT,
   handler: async ({ input, caller, clock, deps, profile }) => {
     if (profile === null) throw new AppError("PROFILE_INCOMPLETE");
     const { db } = deps;

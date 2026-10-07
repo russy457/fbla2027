@@ -9,7 +9,7 @@
 import type { ReactElement } from "react";
 import { DEFAULT_TIME_ZONE, localDateIn } from "@fbla/shared";
 import { defaultReportRange } from "@/components/reports/DateRangeFields";
-import { ReportBuilder, type GenerateArgs, type PreviewState, type ReportFilters } from "@/components/reports/ReportBuilder";
+import { ReportBuilder, type GenerateArgs, type GeneratedReport, type PreviewState, type ReportFilters } from "@/components/reports/ReportBuilder";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useNow } from "@/hooks/useNow";
 import { useVolunteerReportPreview } from "@/hooks/useReportPreview";
@@ -37,6 +37,7 @@ const HoursReportPage = (): ReactElement => {
       themeId: args.themeId,
       requestNonce: args.requestNonce
     });
+  const pdfUrl = async (report: GeneratedReport) => (await api.volunteer.getPdfUrl({ path: report.pdfPath })).url;
 
   return (
     <div className="flex flex-col gap-8">
@@ -47,6 +48,7 @@ const HoursReportPage = (): ReactElement => {
         maxDate={localDateIn(new Date(nowMs), TIME_ZONE)}
         usePreview={usePreview}
         generate={generate}
+        pdfUrl={pdfUrl}
         expandErrorDetails={false}
       />
     </div>

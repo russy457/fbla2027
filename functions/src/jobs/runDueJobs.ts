@@ -6,11 +6,14 @@
  *      "skipped-lease" run and stops when another run holds it,
  *   2. pages instances whose nextActionAt <= now (oldest first, 200 per run),
  *   3. runs the waitlist cutoff and then finalizeShift when each is due,
+ *   3b. finishes due contactRefreshJobs (T4 contact hiding after an org's
+ *      verified flag changed; orgs/contactRefreshJob.ts), oldest first,
  *   4. writes jobRuns/{runId} with counts, per-instance errors, and `more`
  *      when the page was full, then releases the lease.
  * Overlapping runs cannot double-process: the lease serializes them, and the
- * cutoffDoneAt / finalizedAt markers make every step a no-op on repeat.
- * Per-instance failures are logged and retried on the next tick.
+ * cutoffDoneAt / finalizedAt markers make every step a no-op on repeat; a
+ * contact refresh pass skips snapshots that already match and its job is
+ * deleted only after a complete pass. Per-instance and per-job failures are logged and retried on the next tick.
  */
 import { randomUUID } from "node:crypto";
 import { onSchedule } from "firebase-functions/v2/scheduler";
@@ -28,6 +31,7 @@ import {
 import { defaultDeps, type ServerDeps } from "../lib/deps";
 import { msOf, readDoc, runTx, ts } from "../lib/firestore";
 import { requestClock } from "../lib/requestClock";
+import { runContactRefreshJobs } from "../orgs/contactRefreshJob";
 import { runCutoff } from "../shifts/cutoff";
 import { SYSTEM_ACTOR, finalizeInstance } from "../shifts/finalize";
 
@@ -40,7 +44,7 @@ export interface RunDueJobsResult {
   readonly more: boolean;
 }
 
-const NOTHING_PROCESSED: JobProcessed = { cutoffs: 0, finalized: 0, seriesExtended: 0 };
+const NOTHING_PROCESSED: JobProcessed = { cutoffs: 0, finalized: 0, seriesExtended: 0, contactRefreshes: 0 };
 
 const isContention = (error: unknown): boolean => isAppError(error) && error.code === "CONTENTION";
 
@@ -130,16 +134,19 @@ export const runDueJobs = async (deps: ServerDeps, clock: Clock, trigger: JobTri
         deps.log.error("runDueJobs instance failed", { instanceId: doc.id, code, error: error instanceof Error ? error.message : String(error) });
       }
     }
-    const errors = results.filter((result): result is { id: string; code: string } => "code" in result);
+    const contactRefresh = await runContactRefreshJobs(deps, clock.nowMs(), pageSize);
+    const errors = [...results.filter((result): result is { id: string; code: string } => "code" in result), ...contactRefresh.errors];
     const work = results.filter((result): result is InstanceWork => "finalized" in result);
 
     const processed: JobProcessed = {
       cutoffs: work.reduce((sum, item) => sum + item.cutoffs, 0),
       finalized: work.reduce((sum, item) => sum + item.finalized, 0),
-      seriesExtended: 0
+      seriesExtended: 0,
+      contactRefreshes: contactRefresh.refreshed
     };
-    const outcome: JobOutcome = errors.length === 0 ? "ok" : errors.length < due.size ? "partial" : "error";
-    const more = due.size === pageSize;
+    const attempted = due.size + contactRefresh.due;
+    const outcome: JobOutcome = errors.length === 0 ? "ok" : errors.length < attempted ? "partial" : "error";
+    const more = due.size === pageSize || contactRefresh.due === pageSize;
     await writeRun(deps, runId, { trigger, startedAt, finishedAt: ts(clock.nowMs()), processed, more, errors, outcome });
     deps.log.info("runDueJobs finished", { runId, trigger, outcome, ...processed, more, errorCount: errors.length });
     return { runId, outcome, processed, more };

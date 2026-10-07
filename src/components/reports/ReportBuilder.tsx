@@ -57,6 +57,7 @@ export interface GenerateArgs extends ReportFilters {
 }
 
 export interface GeneratedReport {
+  readonly reportId: string;
   readonly status: ReportStatus;
   readonly pdfPath: string;
 }
@@ -68,6 +69,8 @@ interface ReportBuilderProps {
   readonly maxDate: string;
   readonly usePreview: (filters: ReportFilters) => PreviewState;
   readonly generate: (args: GenerateArgs) => Promise<GeneratedReport>;
+  /** A short-lived link to a ready report PDF (an op re-checks ownership). */
+  readonly pdfUrl: (report: GeneratedReport) => Promise<string>;
   /** Coordinators and admins see error details expanded (D22). */
   readonly expandErrorDetails: boolean;
 }
@@ -82,7 +85,7 @@ const downloadText = (text: string, filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-export const ReportBuilder = ({ kind, initialRange, maxDate, usePreview, generate, expandErrorDetails }: ReportBuilderProps): ReactElement => {
+export const ReportBuilder = ({ kind, initialRange, maxDate, usePreview, generate, pdfUrl, expandErrorDetails }: ReportBuilderProps): ReactElement => {
   const csvColumns: readonly CsvColumn[] = kind === "org-participation" ? ORG_CSV_COLUMNS : VOLUNTEER_CSV_COLUMNS;
   const [range, setRange] = useState<DateRange>(initialRange);
   const [opportunityId, setOpportunityId] = useState<string | null>(null);
@@ -145,7 +148,7 @@ export const ReportBuilder = ({ kind, initialRange, maxDate, usePreview, generat
             <FilePdf aria-hidden="true" size={18} />
             {isPending ? "Generating PDF..." : "Generate PDF"}
           </button>
-          {result ? <DownloadButton status={result.status} pdfPath={result.pdfPath} onRetry={() => void runGenerate()} isRetrying={isPending} /> : null}
+          {result ? <DownloadButton status={result.status} getUrl={() => pdfUrl(result)} onRetry={() => void runGenerate()} isRetrying={isPending} /> : null}
           {error ? <ErrorNotice error={error} expandDetails={expandErrorDetails} /> : null}
           <CsvColumnPicker columns={csvColumns} selected={columns} onChange={setColumns} />
           <button type="button" onClick={exportCsv} disabled={!preview.preview || invalidRange !== null} className={buttonClassName("secondary")}>

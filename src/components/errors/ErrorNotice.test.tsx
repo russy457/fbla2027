@@ -22,7 +22,9 @@ const renderNotice = (error = apiErrorFor("KIOSK_CODE_INVALID", {}, "req-42").us
 const detailsOf = (): HTMLDetailsElement => screen.getByText("Details").closest("details") as HTMLDetailsElement;
 
 describe("ErrorNotice (D22)", () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it("shows friendly copy, the next step, and a help link", () => {
     renderNotice();

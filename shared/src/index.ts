@@ -55,3 +55,5 @@ export * from "./schemas/ops/inboxOps";
 export * from "./disputes";
 export * from "./zipAreas";
 export * from "./schemas/ops/profileOps";
+// Tier 1 review fixes: short-lived PDF links
+export * from "./schemas/ops/pdfOps";

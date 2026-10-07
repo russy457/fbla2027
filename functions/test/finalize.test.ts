@@ -86,7 +86,7 @@ describe("runDueJobs", () => {
     await seedRoster("inst1");
     testClock.set(START - HOUR); // past the 2 h cutoff, before the start
     const first = await call<{ processed: { cutoffs: number; finalized: number } }>("admin", "runDueJobs", {}, adminUser());
-    expect(first.processed).toEqual({ cutoffs: 1, finalized: 0, seriesExtended: 0 });
+    expect(first.processed).toEqual({ cutoffs: 1, finalized: 0, seriesExtended: 0, contactRefreshes: 0 });
     expect((await instance("inst1")).nextActionAt?.toMillis()).toBe(END + 30 * MINUTE);
 
     testClock.set(END + 30 * MINUTE);

@@ -26,6 +26,8 @@ export interface FunctionsEnv {
   readonly kioskMasterSecret: string | null;
   readonly appBaseUrl: string;
   readonly storageBucket: string;
+  /** host:port of the Storage emulator on the emulator (default 127.0.0.1:9199), else null. */
+  readonly storageEmulatorHost: string | null;
   readonly version: string;
   readonly config: AppConfig;
 }
@@ -44,6 +46,15 @@ const readFirebaseConfig = (raw: string | undefined): { projectId?: string; stor
 
 const nonEmpty = (value: string | undefined): string | null => (value && value.trim() !== "" ? value.trim() : null);
 
+/** Default Storage emulator address (SPEC 10.4 ports). */
+const DEFAULT_STORAGE_EMULATOR_HOST = "127.0.0.1:9199";
+
+const storageEmulatorHostOf = (env: EnvSource, isEmulator: boolean): string | null => {
+  if (!isEmulator) return null;
+  const raw = nonEmpty(env.FIREBASE_STORAGE_EMULATOR_HOST) ?? nonEmpty(env.STORAGE_EMULATOR_HOST);
+  return raw === null ? DEFAULT_STORAGE_EMULATOR_HOST : raw.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+};
+
 export const readFunctionsEnv = (env: EnvSource): FunctionsEnv => {
   const firebaseConfig = readFirebaseConfig(env.FIREBASE_CONFIG);
   const projectId = nonEmpty(env.GCLOUD_PROJECT) ?? nonEmpty(env.GCP_PROJECT) ?? firebaseConfig.projectId ?? DEFAULT_PROJECT_ID;
@@ -59,6 +70,7 @@ export const readFunctionsEnv = (env: EnvSource): FunctionsEnv => {
     kioskMasterSecret: nonEmpty(env.KIOSK_MASTER_SECRET) ?? (isEmulator ? EMULATOR_KIOSK_MASTER_SECRET : null),
     appBaseUrl: (nonEmpty(env.APP_BASE_URL) ?? "http://localhost:5173").replace(/\/+$/, ""),
     storageBucket: nonEmpty(env.STORAGE_BUCKET) ?? firebaseConfig.storageBucket ?? `${projectId}.appspot.com`,
+    storageEmulatorHost: storageEmulatorHostOf(env, isEmulator),
     version: nonEmpty(env.K_REVISION) ?? "dev",
     config: resolveConfig(env)
   };
