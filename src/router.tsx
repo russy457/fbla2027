@@ -54,6 +54,10 @@ const OrganizationPage = lazyWithReload(() => import("./pages/OrganizationPage")
 // Tier 2 lane A
 const OrgSeriesPage = lazyWithReload(() => import("./pages/org/OrgSeriesPage"));
 // End Tier 2 lane A
+// Tier 2 lane B
+const CollectionPage = lazyWithReload(() => import("./pages/CollectionPage"));
+const OrgCollectionsPage = lazyWithReload(() => import("./pages/org/OrgCollectionsPage"));
+// End Tier 2 lane B
 
 export const routes: RouteObject[] = [
   {
@@ -65,6 +69,9 @@ export const routes: RouteObject[] = [
       { path: "opportunity/:instanceId", element: <OpportunityPage /> },
       // Tier 1 integration: public organization page (SPEC 9.2 "Organization")
       { path: "organizations/:orgId", element: <OrganizationPage /> },
+      // Tier 2 lane B: public curated collection page (SPEC 9.1)
+      { path: "collections/:collectionId", element: <CollectionPage /> },
+      // End Tier 2 lane B
       { path: "help", element: <HelpPage /> },
       { path: "help/:slug", element: <HelpPage /> },
       { path: "verify", element: <VerifyPage /> },
@@ -102,9 +109,15 @@ export const routes: RouteObject[] = [
             ]
           },
           // End Tier 1 lane B
-          // Tier 2 lane A: recurring series page for coordinators
-          { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "series/:seriesId", element: <OrgSeriesPage /> }] }
-          // End Tier 2 lane A
+          // Tier 2 lanes A and B: coordinator series page and curated collections
+          {
+            path: "org/:orgId",
+            element: <RequireCoordinator />,
+            children: [
+              { path: "series/:seriesId", element: <OrgSeriesPage /> },
+              { path: "collections", element: <OrgCollectionsPage /> }
+            ]
+          }
         ]
       },
       // Tier 1 lane C

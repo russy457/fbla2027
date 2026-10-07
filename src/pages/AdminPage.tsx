@@ -18,6 +18,8 @@ import { VerificationQueue } from "@/components/admin/VerificationQueue";
 import { isDemoMode } from "@/lib/demoMode";
 // Tier 1 lane C
 import { ResetDemoDataControl } from "@/components/admin/ResetDemoDataControl";
+// Tier 2 lane B
+import { AdminCollectionsPanel } from "@/components/admin/AdminCollectionsPanel";
 
 const AdminPage = (): ReactElement => (
   <div className="flex flex-col gap-8">
@@ -27,6 +29,8 @@ const AdminPage = (): ReactElement => (
     <JobRunsPanel />
     <RevokeLetterByCode />
     {/* End Tier 1 lane B */}
+    {/* Tier 2 lane B */}
+    <AdminCollectionsPanel />
     {isDemoMode() ? (
       <>
         <DemoControls />

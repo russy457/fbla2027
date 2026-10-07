@@ -44,7 +44,7 @@ export const createAnthropicModel = (options: AnthropicModelOptions): AssistantM
             max_tokens: request.maxOutputTokens,
             system: request.system,
             messages: [{ role: "user", content: request.question }],
-            output_config: { effort: "low", format: { type: "json_schema", schema: { ...ASSISTANT_REPLY_JSON_SCHEMA } } }
+            output_config: { effort: "low", format: { type: "json_schema", schema: { ...(request.output?.schema ?? ASSISTANT_REPLY_JSON_SCHEMA) } } }
           },
           { timeout: request.timeoutMs }
         );

@@ -5,6 +5,8 @@
  * (the range is applied in the shared aggregation because milestones use the
  * lifetime total), then the organizations and instances those logs mention,
  * for names, verification state, and shift titles. Capped at MAX_REPORT_DOCS.
+ * Tier 2 lane B: also the volunteer's own signups (uid == X, auto index) for
+ * the track record chart; the shared aggregation applies the range.
  */
 import type { Firestore } from "firebase-admin/firestore";
 import {
@@ -17,7 +19,7 @@ import {
   type VolunteerReportData
 } from "@fbla/shared";
 import { readDoc } from "../../lib/firestore";
-import { MAX_REPORT_DOCS, logRowOf, rangeFor, shiftInfoOf } from "./rows";
+import { MAX_REPORT_DOCS, logRowOf, rangeFor, shiftInfoOf, signupRowOf } from "./rows";
 
 export interface VolunteerReportRequest {
   readonly uid: string;
@@ -40,8 +42,12 @@ const readByIds = async <D, T>(db: Firestore, collection: string, ids: readonly 
 };
 
 export const loadVolunteerReportData = async (db: Firestore, request: VolunteerReportRequest): Promise<VolunteerReportData> => {
-  const snapshot = await db.collection(COLLECTIONS.hoursLogs).where("uid", "==", request.uid).limit(MAX_REPORT_DOCS).get();
+  const [snapshot, signupSnapshot] = await Promise.all([
+    db.collection(COLLECTIONS.hoursLogs).where("uid", "==", request.uid).limit(MAX_REPORT_DOCS).get(),
+    db.collection(COLLECTIONS.signups).where("uid", "==", request.uid).limit(MAX_REPORT_DOCS).get()
+  ]);
   const logs = snapshot.docs.map(logRowOf);
+  const signups = signupSnapshot.docs.map(signupRowOf).map((signup) => ({ uid: signup.uid, status: signup.status, lateCancel: signup.lateCancel ?? false, startMs: signup.startMs }));
   const [orgs, shifts] = await Promise.all([
     readByIds<OrganizationDoc, ReportOrgInfo>(db, COLLECTIONS.organizations, logs.map((log) => log.orgId), (org) => ({ name: org.name, verified: org.verified })),
     readByIds<InstanceDoc, ReportShiftInfo>(
@@ -51,5 +57,5 @@ export const loadVolunteerReportData = async (db: Firestore, request: VolunteerR
       shiftInfoOf
     )
   ]);
-  return buildVolunteerReport({ logs, orgs, shifts, range: rangeFor(request.from, request.to, request.timeZone), timeZone: request.timeZone });
+  return buildVolunteerReport({ logs, orgs, shifts, signups, range: rangeFor(request.from, request.to, request.timeZone), timeZone: request.timeZone });
 };

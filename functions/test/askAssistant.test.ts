@@ -17,7 +17,7 @@ import { getHelpCorpus } from "../src/ai/helpCorpus";
 import { createEndpointHandler } from "../src/lib/defineCallable";
 import type { ServerDeps } from "../src/lib/deps";
 import { createAskAssistantOp } from "../src/ops/askAssistant";
-import { pingOp } from "../src/ops/ping";
+import { aiOps } from "../src/endpoints/ai";
 import { call, db, expectCode, logLines, makeDeps, resetEmulators, user } from "./harness";
 import { ADULT_BIRTH, profile } from "./fixtures";
 
@@ -34,7 +34,8 @@ const askWithModel = async (model: AssistantModel, uid: string, deps: ServerDeps
     model: () => model,
     corpus: getHelpCorpus
   });
-  const handler = createEndpointHandler("ai", [pingOp("ai"), op], () => deps);
+  // Tier 2 lane B: the real ai table with only askAssistant swapped, so every op stays registered.
+  const handler = createEndpointHandler("ai", aiOps.map((entry) => (entry.op === "askAssistant" ? op : entry)), () => deps);
   const response = await handler({ data: { op: "askAssistant", question: QUESTION, route: "/me/shifts" }, auth: user(uid) });
   return response.data as { answer: string; source: string; limited: boolean; articles: Array<{ slug: string; title: string }> };
 };

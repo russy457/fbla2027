@@ -5,7 +5,7 @@
  * with the verification chip (Verified, or the D23 Unverified chip with its
  * explanation), the mission, then upcoming shifts; the primary action opens
  * the next shift, and Save is the secondary action (signed in only). Reviews
- * are Tier 2. An organization with nothing scheduled shows the D6 empty
+ * (Tier 2 lane B) follow About: the aggregate and the public list. An organization with nothing scheduled shows the D6 empty
  * line "No upcoming shifts right now." with Save. The org document and its
  * shifts are public reads (SPEC 4.3); shifts update live.
  * Tier 2 lane C: the page sets its title, description, and schema.org
@@ -44,6 +44,8 @@ const orgPageHead = (org: Organization): PageHeadOverride => {
     jsonLd: buildOrganizationJsonLd({ ...org, causeLabels: org.causeAreas.map((cause) => CAUSE_AREA_LABELS[cause]) }, pageUrl)
   };
 };
+// Tier 2 lane B
+import { OrgReviews } from "@/components/reviews/OrgReviews";
 
 /** Enough to scan a month of a busy org; Explore has the full list. */
 const UPCOMING_SHOWN = 10;
@@ -147,6 +149,9 @@ const OrganizationPage = (): ReactElement => {
         ) : null}
         {data.verified ? null : <p className="max-w-[65ch] text-sm text-fg-muted">Volunteers under 18 can join this organization's shifts after it is verified.</p>}
       </section>
+
+      {/* Tier 2 lane B: org experience reviews (SPEC 3.20) */}
+      <OrgReviews orgId={orgId} orgName={data.name} timeZone={data.timeZone} />
     </article>
   );
 };

@@ -108,6 +108,9 @@ import {
 } from "./schemas/ops/seriesOps";
 import { inviteVolunteersInput, inviteVolunteersOutput, rankVolunteersInput, rankVolunteersOutput } from "./schemas/ops/rankOps";
 // End Tier 2 lane A
+// Tier 2 lane B
+import { shiftPlannerParseInput, shiftPlannerParseOutput } from "./schemas/ops/plannerOps";
+// End Tier 2 lane B
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -183,7 +186,10 @@ export const OPS = {
   ai: {
     ping: op(pingInput, pingOutput),
     // Tier 1 lane C
-    askAssistant: op(askAssistantInput, askAssistantOutput)
+    askAssistant: op(askAssistantInput, askAssistantOutput),
+    // Tier 2 lane B
+    shiftPlannerParse: op(shiftPlannerParseInput, shiftPlannerParseOutput)
+    // End Tier 2 lane B
   }
 } as const;
 

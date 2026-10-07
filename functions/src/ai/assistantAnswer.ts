@@ -64,8 +64,8 @@ const fallback = (articles: readonly HelpArticle[], limited: boolean): AskAssist
   return { answer, source: "help", limited, articles: top };
 };
 
-/** Never longer than timeoutMs, even if a provider ignores its own timeout. */
-const withTimeout = <T>(work: Promise<T>, timeoutMs: number): Promise<T> => {
+/** Never longer than timeoutMs, even if a provider ignores its own timeout. Tier 2 lane B: also used by shiftPlannerParse. */
+export const withTimeout = <T>(work: Promise<T>, timeoutMs: number): Promise<T> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_resolve, reject) => {
     timer = setTimeout(() => reject(new AssistantModelError("timeout")), timeoutMs);

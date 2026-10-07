@@ -64,3 +64,9 @@ export * from "./schemas/seriesDocs";
 export * from "./schemas/ops/seriesOps";
 export * from "./schemas/ops/rankOps";
 // End Tier 2 lane A
+// Tier 2 lane B: AI planner op, reliability charts, collections, reviews
+export * from "./schemas/ops/plannerOps";
+export * from "./reliabilityReport";
+export * from "./schemas/curationDocs";
+export * from "./reviews";
+// End Tier 2 lane B

@@ -17,6 +17,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ErrorState } from "@/components/ErrorState";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
+// Tier 2 lane B
+import { FeaturedCollections } from "@/components/collections/FeaturedCollections";
 import { RecommendedShifts } from "@/components/explore/RecommendedShifts";
 import { LoadingState } from "@/components/LoadingState";
 import { PromotionBanner } from "@/components/shifts/PromotionBanner";
@@ -100,6 +102,8 @@ const ExplorePage = (): ReactElement => {
 
       {uid !== null ? <PromotionBanner uid={uid} signups={signups.data ?? []} nowMs={nowMs} /> : null}
       {me !== null && rows.length > 0 ? <RecommendedShifts picks={picks} hasInterests={me.interests.length > 0} /> : null}
+      {/* Tier 2 lane B: published curated collections */}
+      <FeaturedCollections />
 
       {instances.error ? (
         <ErrorState title="We couldn't load shifts" description="Check your connection, then reload the page." />

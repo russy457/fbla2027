@@ -16,6 +16,11 @@ export interface AssistantModelRequest {
   readonly question: string;
   readonly maxOutputTokens: number;
   readonly timeoutMs: number;
+  /**
+   * Tier 2 lane B: the JSON Schema the reply must follow, for ops other than
+   * askAssistant (shiftPlannerParse). Omitted means ASSISTANT_REPLY_JSON_SCHEMA.
+   */
+  readonly output?: { readonly name: string; readonly schema: Readonly<Record<string, unknown>> };
 }
 
 export interface AssistantModel {

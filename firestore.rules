@@ -250,5 +250,106 @@ service cloud.firestore {
       allow write: if false;
     }
     // End Tier 2 lane A
+    // Tier 2 lane B
+    // Curated collections (SPEC 3.19, 4.3; gate UC1: coordinator/admin-authored
+    // only). Anyone reads a published collection; the org's coordinators and
+    // admins also read drafts. Writes: org collections by the org's
+    // coordinators, admin collections (orgId null) by admins. The author is
+    // stamped on create and never changes; the org never changes either.
+    // Rules cannot loop over a list, so each item's shape is checked by the
+    // client schema on write and again when the app parses reads.
+    function canCurate(orgId) {
+      return orgId == null ? isAdmin() : (orgId is string && isMember(orgId));
+    }
+
+    function validCollection(data) {
+      return data.keys().hasOnly(['title', 'description', 'items', 'orgId', 'authorUid', 'published', 'updatedAt'])
+        && data.keys().hasAll(['title', 'description', 'items', 'orgId', 'authorUid', 'published', 'updatedAt'])
+        && data.title is string && data.title.size() >= 4 && data.title.size() <= 80
+        && data.description is string && data.description.size() <= 500
+        && data.items is list && data.items.size() <= 30
+        && data.published is bool
+        && data.authorUid is string
+        && data.updatedAt == request.time;
+    }
+
+    match /collections/{collectionId} {
+      allow read: if resource.data.published == true
+        || isAdmin()
+        || (resource.data.orgId != null && isMember(resource.data.orgId));
+      allow create: if signedIn()
+        && validCollection(request.resource.data)
+        && request.resource.data.authorUid == request.auth.uid
+        && canCurate(request.resource.data.orgId);
+      allow update: if signedIn()
+        && validCollection(request.resource.data)
+        && request.resource.data.authorUid == resource.data.authorUid
+        && request.resource.data.orgId == resource.data.orgId
+        && canCurate(resource.data.orgId);
+      allow delete: if signedIn() && canCurate(resource.data.orgId);
+    }
+
+    // Org experience reviews (SPEC 3.20, 4.3). Public read. The id is the
+    // signup id: the author must own that signup, it must be completed (they
+    // attended), and it must belong to the reviewed org, so one review per
+    // attended shift. The name is the author's public name (first name + last
+    // initial, SPEC 4.2) or "A volunteer". Authors edit rating, tags, and text
+    // at most once every 30 seconds (a simple write rate limit; an author's
+    // delete waits too); org coordinators only set or clear the response;
+    // authors and admins delete.
+    function signupDoc(signupId) {
+      return get(/databases/$(database)/documents/signups/$(signupId)).data;
+    }
+
+    function validReviewBody(data) {
+      return data.rating is int && data.rating >= 1 && data.rating <= 5
+        && data.tags is list && data.tags.size() <= 5
+        && data.tags.toSet().size() == data.tags.size()
+        && data.tags.toSet().hasOnly(['well-organized', 'welcoming', 'meaningful-impact', 'good-communication', 'accessible'])
+        && data.text is string && data.text.size() <= 1000;
+    }
+
+    function validReviewName(data) {
+      return data.displayName == 'A volunteer'
+        || data.displayName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.displayName;
+    }
+
+    function validResponse(response) {
+      return response == null
+        || (response is map
+            && response.keys().hasOnly(['text', 'by', 'at'])
+            && response.keys().hasAll(['text', 'by', 'at'])
+            && response.text is string && response.text.size() >= 1 && response.text.size() <= 1000
+            && response.by == request.auth.uid
+            && response.at == request.time);
+    }
+
+    match /reviews/{signupId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['orgId', 'uid', 'displayName', 'rating', 'tags', 'text', 'response', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['orgId', 'uid', 'displayName', 'rating', 'tags', 'text', 'response', 'createdAt', 'updatedAt'])
+        && request.resource.data.uid == request.auth.uid
+        && signupDoc(signupId).uid == request.auth.uid
+        && signupDoc(signupId).status == 'completed'
+        && signupDoc(signupId).orgId == request.resource.data.orgId
+        && validReviewBody(request.resource.data)
+        && validReviewName(request.resource.data)
+        && request.resource.data.response == null
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if (isSelf(resource.data.uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'tags', 'text', 'updatedAt'])
+          && validReviewBody(request.resource.data)
+          && request.resource.data.updatedAt == request.time
+          && request.time > resource.data.updatedAt + duration.value(30, 's'))
+        || (isMember(resource.data.orgId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['response'])
+          && validResponse(request.resource.data.response));
+      // The author's delete waits out the same cooldown, so delete + recreate cannot skip it.
+      allow delete: if (isSelf(resource.data.uid) && request.time > resource.data.updatedAt + duration.value(30, 's'))
+        || isAdmin();
+    }
+    // End Tier 2 lane B
   }
 }

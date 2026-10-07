@@ -18,6 +18,8 @@ import { MILESTONES } from "./config";
 import { minutesToHours, nextMilestone } from "./hours";
 import type { HoursSource, HoursStatus, SignupStatus } from "./schemas/common";
 import { SIGNUP_STATUSES } from "./schemas/common";
+// Tier 2 lane B: reliability charts (SPEC 8.6)
+import { reliabilityDistribution, trackRecordFor, type ReliabilityDistribution, type ReliabilityReportSignup, type TrackRecordReport } from "./reliabilityReport";
 
 export interface ReportRange {
   /** Inclusive start instant. */
@@ -47,6 +49,8 @@ export interface ReportSignupRow {
   readonly opportunityId: string;
   readonly status: SignupStatus;
   readonly startMs: number;
+  /** Tier 2 lane B: feeds the reliability distribution; missing means false. */
+  readonly lateCancel?: boolean;
 }
 
 export interface ReportShiftInfo {
@@ -159,6 +163,8 @@ export interface OrgReportData {
   readonly hoursByMonth: MonthMinutes[];
   readonly attendance: StatusCount[];
   readonly topVolunteers: TopVolunteer[];
+  /** Tier 2 lane B: volunteers per attendance band (SPEC 8.6 reliability distribution). */
+  readonly reliability: ReliabilityDistribution;
   readonly rows: ReportCsvRow[];
 }
 
@@ -253,6 +259,10 @@ export const buildOrgReport = (input: OrgReportInput): OrgReportData => {
     hoursByMonth: hoursByMonth(logs, input.range, input.timeZone),
     attendance: SIGNUP_STATUSES.map((status) => ({ status, count: signups.filter((signup) => signup.status === status).length })),
     topVolunteers: topVolunteers(logs, names),
+    reliability: reliabilityDistribution(
+      signups.map((signup) => ({ uid: signup.uid, status: signup.status, lateCancel: signup.lateCancel ?? false, startMs: signup.startMs })),
+      input.range
+    ),
     rows: logRows(logs, input.timeZone, (log) => ({
       volunteer: names.get(log.uid) ?? UNKNOWN_VOLUNTEER_NAME,
       organization: "",
@@ -270,6 +280,8 @@ export interface VolunteerReportInput {
   readonly shifts: Readonly<Record<string, ReportShiftInfo>>;
   readonly range: ReportRange;
   readonly timeZone: string;
+  /** Tier 2 lane B: the volunteer's own signups, for the track record chart; missing means none. */
+  readonly signups?: readonly ReliabilityReportSignup[];
 }
 
 export interface VolunteerSummary {
@@ -310,6 +322,8 @@ export interface VolunteerReportData {
   readonly hoursByMonth: MonthMinutes[];
   readonly shiftList: ShiftListItem[];
   readonly milestones: MilestoneProgress;
+  /** Tier 2 lane B: attended / no-shows / late cancels in the range (SPEC 7.2, D12). */
+  readonly trackRecord: TrackRecordReport;
   readonly rows: ReportCsvRow[];
 }
 
@@ -356,6 +370,7 @@ export const buildVolunteerReport = (input: VolunteerReportInput): VolunteerRepo
         status: log.status
       })),
     milestones: milestoneProgress(sumMinutes(approvedOnly(visible))),
+    trackRecord: trackRecordFor(input.signups ?? [], input.range),
     rows: logRows(logs, input.timeZone, (log) => ({
       volunteer: "",
       organization: orgInfo(input.orgs, log.orgId).name,

@@ -11,7 +11,7 @@ describe("SectionSelector", () => {
   it("lists the org report sections and toggles them in canonical order", () => {
     const onChange = vi.fn();
     render(<SectionSelector kind="org-participation" selected={["topVolunteers"]} onChange={onChange} />);
-    expect(screen.getAllByRole("checkbox")).toHaveLength(5);
+    expect(screen.getAllByRole("checkbox")).toHaveLength(6); // Tier 2 lane B adds Reliability distribution
     fireEvent.click(screen.getByRole("checkbox", { name: "Summary" }));
     expect(onChange).toHaveBeenCalledWith(["summary", "topVolunteers"]);
   });

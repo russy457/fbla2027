@@ -45,7 +45,10 @@ export const createOpenRouterModel = (options: OpenRouterModelOptions): Assistan
               { role: "system", content: request.system },
               { role: "user", content: request.question }
             ],
-            response_format: { type: "json_schema", json_schema: { name: "assistant_answer", strict: true, schema: ASSISTANT_REPLY_JSON_SCHEMA } }
+            response_format: {
+              type: "json_schema",
+              json_schema: { name: request.output?.name ?? "assistant_answer", strict: true, schema: request.output?.schema ?? ASSISTANT_REPLY_JSON_SCHEMA }
+            }
           })
         });
       } catch (error) {

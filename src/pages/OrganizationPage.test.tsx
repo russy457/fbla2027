@@ -22,6 +22,8 @@ vi.mock("@/hooks/useShiftData", () => ({ useOrgInstances: () => ({ data: state.s
 vi.mock("@/hooks/useNow", () => ({ useNow: () => SHIFT_START_MS - 60 * 60 * 1000 }));
 vi.mock("@/hooks/useInbox", () => ({ useSavedItems: () => ({ data: [], error: null, isLoading: false }) }));
 vi.mock("@/store/authStore", () => ({ useSessionUser: () => (state.signedIn ? { uid: "uid-1" } : null) }));
+// Tier 2 lane B: reviews have their own tests (src/components/reviews/OrgReviews.test.tsx).
+vi.mock("@/components/reviews/OrgReviews", () => ({ OrgReviews: () => null }));
 
 const pantry = (overrides: Partial<OrganizationDoc> = {}): OrganizationDoc & { id: string } => ({
   id: "org-1",

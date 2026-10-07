@@ -12,7 +12,8 @@
  */
 import { MAX_CAPACITY, type CauseArea, type PlannerDraft, type PlannerWarning } from "@fbla/shared";
 
-export type PrefillField = "title" | "causeArea" | "location" | "date" | "startTime" | "endTime" | "capacity";
+// Tier 2 lane B: "description" is filled only by the AI planner (ai.shiftPlannerParse).
+export type PrefillField = "title" | "causeArea" | "location" | "date" | "startTime" | "endTime" | "capacity" | "description";
 
 export interface PlannerPrefill {
   readonly title?: string;
@@ -23,6 +24,8 @@ export interface PlannerPrefill {
   readonly startTime?: string;
   readonly endTime?: string;
   readonly capacity?: number;
+  /** Tier 2 lane B: AI-written listing description (never from the deterministic parser). */
+  readonly description?: string;
   readonly filled: ReadonlySet<PrefillField>;
   readonly hints: readonly string[];
   // Tier 2 lane A: "every Saturday" in the sentence; the page preselects "Repeats".
@@ -74,7 +77,8 @@ const FIELD_LABELS: Readonly<Record<PrefillField, string>> = {
   date: "date",
   startTime: "start time",
   endTime: "end time",
-  capacity: "volunteers needed"
+  capacity: "volunteers needed",
+  description: "description"
 };
 
 /** "We filled in title, date, and start time. Check each highlighted field." */

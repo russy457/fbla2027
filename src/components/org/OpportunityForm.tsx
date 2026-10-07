@@ -71,7 +71,7 @@ export const OpportunityForm = ({ initial = EMPTY_OPPORTUNITY, submitLabel, isPe
         hint={highlighted.has("title") ? PREFILLED_HINT : "4 to 80 characters, for example Sort and pack food boxes."}
         {...(highlighted.has("title") ? { inputClassName: PREFILLED_INPUT_CLASSES } : {})}
         value={fields.title} onChange={(event) => update({ title: event.target.value })} error={errors.title} />
-      <TextAreaField label="Description" rows={4} maxLength={2000} value={fields.description} onChange={(event) => update({ description: event.target.value })} error={errors.description} />
+      <TextAreaField label="Description" {...(highlighted.has("description") ? { hint: PREFILLED_HINT } : {})} rows={4} maxLength={2000} value={fields.description} onChange={(event) => update({ description: event.target.value })} error={errors.description} />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor={ids.cause} className="text-sm font-semibold text-fg">Cause area</label>

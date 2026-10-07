@@ -41,8 +41,12 @@ export const COLLECTIONS = Object.freeze({
   // End Tier 1 lane A
   // Tier 2 lane A: recurring series and each volunteer's whole-series signup record.
   series: "series",
-  seriesSignups: "seriesSignups"
+  seriesSignups: "seriesSignups",
   // End Tier 2 lane A
+  // Tier 2 lane B: curated collections (SPEC 3.19) and org reviews (SPEC 3.20), both client-written under the rules.
+  curatedCollections: "collections",
+  reviews: "reviews"
+  // End Tier 2 lane B
 });
 
 export const PATHS = Object.freeze({

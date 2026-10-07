@@ -11,10 +11,11 @@
  */
 import type { ReportKind } from "./schemas/orgAdminDocs";
 
-export const VOLUNTEER_REPORT_SECTIONS = ["summary", "hoursByOrg", "hoursByMonth", "shiftList", "milestones"] as const;
+// Tier 2 lane B: "trackRecord" and "reliability" are the reliability charts (SPEC 8.6).
+export const VOLUNTEER_REPORT_SECTIONS = ["summary", "hoursByOrg", "hoursByMonth", "shiftList", "milestones", "trackRecord"] as const;
 export type VolunteerReportSection = (typeof VOLUNTEER_REPORT_SECTIONS)[number];
 
-export const ORG_REPORT_SECTIONS = ["summary", "hoursByOpportunity", "hoursByMonth", "attendance", "topVolunteers"] as const;
+export const ORG_REPORT_SECTIONS = ["summary", "hoursByOpportunity", "hoursByMonth", "attendance", "topVolunteers", "reliability"] as const;
 export type OrgReportSection = (typeof ORG_REPORT_SECTIONS)[number];
 
 export type ReportSection = VolunteerReportSection | OrgReportSection;
@@ -27,7 +28,9 @@ export const REPORT_SECTION_LABELS: Readonly<Record<ReportSection, string>> = {
   milestones: "Milestones",
   hoursByOpportunity: "Hours by opportunity",
   attendance: "Attendance breakdown",
-  topVolunteers: "Top volunteers"
+  topVolunteers: "Top volunteers",
+  trackRecord: "Track record",
+  reliability: "Reliability distribution"
 };
 
 /** Section keys allowed for a report kind, in the order the PDF prints them. */
