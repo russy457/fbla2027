@@ -1,7 +1,8 @@
 /**
  * AccountControls.tsx
  * Right side of the header (SPEC#screen-nav D2): role links and the account
- * action. Tier 1 adds the notification badge, Saved, and Profile. Shows "Coordinator" only when the person has at least one
+ * action. Tier 1 adds the notification badge, Saved, and Profile; Tier 2
+ * turns the badge into the bell menu (SPEC 8.3). Shows "Coordinator" only when the person has at least one
  * organization membership, "Admin" only with the admin claim, then Sign in
  * or Sign out. Sign-out returns to Explore and clears cached personal data.
  */
@@ -9,7 +10,7 @@ import { useState, type ReactElement } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookmarkSimple, Buildings, ShieldCheck, SignIn, SignOut, UserCircle } from "@phosphor-icons/react";
-import { NotificationBadge } from "@/components/notifications/NotificationBadge";
+import { BellMenu } from "@/components/notifications/BellMenu"; // Tier 2 lane C
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { signOutUser } from "@/lib/authClient";
 import { cn } from "@/lib/cn";
@@ -58,8 +59,9 @@ export const AccountControls = (): ReactElement | null => {
 
   return (
     <div className="flex items-center gap-1">
-      {/* Tier 1 lane A: unread badge (opens /me/notifications) and saved items. */}
-      <NotificationBadge uid={user.uid} />
+      {/* Tier 2 lane C: the bell menu (latest alerts, Mark all read) replaces the Tier 1 badge link. */}
+      <BellMenu uid={user.uid} />
+      {/* Tier 1 lane A: saved items. */}
       <NavLink to="/me/saved" className={linkClass}>
         <BookmarkSimple aria-hidden="true" size={18} />
         <span className="hidden sm:inline">Saved</span>

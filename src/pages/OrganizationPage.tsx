@@ -8,6 +8,8 @@
  * are Tier 2. An organization with nothing scheduled shows the D6 empty
  * line "No upcoming shifts right now." with Save. The org document and its
  * shifts are public reads (SPEC 4.3); shifts update live.
+ * Tier 2 lane C: the page sets its title, description, and schema.org
+ * Organization JSON-LD (SPEC 1.2 Tier 3 SEO).
  */
 import type { ReactElement } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -27,6 +29,21 @@ import { useOrgInstances } from "@/hooks/useShiftData";
 import { CAUSE_AREA_LABELS } from "@/lib/causeAreas";
 import { getOrganization } from "@/lib/data/orgs";
 import { seatsLeft } from "@/lib/signupButtonState";
+// Tier 2 lane C
+import { usePageHead, type PageHeadOverride } from "@/components/seo/pageHead";
+import { resolveBaseUrl } from "@/lib/seo/head";
+import { buildOrganizationJsonLd } from "@/lib/seo/orgJsonLd";
+import type { Organization } from "@/lib/data/orgs";
+
+/** Head tags for a loaded organization (title, mission, Organization JSON-LD). */
+const orgPageHead = (org: Organization): PageHeadOverride => {
+  const pageUrl = `${resolveBaseUrl(import.meta.env.APP_BASE_URL, window.location.origin)}/organizations/${encodeURIComponent(org.id)}`;
+  return {
+    title: org.name,
+    description: org.mission,
+    jsonLd: buildOrganizationJsonLd({ ...org, causeLabels: org.causeAreas.map((cause) => CAUSE_AREA_LABELS[cause]) }, pageUrl)
+  };
+};
 
 /** Enough to scan a month of a busy org; Explore has the full list. */
 const UPCOMING_SHOWN = 10;
@@ -55,6 +72,7 @@ const OrganizationPage = (): ReactElement => {
   const nowMs = useNow(60_000);
   const org = useQuery({ queryKey: ["organization", orgId], queryFn: () => getOrganization(orgId), staleTime: 60_000, enabled: orgId !== "" });
   const shifts = useOrgInstances(orgId === "" ? null : orgId);
+  usePageHead(org.data ? orgPageHead(org.data) : null); // Tier 2 lane C
 
   if (org.isError) return <ErrorState title="We couldn't load this organization" description="Check your connection, then reload the page." />;
   if (org.isPending) return <LoadingState label="Loading the organization" />;

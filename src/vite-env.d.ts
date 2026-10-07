@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly VITE_MAPBOX_TOKEN?: string;
   readonly VITE_APPCHECK_SITE_KEY?: string;
   readonly VITE_APPCHECK_DEBUG_TOKEN?: string;
+  /** Public site origin for canonical URLs and the sitemap (exposed by vite.config.ts envPrefix). */
+  readonly APP_BASE_URL?: string;
 }
 
 interface ImportMeta {

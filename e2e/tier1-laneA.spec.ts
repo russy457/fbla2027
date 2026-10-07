@@ -51,12 +51,13 @@ test("keyboard-only waitlist signup, then promotion notification and banner", as
   await tabTo(page, join);
   await page.keyboard.press("Enter");
   await expect(page.getByText("Waitlisted #1 of 1")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Notifications" })).toBeVisible();
+  // Tier 2 lane C: the header bell is a menu button now (SPEC 8.3 Tier 2).
+  await expect(page.getByRole("button", { name: /^Notifications/ })).toBeVisible();
 
   // Sam cancels; the head of the waitlist (Jordan) is promoted in the same transaction.
   await callOpAs(ACCOUNTS.minor, "volunteer", "cancelSignup", { signupId: `${WAITLIST_SHIFT.id}_demo-minor` });
 
-  await expect(page.getByRole("link", { name: /^Notifications, \d+ unread$/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Notifications, \d+ unread$/ })).toBeVisible();
   const banner = page.getByRole("region", { name: "Updates about your shifts" });
   await expect(banner.getByText(/^You're in! /)).toBeVisible();
   await expect(banner.getByRole("button", { name: "Confirm" })).toBeVisible();
@@ -68,7 +69,8 @@ test("keyboard-only waitlist signup, then promotion notification and banner", as
   await page.keyboard.press("Enter");
   await expect(banner.getByText(/^You're in! /)).toHaveCount(0);
 
-  await page.getByRole("link", { name: /^Notifications/ }).first().click();
+  await page.getByRole("button", { name: /^Notifications/ }).click();
+  await page.getByRole("link", { name: "See all notifications" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Notifications" })).toBeVisible();
   await expect(page.getByText(/^You're in! /)).toBeVisible();
   await context.close();

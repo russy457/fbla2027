@@ -3,12 +3,12 @@
  * D13 / SPEC 9.11: a waitlist promotion shows "You're in!" with Confirm
  * (marks the alert read) and Can't make it (cancelSignup with release, then
  * mark read); pending until the Function returns; reminders for confirmed
- * shifts within 24 h. Also the header badge's 99+ cap and accessible name.
+ * shifts within 24 h. (The header bell's 99+ cap and accessible name are
+ * tested in components/notifications/BellMenu.test.tsx.)
  */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NotificationBadge } from "@/components/notifications/NotificationBadge";
 import { MINUTE, SHIFT_START_MS, makeInstance, makeSignup, ts } from "@/test/fixtures";
 import { PromotionBanner } from "./PromotionBanner";
 
@@ -87,29 +87,5 @@ describe("PromotionBanner", () => {
     renderBanner([makeSignup({ status: "cancelled" }), makeSignup({ id: "other", instanceId: "shift-2" })]);
     expect(screen.queryByText("You're in! Saturday 9 AM")).toBeNull();
     expect(screen.getByRole("list", { name: "Reminders" })).toBeInTheDocument();
-  });
-});
-
-describe("NotificationBadge", () => {
-  it("names the unread count and caps it at 99+", () => {
-    unread = Array.from({ length: 100 }, (_, index) => ({ ...promotion, id: `n${index}` }));
-    render(
-      <MemoryRouter>
-        <NotificationBadge uid="uid-1" />
-      </MemoryRouter>
-    );
-    expect(screen.getByRole("link", { name: "Notifications, 99+ unread" })).toHaveAttribute("href", "/me/notifications");
-    expect(screen.getByTestId("unread-badge")).toHaveTextContent("99+");
-  });
-
-  it("shows no count when everything is read", () => {
-    unread = [];
-    render(
-      <MemoryRouter>
-        <NotificationBadge uid="uid-1" />
-      </MemoryRouter>
-    );
-    expect(screen.getByRole("link", { name: "Notifications" })).toBeInTheDocument();
-    expect(screen.queryByTestId("unread-badge")).toBeNull();
   });
 });

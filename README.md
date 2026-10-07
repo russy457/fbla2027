@@ -4,6 +4,8 @@ A volunteer management platform for nonprofits, built for the FBLA 2026-27 Codin
 
 **Source of truth:** [`docs/SPEC.md`](docs/SPEC.md) defines the behavior, data model, rules, and screens. This README covers setup only.
 
+**More docs:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (how the app, `shared/`, Functions, and rules fit together; adding an op or a screen) and [`docs/DEMO.md`](docs/DEMO.md) (first deploy, competition-day runbook, demo script, reset, explainers). [`docs/RUBRIC_MAP.md`](docs/RUBRIC_MAP.md) maps rubric rows to screens and files.
+
 ## Prerequisites
 
 - **Node 22** (pinned in `.nvmrc`; `nvm use` picks it up)
@@ -48,7 +50,7 @@ shared/         TypeScript shared by the app and Functions (clock, limits, error
 functions/      Cloud Functions source (health + five callable endpoints via defineCallable)
 scripts/        Cross-platform Node scripts (demo, doctor, build-functions, check-tokens, seed)
 e2e/            Playwright tests
-docs/           SPEC.md (source of truth), PORT_PLAN.md, PORT_LEDGER.md
+docs/           SPEC.md (source of truth), ARCHITECTURE.md, DEMO.md, RUBRIC_MAP.md, PORT_PLAN.md, PORT_LEDGER.md
 ```
 
 ## Licenses and credits
