@@ -4,12 +4,14 @@
  * still-waitlisted signup is cancelled with cancelReason "waitlist-cutoff"
  * (not counted against reliability) and the waitlist empties; seats freed
  * later go to walk-ups. One transaction; cutoffDoneAt is the idempotency
- * marker, so a repeated run is a no-op. The waitlist-closed notification is
- * Tier 1 (notifications).
+ * marker, so a repeated run is a no-op. Each cancelled volunteer gets a
+ * waitlist-closed notification in the same transaction (deterministic id, so
+ * it is never sent twice).
  */
 import type { Firestore } from "firebase-admin/firestore";
-import { COLLECTIONS, assertTransition, type InstanceDoc, type SignupDoc } from "@fbla/shared";
-import { readDoc, runTx, ts } from "../lib/firestore";
+import { COLLECTIONS, assertTransition, waitlistClosedNotification, type InstanceDoc, type SignupDoc } from "@fbla/shared";
+import { msOf, readDoc, runTx, ts } from "../lib/firestore";
+import { queueNotification } from "../notifications/notify";
 import { SYSTEM_ACTOR } from "./finalize";
 import { withHistory } from "./signupRecords";
 
@@ -34,6 +36,15 @@ export const runCutoff = async (db: Firestore, instanceId: string, nowMs: number
         history: withHistory(signup.history, "waitlisted", "cancelled", SYSTEM_ACTOR, "runDueJobs", nowMs),
         updatedAt: ts(nowMs)
       });
+      const content = waitlistClosedNotification({
+        instanceId,
+        signupId: ref.id,
+        title: instance.title,
+        orgName: instance.orgName,
+        startMs: msOf(instance.start),
+        timeZone: instance.timeZone
+      });
+      queueNotification(tx, db, signup.uid, content, ref.id, nowMs);
     });
     tx.update(instanceRef, {
       waitlist: [],

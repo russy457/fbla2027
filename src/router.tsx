@@ -43,6 +43,11 @@ const JoinPage = lazyWithReload(() => import("./pages/volunteer/JoinPage"));
 const ManualHoursPage = lazyWithReload(() => import("./pages/volunteer/ManualHoursPage"));
 const HoursReportPage = lazyWithReload(() => import("./pages/volunteer/HoursReportPage"));
 // End Tier 1 lane B
+// Tier 1 lane A
+const NotificationsPage = lazyWithReload(() => import("./pages/NotificationsPage"));
+const SavedPage = lazyWithReload(() => import("./pages/SavedPage"));
+const CheckinPage = lazyWithReload(() => import("./pages/CheckinPage"));
+// End Tier 1 lane A
 
 export const routes: RouteObject[] = [
   {
@@ -63,6 +68,11 @@ export const routes: RouteObject[] = [
         children: [
           { path: "me/shifts", element: <MyShiftsPage /> },
           { path: "impact", element: <ImpactPage /> },
+          // Tier 1 lane A
+          { path: "me/notifications", element: <NotificationsPage /> },
+          { path: "me/saved", element: <SavedPage /> },
+          { path: "checkin", element: <CheckinPage /> },
+          // End Tier 1 lane A
           { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "dashboard", element: <OrgDashboardPage /> }] },
           { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] },
           // Tier 1 lane B

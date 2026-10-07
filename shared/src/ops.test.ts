@@ -17,6 +17,8 @@ describe("op map (SPEC#api)", () => {
   it("lists the five endpoints and the Tier 0 ops", () => {
     expect(ENDPOINTS).toEqual(["volunteer", "kiosk", "coordinator", "admin", "ai"]);
     expect(OP_NAMES.volunteer).toEqual(expect.arrayContaining(["ping", "completeProfile", "signup", "cancelSignup", "issueLetter"]));
+    // Tier 1 lane A
+    expect(OP_NAMES.volunteer).toEqual(expect.arrayContaining(["markNotificationsRead"]));
     expect(OP_NAMES.kiosk).toEqual(expect.arrayContaining(["ping", "issueKioskCode", "checkIn", "checkOut"]));
     expect(OP_NAMES.coordinator).toEqual(expect.arrayContaining(["ping", "startKiosk", "finalizeShift", "revokeLetter"]));
     expect(OP_NAMES.admin).toEqual(expect.arrayContaining(["ping", "runDueJobs", "setDemoClock", "resetDemoData", "verifyOrganization"]));

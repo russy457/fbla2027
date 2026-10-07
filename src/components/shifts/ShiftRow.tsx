@@ -14,6 +14,7 @@ import { UnverifiedChip } from "@/components/ui/UnverifiedChip";
 import type { Instance } from "@/lib/data/instances";
 import type { Signup } from "@/lib/data/signups";
 import { seatsLeft } from "@/lib/signupButtonState";
+import { SaveToggle } from "./SaveToggle";
 import { SignupAction } from "./SignupAction";
 
 interface ShiftRowProps {
@@ -63,6 +64,8 @@ export const ShiftRow = ({ instance, signup, birthDate, signedIn, nowMs }: Shift
           </span>
           {instance.minAge > 13 ? <span>Ages {instance.minAge}+</span> : null}
         </p>
+        {/* Tier 1 lane A: save the listing (SPEC 3.18); signed-out visitors see nothing. */}
+        <SaveToggle kind="opportunity" refId={instance.opportunityId} label={instance.title} />
       </div>
       <SignupAction instance={instance} signup={signup} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />
     </li>

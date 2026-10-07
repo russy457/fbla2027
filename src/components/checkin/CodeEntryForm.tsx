@@ -8,7 +8,7 @@
  * returns to the field after a failed submit so the next try is one keystroke
  * away (D20).
  */
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { UserError } from "@fbla/shared";
@@ -24,6 +24,12 @@ interface CodeEntryFormProps {
   /** Sends the 6-digit code; throws ApiError when the server refuses. */
   readonly onSubmitCode: (code: string) => Promise<void>;
   readonly onCancel?: () => void;
+  /** Tier 1: a code to start with (from a scanned or opened /checkin link). */
+  readonly initialCode?: string;
+  /** Tier 1: an error to show on open (for example a refused scanned code). */
+  readonly initialError?: UserError | null;
+  /** Tier 1: extra controls under the field, such as "Scan QR". */
+  readonly extraAction?: ReactNode;
 }
 
 const retryAfterOf = (error: UserError | null): number => {
@@ -31,9 +37,9 @@ const retryAfterOf = (error: UserError | null): number => {
   return Number.isFinite(value) && value > 0 ? Math.ceil(value) : 0;
 };
 
-export const CodeEntryForm = ({ actionLabel, onSubmitCode, onCancel }: CodeEntryFormProps): ReactElement => {
-  const [serverError, setServerError] = useState<UserError | null>(null);
-  const [waitSeconds, setWaitSeconds] = useState(0);
+export const CodeEntryForm = ({ actionLabel, onSubmitCode, onCancel, initialCode = "", initialError = null, extraAction }: CodeEntryFormProps): ReactElement => {
+  const [serverError, setServerError] = useState<UserError | null>(initialError);
+  const [waitSeconds, setWaitSeconds] = useState(() => retryAfterOf(initialError));
   const inputRef = useRef<HTMLInputElement | null>(null);
   const {
     register,
@@ -41,7 +47,7 @@ export const CodeEntryForm = ({ actionLabel, onSubmitCode, onCancel }: CodeEntry
     setFocus,
     reset,
     formState: { errors, isSubmitting }
-  } = useForm<KioskCodeForm>({ resolver: zodResolver(kioskCodeFormSchema), defaultValues: { code: "" } });
+  } = useForm<KioskCodeForm>({ resolver: zodResolver(kioskCodeFormSchema), defaultValues: { code: initialCode } });
 
   // Count down the RATE_LIMITED wait, one second at a time.
   useEffect(() => {
@@ -97,6 +103,7 @@ export const CodeEntryForm = ({ actionLabel, onSubmitCode, onCancel }: CodeEntry
         <button type="submit" disabled={isSubmitting || isWaiting} className={buttonClassName("primary")}>
           {isSubmitting ? "Checking code..." : "Submit code"}
         </button>
+        {extraAction}
         {onCancel ? (
           <button type="button" onClick={onCancel} className={buttonClassName("quiet")}>
             Not now

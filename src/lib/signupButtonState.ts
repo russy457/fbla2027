@@ -4,11 +4,13 @@
  * the rule order lives in one tested place and every shift card renders the
  * same answer. Conditions are evaluated top to bottom; the first match wins.
  *
- * Tier 0 scope: confirmed seats only. When no seat is free the answer is
- * "Full" (the waitlist and its "Join waitlist (#N)" state arrive in Tier 1;
- * a signup that is already waitlisted still renders correctly).
+ * Tier 1 adds the waitlist rows: with no seat, before the 2 h cutoff and
+ * while the waitlist has room, "Join waitlist (#N)" where N is the place the
+ * viewer would get (shared decideSeat, the same rule the server uses); a
+ * waitlisted signup shows "Waitlisted #N of M" with Leave waitlist; a free
+ * seat after the cutoff carries the walk-up note.
  */
-import { ageOn, type SignupStatus } from "@fbla/shared";
+import { DEFAULT_CONFIG, MINUTE_MS, ageOn, decideSeat, type SignupStatus } from "@fbla/shared";
 
 export type SignupButtonKind =
   | "cancelled-by-org"
@@ -21,6 +23,7 @@ export type SignupButtonKind =
   | "age-restricted"
   | "minor-unverified"
   | "available"
+  | "join-waitlist"
   | "full"
   | "signed-out";
 
@@ -34,6 +37,8 @@ export interface SignupButtonState {
   readonly reason: string | null;
   /** True when a Cancel action belongs next to the button (D5 "Signed up" row). */
   readonly canCancel: boolean;
+  /** Text of that action: "Cancel", or "Leave waitlist" for a waitlisted signup. */
+  readonly cancelLabel: string;
 }
 
 export interface SignupButtonInput {
@@ -46,6 +51,10 @@ export interface SignupButtonInput {
     readonly capacity: number;
     readonly signupCount: number;
     readonly timeZone: string;
+    /** Waitlist closes here; defaults to start - 2 h (SPEC 7.3). */
+    readonly cutoffAtMs?: number;
+    /** People already waitlisted; defaults to 0. */
+    readonly waitlistLength?: number;
   };
   /** The viewer's own signup on this shift, if any. */
   readonly signup: { readonly status: SignupStatus; readonly waitlistPosition: number | null; readonly waitlistSize: number | null } | null;
@@ -59,13 +68,14 @@ const ADULT_AGE = 18;
 const state = (
   kind: SignupButtonKind,
   label: string,
-  options: { actionable?: boolean; reason?: string | null; canCancel?: boolean } = {}
+  options: { actionable?: boolean; reason?: string | null; canCancel?: boolean; cancelLabel?: string } = {}
 ): SignupButtonState => ({
   kind,
   label,
   actionable: options.actionable ?? false,
   reason: options.reason ?? null,
-  canCancel: options.canCancel ?? false
+  canCancel: options.canCancel ?? false,
+  cancelLabel: options.cancelLabel ?? "Cancel"
 });
 
 /** Answers for a viewer who already has a signup on this shift. */
@@ -77,7 +87,11 @@ const fromOwnSignup = (signup: NonNullable<SignupButtonInput["signup"]>): Signup
     case "waitlisted": {
       const place = signup.waitlistPosition === null ? "" : ` #${signup.waitlistPosition}`;
       const size = signup.waitlistSize === null ? "" : ` of ${signup.waitlistSize}`;
-      return state("waitlisted", `Waitlisted${place}${size}`);
+      return state("waitlisted", `Waitlisted${place}${size}`, {
+        canCancel: true,
+        cancelLabel: "Leave waitlist",
+        reason: "If a spot opens before the waitlist closes (2 hours before the start), you move up automatically."
+      });
     }
     case "cancelled":
       return state("own-cancelled", "Cancelled", { reason: "You cancelled this shift." });
@@ -113,8 +127,23 @@ export const signupButtonState = (input: SignupButtonInput): SignupButtonState =
     }
   }
 
-  if (instance.signupCount < instance.capacity) return state("available", "Sign up", { actionable: true });
-  return state("full", "Full");
+  const seat = decideSeat({
+    capacity: instance.capacity,
+    signupCount: instance.signupCount,
+    waitlistLength: instance.waitlistLength ?? 0,
+    nowMs,
+    cutoffAtMs: instance.cutoffAtMs ?? instance.startMs - DEFAULT_CONFIG.waitlistCutoffMin * MINUTE_MS
+  });
+  if (seat.kind === "confirmed") {
+    return state("available", "Sign up", { actionable: true, reason: seat.walkUp ? "Walk-up spot: the waitlist has closed, but a seat is open." : null });
+  }
+  if (seat.kind === "waitlisted") {
+    return state("join-waitlist", `Join waitlist (#${seat.position})`, {
+      actionable: true,
+      reason: "This shift is full. Join the waitlist and you move in automatically if a spot opens."
+    });
+  }
+  return state("full", "Full", { reason: seat.code === "WAITLIST_CLOSED" ? "This shift is full and its waitlist has closed." : "This shift and its waitlist are full." });
 };
 
 /** Seats still open, never negative (signupCount can briefly exceed capacity after an edit). */

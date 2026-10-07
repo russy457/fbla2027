@@ -90,6 +90,9 @@ import {
 } from "./schemas/ops/hoursOps";
 import { generateOrgReportInput, generateReportOutput, generateVolunteerReportInput } from "./schemas/ops/reportOps";
 // End Tier 1 lane B
+// Tier 1 lane A
+import { markNotificationsReadInput, markNotificationsReadOutput } from "./schemas/ops/inboxOps";
+// End Tier 1 lane A
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -103,8 +106,11 @@ export const OPS = {
     // Tier 1 lane B
     submitManualHours: op(submitManualHoursInput, submitManualHoursOutput),
     requestAttendanceReview: op(requestAttendanceReviewInput, requestAttendanceReviewOutput),
-    generateVolunteerReport: op(generateVolunteerReportInput, generateReportOutput)
+    generateVolunteerReport: op(generateVolunteerReportInput, generateReportOutput),
     // End Tier 1 lane B
+    // Tier 1 lane A
+    markNotificationsRead: op(markNotificationsReadInput, markNotificationsReadOutput)
+    // End Tier 1 lane A
   },
   kiosk: {
     ping: op(pingInput, pingOutput),

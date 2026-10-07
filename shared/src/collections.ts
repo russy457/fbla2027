@@ -30,8 +30,13 @@ export const COLLECTIONS = Object.freeze({
   // Tier 1 lane B
   invites: "invites",
   reports: "reports",
-  orgVerificationLog: "orgVerificationLog"
+  orgVerificationLog: "orgVerificationLog",
   // End Tier 1 lane B
+  // Tier 1 lane A: in-app notifications (notifications/{uid}/items) and saved items (users/{uid}/saved).
+  notifications: "notifications",
+  notificationItems: "items",
+  saved: "saved"
+  // End Tier 1 lane A
 });
 
 export const PATHS = Object.freeze({
@@ -46,6 +51,12 @@ export const PATHS = Object.freeze({
   letterPdf: (uid: string, letterId: string) => `letters/${uid}/${letterId}.pdf`,
   // Tier 1 lane B
   /** Storage path of a report PDF (SPEC 3.22). */
-  reportPdf: (uid: string, reportId: string) => `reports/${uid}/${reportId}.pdf`
+  reportPdf: (uid: string, reportId: string) => `reports/${uid}/${reportId}.pdf`,
   // End Tier 1 lane B
+  // Tier 1 lane A
+  notificationItems: (uid: string) => `${COLLECTIONS.notifications}/${uid}/${COLLECTIONS.notificationItems}`,
+  notificationItem: (uid: string, itemId: string) => `${COLLECTIONS.notifications}/${uid}/${COLLECTIONS.notificationItems}/${itemId}`,
+  savedItems: (uid: string) => `${COLLECTIONS.users}/${uid}/${COLLECTIONS.saved}`,
+  savedItem: (uid: string, itemId: string) => `${COLLECTIONS.users}/${uid}/${COLLECTIONS.saved}/${itemId}`
+  // End Tier 1 lane A
 });

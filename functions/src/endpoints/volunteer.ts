@@ -10,11 +10,24 @@ import { deploySecrets } from "../lib/secrets";
 import { cancelSignup } from "../ops/cancelSignup";
 import { completeProfile } from "../ops/completeProfile";
 import { issueLetter } from "../ops/issueLetter";
+// Tier 1 lane A
+import { markNotificationsRead } from "../ops/markNotificationsRead";
+// End Tier 1 lane A
 import { pingOp } from "../ops/ping";
 import { signup } from "../ops/signup";
 // Tier 1 lane B
 import { laneBVolunteerOps } from "./laneB";
 
-export const volunteerOps: readonly RegisteredOp[] = [pingOp("volunteer"), completeProfile, signup, cancelSignup, issueLetter, ...laneBVolunteerOps];
+export const volunteerOps: readonly RegisteredOp[] = [
+  pingOp("volunteer"),
+  completeProfile,
+  signup,
+  cancelSignup,
+  issueLetter,
+  // Tier 1 lane A
+  markNotificationsRead,
+  // End Tier 1 lane A
+  ...laneBVolunteerOps
+];
 
 export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: deploySecrets("TURNSTILE_SECRET") });

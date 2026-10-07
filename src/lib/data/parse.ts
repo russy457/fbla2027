@@ -5,7 +5,7 @@
  * screen sees it. A malformed document becomes a DataShapeError naming the
  * path, instead of a crash deep inside a component.
  */
-import type { DocumentSnapshot, QuerySnapshot } from "firebase/firestore";
+import type { DocumentSnapshot, QuerySnapshot, SnapshotOptions } from "firebase/firestore";
 import type { z } from "zod";
 
 export class DataShapeError extends Error {
@@ -31,6 +31,10 @@ const parseOne = <S extends z.ZodType>(schema: S, path: string, id: string, data
 export const parseDocSnapshot = <S extends z.ZodType>(schema: S, snapshot: DocumentSnapshot): WithId<z.output<S>> | null =>
   snapshot.exists() ? parseOne(schema, snapshot.ref.path, snapshot.id, snapshot.data()) : null;
 
-/** Parses every document of a query snapshot, in query order. */
-export const parseQuerySnapshot = <S extends z.ZodType>(schema: S, snapshot: QuerySnapshot): Array<WithId<z.output<S>>> =>
-  snapshot.docs.map((doc) => parseOne(schema, doc.ref.path, doc.id, doc.data()));
+/**
+ * Parses every document of a query snapshot, in query order. `options`
+ * (for example serverTimestamps: "estimate") lets a client-written
+ * server timestamp read as a value before the server confirms it.
+ */
+export const parseQuerySnapshot = <S extends z.ZodType>(schema: S, snapshot: QuerySnapshot, options?: SnapshotOptions): Array<WithId<z.output<S>>> =>
+  snapshot.docs.map((doc) => parseOne(schema, doc.ref.path, doc.id, doc.data(options)));

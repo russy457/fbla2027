@@ -4,7 +4,7 @@
  * useLiveQuery: they parse each snapshot with a zod schema and route parse
  * failures to the error callback instead of throwing inside Firestore.
  */
-import { onSnapshot, type DocumentReference, type Query } from "firebase/firestore";
+import { onSnapshot, type DocumentReference, type Query, type SnapshotOptions } from "firebase/firestore";
 import type { z } from "zod";
 import { parseDocSnapshot, parseQuerySnapshot, type WithId } from "./parse";
 
@@ -35,13 +35,14 @@ export const listenToQuery = <S extends z.ZodType>(
   source: Query,
   schema: S,
   onData: OnData<Array<WithId<z.output<S>>>>,
-  onError: OnError
+  onError: OnError,
+  options?: SnapshotOptions
 ): (() => void) =>
   onSnapshot(
     source,
     (snapshot) => {
       try {
-        onData(parseQuerySnapshot(schema, snapshot));
+        onData(parseQuerySnapshot(schema, snapshot, options));
       } catch (error) {
         onError(asError(error));
       }

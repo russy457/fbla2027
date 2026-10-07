@@ -6,7 +6,8 @@
  *     through completeProfile and is signed out, lib/underAgeAccount.ts)
  *   2 create account (only for people who are signed out)
  *   3 name and phone, 4 interests, 5 skills, 6 availability, 7 ZIP
- *     (5 to 7 skippable), 8 human check + volunteer.completeProfile.
+ *     (5 to 7 skippable), 8 human check + volunteer.completeProfile, then
+ *     "3 shifts that match you" (Tier 1 lane A, MatchesStep) before ?next=.
  * The draft lives in this component's state only; nothing is saved until
  * the final step. People with a finished profile are sent on to ?next=.
  */
@@ -18,6 +19,7 @@ import { AccountStep } from "@/components/onboarding/AccountStep";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { BirthDateStep } from "@/components/onboarding/BirthDateStep";
 import { FinishStep } from "@/components/onboarding/FinishStep";
+import { MatchesStep } from "@/components/onboarding/MatchesStep";
 import { NameStep } from "@/components/onboarding/NameStep";
 import { AvailabilityStep, InterestsStep, SkillsStep, ZipStep } from "@/components/onboarding/PreferenceSteps";
 import { UnderAgeStop } from "@/components/onboarding/UnderAgeStop";
@@ -48,6 +50,9 @@ const OnboardingPage = (): ReactElement => {
   // Decided once, as soon as the session is known, so creating the account mid-flow does not renumber the steps.
   const [needsAccount, setNeedsAccount] = useState<boolean | null>(null);
   if (needsAccount === null && session.status !== "loading") setNeedsAccount(session.status !== "user");
+  // Tier 1 lane A: set once completeProfile succeeds, so the matches screen shows before the redirect below.
+  const [isFinished, setIsFinished] = useState(false);
+  if (isFinished && uid !== null) return <MatchesStep uid={uid} onContinue={() => navigate(next, { replace: true })} />;
 
   if (needsAccount === null || (uid !== null && profile.isLoading)) return <LoadingState label="Getting set up" />;
   if (profile.data?.profileComplete === true) return <Navigate to={next} replace />;
@@ -110,7 +115,7 @@ const OnboardingPage = (): ReactElement => {
     case "zip":
       return <ZipStep {...nav} defaults={draft.zip} onNext={(zip) => advance({ zip })} onSkip={() => advance({ zip: "" })} />;
     case "finish":
-      return <FinishStep {...nav} draft={draft} onDone={() => navigate(next, { replace: true })} />;
+      return <FinishStep {...nav} draft={draft} onDone={() => setIsFinished(true)} />;
   }
 };
 

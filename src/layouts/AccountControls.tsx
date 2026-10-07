@@ -1,14 +1,15 @@
 /**
  * AccountControls.tsx
  * Right side of the header (SPEC#screen-nav D2): role links and the account
- * action. Shows "Coordinator" only when the person has at least one
+ * action. Tier 1 adds the notification badge and Saved. Shows "Coordinator" only when the person has at least one
  * organization membership, "Admin" only with the admin claim, then Sign in
  * or Sign out. Sign-out returns to Explore and clears cached personal data.
  */
 import { useState, type ReactElement } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Buildings, ShieldCheck, SignIn, SignOut } from "@phosphor-icons/react";
+import { BookmarkSimple, Buildings, ShieldCheck, SignIn, SignOut } from "@phosphor-icons/react";
+import { NotificationBadge } from "@/components/notifications/NotificationBadge";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { signOutUser } from "@/lib/authClient";
 import { cn } from "@/lib/cn";
@@ -16,7 +17,7 @@ import { useSessionUser, useSession } from "@/store/authStore";
 
 const linkClass = ({ isActive }: { isActive: boolean }): string =>
   cn(
-    "inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors duration-(--duration-fast)",
+    "inline-flex min-h-touch items-center gap-2 rounded-md px-2 text-sm font-medium sm:px-3 transition-colors duration-(--duration-fast)",
     isActive ? "bg-accent-subtle text-accent" : "text-fg-muted hover:bg-surface-sunken hover:text-fg"
   );
 
@@ -57,6 +58,13 @@ export const AccountControls = (): ReactElement | null => {
 
   return (
     <div className="flex items-center gap-1">
+      {/* Tier 1 lane A: unread badge (opens /me/notifications) and saved items. */}
+      <NotificationBadge uid={user.uid} />
+      <NavLink to="/me/saved" className={linkClass}>
+        <BookmarkSimple aria-hidden="true" size={18} />
+        <span className="hidden sm:inline">Saved</span>
+        <span className="sr-only sm:hidden">Saved</span>
+      </NavLink>
       {firstOrg ? (
         <NavLink to={`/org/${firstOrg.orgId}/dashboard`} className={linkClass}>
           <Buildings aria-hidden="true" size={18} />
@@ -64,12 +72,12 @@ export const AccountControls = (): ReactElement | null => {
           <span className="sr-only sm:hidden">Coordinator dashboard</span>
         </NavLink>
       ) : null}
-      {/* Tier 1 lane B: registration and invite join are reachable before any membership. */}
+      {/* Tier 1 lane B: registration and invite join are reachable before any membership.
+          Below md the header is too narrow at 150% text, so the footer carries this link instead. */}
       {!firstOrg && memberships.isSuccess ? (
-        <NavLink to="/org/register" className={linkClass}>
+        <NavLink to="/org/register" className={(state) => cn(linkClass(state), "hidden md:inline-flex")}>
           <Buildings aria-hidden="true" size={18} />
-          <span className="hidden sm:inline">For organizations</span>
-          <span className="sr-only sm:hidden">For organizations</span>
+          For organizations
         </NavLink>
       ) : null}
       {/* End Tier 1 lane B */}

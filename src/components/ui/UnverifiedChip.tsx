@@ -3,7 +3,9 @@
  * The "Unverified" organization chip (D23) with its explanation as a
  * tooltip that opens on hover and on keyboard focus (role="tooltip",
  * referenced by aria-describedby), so touch, mouse, and screen reader users
- * all get the same sentence before they sign up.
+ * all get the same sentence before they sign up. Hidden (display: none)
+ * until opened, so a chip near the right edge never widens the page at 150%
+ * text on a phone (D21).
  */
 import { useId, type ReactElement } from "react";
 import { Info } from "@phosphor-icons/react";
@@ -25,7 +27,7 @@ export const UnverifiedChip = (): ReactElement => {
       <span
         id={tooltipId}
         role="tooltip"
-        className="pointer-events-none absolute top-full left-0 z-(--z-overlay) mt-2 w-64 rounded-md border border-border bg-surface p-3 text-xs font-normal text-fg opacity-0 shadow-md transition-opacity duration-(--duration-fast) group-focus-within:opacity-100 group-hover:opacity-100"
+        className="pointer-events-none absolute top-full left-0 z-(--z-overlay) mt-2 hidden w-64 max-w-[calc(100vw-2rem)] rounded-md border border-border bg-surface p-3 text-xs font-normal text-fg shadow-md group-focus-within:block group-hover:block"
       >
         {UNVERIFIED_EXPLANATION}
       </span>

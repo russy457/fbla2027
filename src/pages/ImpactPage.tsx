@@ -9,6 +9,8 @@
  * directly means the number is right the moment check-out finishes, without
  * waiting for the trigger. The letter preview uses the same logs plus each
  * organization's verified flag.
+ * Tier 1 lane A: milestones (badges, the one-time milestone moment, the
+ * shareable badge card, streak; E4) and "Your track record" (SPEC 7.2).
  */
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
@@ -22,7 +24,10 @@ import { MilestoneProgress } from "@/components/impact/MilestoneProgress";
 import { LoadingState } from "@/components/LoadingState";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { useMyApprovedLogs, useMyLetters } from "@/hooks/useVolunteerData";
+import { Milestones } from "@/components/impact/Milestones";
+import { TrackRecord } from "@/components/impact/TrackRecord";
+import { useMyPublicUser } from "@/hooks/useInbox";
+import { useMyApprovedLogs, useMyLetters, usePrivateProfile } from "@/hooks/useVolunteerData";
 import { getOrganizations } from "@/lib/data/orgs";
 import { useSessionUser } from "@/store/authStore";
 
@@ -31,6 +36,8 @@ const ImpactPage = (): ReactElement => {
   const uid = user?.uid ?? null;
   const logs = useMyApprovedLogs(uid);
   const letters = useMyLetters(uid);
+  const profile = usePrivateProfile(uid);
+  const publicUser = useMyPublicUser(uid);
   const orgs = useQuery({ queryKey: ["organizations"], queryFn: getOrganizations, staleTime: 60_000 });
 
   if (logs.error || letters.error || orgs.isError) {
@@ -59,6 +66,16 @@ const ImpactPage = (): ReactElement => {
         ) : null}
       </section>
 
+      {profile.data ? (
+        <Milestones
+          uid={uid}
+          hours={hours}
+          displayName={publicUser.data?.displayName ?? profile.data.firstName}
+          milestonesSeen={profile.data.milestonesSeen ?? []}
+          streakWeeks={publicUser.data?.streakWeeks ?? 0}
+        />
+      ) : null}
+
       {approvedLogs.length === 0 ? (
         <section className="flex flex-col items-start gap-3">
           <h2 className="text-xl font-semibold text-fg">Get a verified letter</h2>
@@ -83,6 +100,7 @@ const ImpactPage = (): ReactElement => {
         </Link>
       </nav>
       {/* End Tier 1 lane B */}
+      {profile.data ? <TrackRecord reliability={profile.data.reliability} /> : null}
     </div>
   );
 };

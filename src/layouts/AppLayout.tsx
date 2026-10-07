@@ -103,6 +103,11 @@ export const AppLayout = (): ReactElement => {
       <footer className="border-t border-border bg-surface pb-20 lg:pb-0">
         <div className="mx-auto w-full max-w-5xl px-4 py-6">
           <DisplayPreferences />
+          <p className="mt-4 text-sm">
+            <Link to="/org/register" className="font-medium text-accent underline-offset-4 hover:underline">
+              For organizations: register your nonprofit
+            </Link>
+          </p>
           {/* Tier 1 lane C */}
           <LegalLinks />
         </div>

@@ -8,6 +8,8 @@
  *             every 30 seconds)
  *   paused    the last code dimmed and struck through, with "Reconnecting,
  *             codes paused"; an expired code is never shown as live
+ * Tier 1: the QR of qrPayload sits beside the live code (secure context
+ * only, KioskQr); it disappears with the code when paused.
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { WifiSlash } from "@phosphor-icons/react";
@@ -15,6 +17,7 @@ import { DEFAULT_CONFIG } from "@fbla/shared";
 import type { KioskCodeState } from "@/hooks/useKioskCode";
 import { cn } from "@/lib/cn";
 import { CountdownRing } from "./CountdownRing";
+import { KioskQr } from "./KioskQr";
 
 interface KioskCodeDisplayProps {
   readonly state: Extract<KioskCodeState, { kind: "loading" | "live" | "paused" }>;
@@ -46,6 +49,7 @@ const useAnnouncement = (state: KioskCodeDisplayProps["state"]): string => {
 export const KioskCodeDisplay = ({ state }: KioskCodeDisplayProps): ReactElement => {
   const announcement = useAnnouncement(state);
   return (
+    <div className="flex flex-wrap items-center gap-8">
     <div className="flex flex-col gap-6">
       <p aria-live="polite" className="sr-only">
         {announcement}
@@ -79,6 +83,8 @@ export const KioskCodeDisplay = ({ state }: KioskCodeDisplayProps): ReactElement
           <p className="max-w-[32ch] text-lg text-fg-muted">Type this code in the app under My Shifts. It changes every 30 seconds.</p>
         )}
       </div>
+    </div>
+    {state.kind === "live" ? <KioskQr payload={state.qrPayload} /> : null}
     </div>
   );
 };
