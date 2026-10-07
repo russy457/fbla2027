@@ -52,6 +52,19 @@ jobs:
         working-directory: functions-dist
         run: npm ci --omit=dev --ignore-scripts
 
+      # Emulator-backed suites: Firestore/Storage rules and Functions ops (Java required).
+      - name: Rules tests (emulators)
+        if: runner.os == 'Linux'
+        run: npm run test:rules
+
+      - name: Functions tests (emulators)
+        if: runner.os == 'Linux'
+        run: npm run test:functions
+
+      - name: Typecheck emulator test sources
+        if: runner.os == 'Linux'
+        run: npx tsc -p tests/tsconfig.json
+
       - name: Scan for committed secrets
         if: runner.os == 'Linux'
         uses: gitleaks/gitleaks-action@v2
