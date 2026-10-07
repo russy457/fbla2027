@@ -48,14 +48,14 @@ const SHIFTS = { inst0: { title: "Sort food", opportunityId: "opp0" }, inst1: { 
 const orgData = (empty: boolean) =>
   buildOrgReport({ logs: empty ? [] : LOGS, signups: empty ? [] : LOGS.map((_, index) => signup(index)), shifts: SHIFTS, range, timeZone: TZ, opportunityId: null });
 const volunteerData = (empty: boolean) =>
-  buildVolunteerReport({ logs: empty ? [] : LOGS, orgs: { orgA: { name: "Alamo Community Pantry", verified: true } }, shifts: SHIFTS, range, timeZone: TZ });
+  buildVolunteerReport({ logs: empty ? [] : LOGS, orgs: { orgA: { name: "Common Table Pantry", verified: true } }, shifts: SHIFTS, range, timeZone: TZ });
 
 const common = { from: "2026-08-01", to: "2026-10-17", generatedAt, timeZone: TZ };
 const isPdf = (bytes: Buffer): boolean => bytes.subarray(0, 5).toString() === "%PDF-";
 
 describe("renderReport", () => {
   it.each([true, false])("renders an org report (empty: %s)", async (empty) => {
-    const bytes = await renderReport({ ...common, kind: "org-participation", orgName: "Alamo", opportunityTitle: empty ? "Sort food" : null, data: orgData(empty), sections: [...ORG_REPORT_SECTIONS], themeId: "blue" });
+    const bytes = await renderReport({ ...common, kind: "org-participation", orgName: "Common Table", opportunityTitle: empty ? "Sort food" : null, data: orgData(empty), sections: [...ORG_REPORT_SECTIONS], themeId: "blue" });
     expect(isPdf(bytes)).toBe(true);
   });
 
@@ -77,7 +77,7 @@ describe("renderReport", () => {
   });
 
   it("ignores section keys of the other kind", async () => {
-    const bytes = await renderReport({ ...common, kind: "org-participation", orgName: "Alamo", opportunityTitle: null, data: orgData(false), sections: ["shiftList", "summary"], themeId: "neutral" });
+    const bytes = await renderReport({ ...common, kind: "org-participation", orgName: "Common Table", opportunityTitle: null, data: orgData(false), sections: ["shiftList", "summary"], themeId: "neutral" });
     expect(isPdf(bytes)).toBe(true);
   });
 });

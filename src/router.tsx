@@ -16,6 +16,7 @@ import { RouteError } from "./components/RouteError";
 import { AppLayout } from "./layouts/AppLayout";
 import { lazyWithReload } from "./lib/lazyWithReload";
 
+const LandingPage = lazyWithReload(() => import("./pages/LandingPage"));
 const ExplorePage = lazyWithReload(() => import("./pages/ExplorePage"));
 const MyShiftsPage = lazyWithReload(() => import("./pages/MyShiftsPage"));
 const ImpactPage = lazyWithReload(() => import("./pages/ImpactPage"));
@@ -64,7 +65,7 @@ export const routes: RouteObject[] = [
     element: <AppLayout />,
     errorElement: <RouteError />,
     children: [
-      { index: true, element: <ExplorePage /> },
+      { index: true, element: <LandingPage /> },
       { path: "explore", element: <ExplorePage /> },
       { path: "opportunity/:instanceId", element: <OpportunityPage /> },
       // Tier 1 integration: public organization page (SPEC 9.2 "Organization")

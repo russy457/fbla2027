@@ -11,8 +11,8 @@ const parse = (text: string, extra: Partial<{ maxInputChars: number; defaultDura
   parsePlannerText(text, { referenceDate: REF, ...extra });
 
 describe("SPEC example sentences", () => {
-  it("Food sort every Saturday 9-12 at Alamo pantry, 8 volunteers", () => {
-    expect(parse("Food sort every Saturday 9-12 at Alamo pantry, 8 volunteers")).toEqual({
+  it("Food sort every Saturday 9-12 at Common Table pantry, 8 volunteers", () => {
+    expect(parse("Food sort every Saturday 9-12 at Common Table pantry, 8 volunteers")).toEqual({
       title: "Food sort",
       volunteersNeeded: 8,
       date: "2026-10-10",
@@ -21,7 +21,7 @@ describe("SPEC example sentences", () => {
       startTime: "09:00",
       endTime: "12:00",
       durationMinutes: 180,
-      location: "Alamo pantry",
+      location: "Common Table pantry",
       causeArea: "hunger-food-security",
       matched: [...PLANNER_FIELDS],
       warnings: ["time-assumed"]
@@ -195,9 +195,9 @@ describe("dates and weekdays", () => {
 
 describe("location", () => {
   it.each([
-    ["@ Alamo pantry", "Alamo pantry"],
-    ["@Alamo", "Alamo"],
-    ["at Alamo pantry 8 volunteers", "Alamo pantry"],
+    ["@ Common Table pantry", "Common Table pantry"],
+    ["@Common Table", "Common Table"],
+    ["at Common Table pantry 8 volunteers", "Common Table pantry"],
     ["at the library starting soon", "the library"],
     ["At Main St. Church", "Main St"],
     ["meet at the park.", "the park"],

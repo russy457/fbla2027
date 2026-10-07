@@ -34,7 +34,11 @@ export interface ApplySeedParams {
   readonly nowMs: number;
   readonly shiftStartsInMs: number;
   readonly password: string;
+  /** Optional per-account passwords for a cloud demo; never expose these in browser code. */
+  readonly accountPasswords?: Readonly<Record<string, string>>;
   readonly appBaseUrl: string;
+  /** Cloud Firestore can be used on Spark even when Cloud Storage has no bucket. */
+  readonly renderLetterPdf?: boolean;
 }
 
 export interface AppliedSeed {
@@ -69,11 +73,13 @@ export const applyDemoSeed = async (params: ApplySeedParams): Promise<AppliedSee
     letterVerifyCode: newVerifyCode(),
     letterNonce: randomBytes(16).toString("hex")
   });
-  for (const account of seed.accounts) await upsertAccount(params.auth, account, params.password);
+  for (const account of seed.accounts) {
+    await upsertAccount(params.auth, account, params.accountPasswords?.[account.uid] ?? params.password);
+  }
   await commitAll(params.db, seed.writes);
 
   // A Storage failure only marks the letter's PDF "failed"; the volunteer can retry from Impact.
-  const letterPdfStatus = await storeLetterPdf({
+  const letterPdfStatus = params.renderLetterPdf === false ? "skipped" : await storeLetterPdf({
     db: params.db,
     storage: params.storage,
     bucket: params.bucket,

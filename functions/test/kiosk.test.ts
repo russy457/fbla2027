@@ -152,7 +152,7 @@ describe("kiosk.checkOut", () => {
     testClock.set(END - 8 * MINUTE);
     const code = await currentCode();
     const result = await call("kiosk", "checkOut", { instanceId: "inst1", code }, user("vol1"));
-    expect(result).toEqual({ status: "completed", minutes: 225, orgName: "Alamo Community Pantry", totalApprovedHours: 3.75, needsReview: false });
+    expect(result).toEqual({ status: "completed", minutes: 225, orgName: "Common Table Pantry", totalApprovedHours: 3.75, needsReview: false });
 
     // Retry with the same request (for example after a dropped response): same result, still one log.
     testClock.advance(2 * MINUTE);
@@ -169,7 +169,7 @@ describe("kiosk.checkOut", () => {
     testClock.set(START - 10 * MINUTE);
     const code = await currentCode();
     const result = await call("kiosk", "checkOut", { instanceId: "inst1", code }, user("vol1"));
-    expect(result).toEqual({ status: "completed", minutes: 0, orgName: "Alamo Community Pantry", totalApprovedHours: 0, needsReview: true });
+    expect(result).toEqual({ status: "completed", minutes: 0, orgName: "Common Table Pantry", totalApprovedHours: 0, needsReview: true });
     const log = (await db.collection(COLLECTIONS.hoursLogs).doc("inst1_vol1").get()).data() as HoursLogDoc;
     expect(log).toMatchObject({ source: "kiosk", status: "pending", needsReview: true, minutes: 0 });
     // The idempotent retry reports the same review state.

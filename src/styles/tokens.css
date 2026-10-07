@@ -1,98 +1,103 @@
 /*
- * tokens.css
- * Every design value in the app lives here as a CSS custom property: color,
- * type, radius, spacing, shadow, and motion. Components never hardcode these;
- * Tailwind utilities (see app.css) and React Bits components read them. When
- * the team's design doc lands, restyling the app means editing this file only.
- *
- * Interim direction (plan TD1): one cool neutral ramp plus ONE accent. No brand
- * palette yet. Status colors are semantic (D14) and always paired with an icon
- * and a text label in the UI, never color alone.
- *
- * Runtime switches (set on <html> by src/store/preferencesStore.ts):
- *   data-text-size="125" | "150"   larger root font size (D21)
- *   data-contrast="high"           stronger text, borders, and focus (E3)
- *   data-motion="reduced"          zero animation durations (D18)
+ * Visual tokens for fbla 2027. Keep raw values here. Components use semantic
+ * roles through app.css, so palette, font, and accessibility changes stay
+ * independent of page logic. See docs/DESIGN.md.
  */
 
 :root {
-  /* Type scale root. rem-based sizes everywhere scale from this. */
   --root-font-size: 100%;
 
-  /* Neutral ramp (cool gray, hue 255). */
-  --neutral-0: oklch(99.5% 0.002 255);
-  --neutral-50: oklch(98.2% 0.003 255);
-  --neutral-100: oklch(96.2% 0.004 255);
-  --neutral-200: oklch(92.4% 0.006 255);
-  --neutral-300: oklch(86.5% 0.008 255);
-  --neutral-400: oklch(70.8% 0.012 255);
-  --neutral-500: oklch(55.6% 0.014 255);
-  --neutral-600: oklch(46% 0.014 255);
-  --neutral-700: oklch(37.5% 0.013 255);
-  --neutral-800: oklch(28% 0.012 255);
-  --neutral-900: oklch(21% 0.01 255);
-  --neutral-950: oklch(15.5% 0.008 255);
+  /* Near-white paper and a single family of warm browns. */
+  --neutral-0: #ffffff;
+  --neutral-50: #fcfbf9;
+  --neutral-100: #f6f3ef;
+  --neutral-200: #ebe5de;
+  --neutral-300: #d8cec4;
+  --neutral-400: #b8a99b;
+  --neutral-500: #8a7769;
+  --neutral-600: #6d594b;
+  --neutral-700: #564335;
+  --neutral-800: #3f2e23;
+  --neutral-900: #2c1d15;
+  --neutral-950: #21150f;
 
-  /* The single accent (cobalt). Kept distinct from the green success status. */
-  --accent-50: oklch(96.5% 0.02 262);
-  --accent-100: oklch(92.5% 0.045 262);
-  --accent-500: oklch(58% 0.17 262);
-  --accent-600: oklch(50.5% 0.17 262);
-  --accent-700: oklch(43% 0.15 262);
-  --accent-800: oklch(36% 0.12 262);
+  --accent-50: #f8f1e9;
+  --accent-100: #ecddce;
+  --accent-500: #8c5d40;
+  --accent-600: #70482f;
+  --accent-700: #593723;
+  --accent-800: #43291b;
+  --clay-500: #aa7253;
+  --clay-700: #70482f;
+  --gold-300: #c8a77d;
 
-  /* Semantic surface and text roles. */
   --bg: var(--neutral-50);
   --surface: var(--neutral-0);
   --surface-sunken: var(--neutral-100);
-  --border: var(--neutral-200);
+  --border: var(--neutral-300);
   --border-strong: var(--neutral-400);
   --fg: var(--neutral-900);
   --fg-muted: var(--neutral-600);
-  --fg-subtle: var(--neutral-500);
+  --fg-subtle: var(--neutral-700);
   --accent: var(--accent-600);
   --accent-hover: var(--accent-700);
-  --accent-fg: var(--neutral-0);
+  --accent-fg: #fff;
   --accent-subtle: var(--accent-50);
-  --spotlight: oklch(58% 0.17 262 / 0.12);
+  --editorial-accent: var(--accent-600);
+  --spotlight: rgb(200 167 125 / 15%);
+  --hero: var(--neutral-900);
+  --hero-fg: #fffdfa;
+  --hero-muted: #f1e7dd;
+  --hero-eyebrow: #e9d4c2;
+  --hero-hairline: rgb(255 255 255 / 14%);
+  --hero-nav-active: rgb(255 255 255 / 18%);
+  --hero-image-border: rgb(255 255 255 / 78%);
+  --hero-photo-edge: rgb(44 29 21 / 36%);
+  --hero-photo-bottom: rgb(20 13 9 / 45%);
+  --hero-oval-bottom: rgb(20 13 9 / 70%);
+  --hero-oval-text-shadow: 0 1px 8px rgb(0 0 0 / 55%);
+  --header-pill-shadow: 0 12px 30px rgb(44 29 21 / 17%);
+  --explore-photo-shade-top: rgb(27 16 11 / 60%);
+  --explore-photo-shade-middle: rgb(27 16 11 / 38%);
+  --explore-photo-shade-bottom: rgb(27 16 11 / 72%);
+  --schedule-surface: #23150f;
+  --schedule-rule: rgb(255 255 255 / 20%);
+  --schedule-rule-soft: rgb(255 255 255 / 14%);
+  --schedule-hover: rgb(255 255 255 / 14%);
+  --schedule-success: #bde8ca;
+  --schedule-warning: #f4d791;
 
-  /* Status colors (D14). fg = text/icon on surface, subtle = tinted background. */
-  --status-success: oklch(47% 0.12 152); /* verified, completed */
-  --status-success-subtle: oklch(95.5% 0.04 152);
-  --status-warning: oklch(50% 0.11 70); /* waitlisted, needs review */
-  --status-warning-subtle: oklch(96% 0.05 85);
-  --status-danger: oklch(50% 0.18 27); /* revoked, no-show */
-  --status-danger-subtle: oklch(95.5% 0.03 27);
-  --status-neutral: var(--neutral-600); /* cancelled, excused */
+  /* State colors remain independent of the brand palette. */
+  --status-success: #28644a;
+  --status-success-subtle: #e5f2e9;
+  --status-warning: #80520c;
+  --status-warning-subtle: #f9edcc;
+  --status-danger: #9e3f2f;
+  --status-danger-subtle: #f9e7e1;
+  --status-neutral: var(--neutral-700);
   --status-neutral-subtle: var(--neutral-100);
 
-  /* Focus ring (D20: visible, themed from tokens). */
-  --focus-ring: var(--accent-500);
+  --focus-ring: var(--accent-700);
   --focus-ring-width: 2px;
-  --focus-ring-offset: 2px;
+  --focus-ring-offset: 3px;
 
-  /* Typography. Self-hosted variable fonts (fontsource) with system fallbacks. */
-  --type-sans: "Instrument Sans Variable", "Instrument Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --type-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  --type-display: "Besley Variable", Georgia, "Times New Roman", serif;
+  --type-sans: "Atkinson Hyperlegible Next Variable", "Trebuchet MS", ui-sans-serif, sans-serif;
+  --type-mono: "JetBrains Mono Variable", "Cascadia Code", ui-monospace, monospace;
 
-  /* Radius scale. Rule: controls use md, cards use lg, chips and pills use full. */
-  --corner-sm: 0.375rem;
-  --corner-md: 0.625rem;
-  --corner-lg: 0.875rem;
+  --corner-sm: 0.25rem;
+  --corner-md: 0.5rem;
+  --corner-lg: 0.75rem;
   --corner-full: 9999px;
 
-  /* Spacing rhythm. Tailwind's spacing unit maps to --space-unit (p-4 = 4 units). */
   --space-unit: 0.25rem;
-  --space-section: clamp(2.5rem, 1.75rem + 3vw, 5rem);
-  --touch-target: 2.75rem; /* 44px minimum (D20) */
+  --space-section: clamp(2.75rem, 2rem + 3vw, 5rem);
+  --touch-target: 2.75rem;
 
-  /* Shadows, tinted to the neutral hue (never pure black). */
-  --elevation-sm: 0 1px 2px oklch(21% 0.02 255 / 0.06), 0 1px 1px oklch(21% 0.02 255 / 0.04);
-  --elevation-md: 0 4px 12px oklch(21% 0.02 255 / 0.08), 0 1px 3px oklch(21% 0.02 255 / 0.06);
-  --elevation-lg: 0 16px 40px oklch(21% 0.02 255 / 0.12), 0 4px 10px oklch(21% 0.02 255 / 0.06);
+  --elevation-sm: 0 1px 2px rgb(44 29 21 / 6%);
+  --elevation-md: 0 5px 18px rgb(44 29 21 / 9%);
+  --elevation-lg: 0 18px 42px rgb(44 29 21 / 12%);
 
-  /* Motion. JavaScript animation reads these too (src/lib/motionTokens.ts). */
   --duration-instant: 80ms;
   --duration-fast: 150ms;
   --duration-base: 240ms;
@@ -100,43 +105,43 @@
   --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
   --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* Layer order. Only these values are used for z-index anywhere in the app. */
   --z-header: 20;
   --z-tabbar: 30;
   --z-overlay: 40;
 }
 
-/* Text size steps (D21). */
-:root[data-text-size="125"] {
-  --root-font-size: 125%;
-}
+:root[data-text-size="125"] { --root-font-size: 125%; }
+:root[data-text-size="150"] { --root-font-size: 150%; }
 
-:root[data-text-size="150"] {
-  --root-font-size: 150%;
-}
-
-/* High contrast (E3): darker text, visible borders, thicker focus ring. */
 :root[data-contrast="high"] {
-  --bg: var(--neutral-0);
-  --surface: var(--neutral-0);
-  --surface-sunken: var(--neutral-50);
-  --border: var(--neutral-600);
-  --border-strong: var(--neutral-900);
+  --bg: #fff;
+  --surface: #fff;
+  --surface-sunken: #f3f3ef;
+  --border: var(--neutral-700);
+  --border-strong: var(--neutral-950);
   --fg: var(--neutral-950);
   --fg-muted: var(--neutral-800);
-  --fg-subtle: var(--neutral-700);
+  --fg-subtle: var(--neutral-800);
   --accent: var(--accent-800);
   --accent-hover: var(--neutral-950);
-  --accent-subtle: var(--accent-100);
-  --status-success: oklch(38% 0.11 152);
-  --status-warning: oklch(40% 0.1 70);
-  --status-danger: oklch(40% 0.16 27);
+  --accent-subtle: #f5e8db;
+  --editorial-accent: var(--accent-800);
+  --status-success: #174d34;
+  --status-warning: #674008;
+  --status-danger: #832b1e;
   --status-neutral: var(--neutral-800);
   --focus-ring: var(--neutral-950);
   --focus-ring-width: 3px;
+  --hero: #000;
+  --hero-fg: #fff;
+  --hero-muted: #fff;
+  --hero-eyebrow: #fff;
+  --explore-photo-shade-top: rgb(0 0 0 / 90%);
+  --explore-photo-shade-middle: rgb(0 0 0 / 85%);
+  --explore-photo-shade-bottom: rgb(0 0 0 / 95%);
+  --schedule-surface: #000;
 }
 
-/* Reduced motion (D18): the OS setting or the in-app toggle zeroes durations. */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-instant: 0ms;

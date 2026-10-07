@@ -31,7 +31,7 @@ const NextShift = ({ signup, nowMs, onCheckedOut }: { signup: Signup; nowMs: num
   if (!instance.data) return <LoadingState label="Loading your next shift" lines={2} />;
   const shift = instance.data;
   return (
-    <section aria-labelledby="next-shift-title" className="flex flex-col gap-5 border-l-4 border-accent bg-surface py-5 pr-4 pl-5 shadow-sm">
+    <section aria-labelledby="next-shift-title" className="feature-panel flex flex-col gap-5">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-semibold text-accent">Next shift</p>
         <h2 id="next-shift-title" className="text-2xl font-semibold text-fg">
@@ -74,7 +74,7 @@ const MyShiftsPage = (): ReactElement => {
         <section className="flex flex-col items-start gap-3">
           <h2 className="text-xl font-semibold text-fg">No shifts yet.</h2>
           <p className="text-fg-muted">Sign up for a shift on Explore and it will show up here.</p>
-          <Link to="/" className={buttonClassName("primary")}>
+          <Link to="/explore" className={buttonClassName("primary")}>
             Find shifts
           </Link>
         </section>

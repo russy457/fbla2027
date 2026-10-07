@@ -12,13 +12,13 @@ const local = (iso: string, zone: string): number => fromZonedTime(iso, zone).ge
 
 const base: SignupIcsInput = {
   signupId: "inst1_vol1",
-  appHost: "pitchin.example",
-  productName: "Pitch In",
+  appHost: "fbla2027.example",
+  productName: "fbla 2027",
   title: "Sort food, pack boxes; stack shelves",
-  orgName: "Alamo Community Pantry",
+  orgName: "Common Table Pantry",
   description: "Bring closed-toe shoes.",
-  location: "1 Main St, San Antonio, TX 78205",
-  url: "https://pitchin.example/opportunity/inst1",
+  location: "1 Main St, Example City, TX 78205",
+  url: "https://fbla2027.example/opportunity/inst1",
   startMs: local("2026-10-17T09:00:00", "America/Chicago"),
   endMs: local("2026-10-17T13:00:00", "America/Chicago"),
   timeZone: "America/Chicago",
@@ -35,18 +35,18 @@ describe("buildSignupIcs", () => {
     const lines = unfold(ics);
     expect(ics.endsWith("\r\n")).toBe(true);
     expect(lines).toContain("METHOD:PUBLISH");
-    expect(lines).toContain("UID:inst1_vol1@pitchin.example");
+    expect(lines).toContain("UID:inst1_vol1@fbla2027.example");
     expect(lines).toContain("SEQUENCE:2");
     expect(lines).toContain("DTSTAMP:20261010T150405Z");
     expect(lines).toContain("DTSTART;TZID=America/Chicago:20261017T090000");
     expect(lines).toContain("DTEND;TZID=America/Chicago:20261017T130000");
     expect(lines).toContain("SUMMARY:Sort food\\, pack boxes\\; stack shelves");
-    expect(lines).toContain("LOCATION:1 Main St\\, San Antonio\\, TX 78205");
+    expect(lines).toContain("LOCATION:1 Main St\\, Example City\\, TX 78205");
     expect(lines).toContain("STATUS:CONFIRMED");
-    expect(lines).toContain("URL:https://pitchin.example/opportunity/inst1");
+    expect(lines).toContain("URL:https://fbla2027.example/opportunity/inst1");
     expect(lines).toContain("TZID:America/Chicago");
     expect(lines.find((line) => line.startsWith("DESCRIPTION:"))).toBe(
-      "DESCRIPTION:Bring closed-toe shoes.\\nOrganization: Alamo Community Pantry\\nDetails: https://pitchin.example/opportunity/inst1"
+      "DESCRIPTION:Bring closed-toe shoes.\\nOrganization: Common Table Pantry\\nDetails: https://fbla2027.example/opportunity/inst1"
     );
   });
 
@@ -59,8 +59,8 @@ describe("buildSignupIcs", () => {
 
   it("falls back to the org name for location and skips empty description parts", () => {
     const lines = unfold(buildSignupIcs({ ...base, location: null, description: null, url: null }));
-    expect(lines).toContain("LOCATION:Alamo Community Pantry");
-    expect(lines).toContain("DESCRIPTION:Organization: Alamo Community Pantry");
+    expect(lines).toContain("LOCATION:Common Table Pantry");
+    expect(lines).toContain("DESCRIPTION:Organization: Common Table Pantry");
     expect(lines.some((line) => line.startsWith("URL:"))).toBe(false);
   });
 

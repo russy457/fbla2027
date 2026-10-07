@@ -40,7 +40,7 @@ const kiosk = (instanceId: string, expMs = Date.now() + HOUR_MS): Firestore =>
 
 beforeEach(async () => {
   await env.clearFirestore();
-  await seed("organizations/orgA", { name: "Alamo Community Pantry", verified: true });
+  await seed("organizations/orgA", { name: "Common Table Pantry", verified: true });
   await seed("organizations/orgB", { name: "Other Org", verified: true });
   await seed("organizations/orgA/members/coordA", { uid: "coordA", orgId: "orgA", role: "owner", canViewContacts: true });
   await seed("organizations/orgA/members/minorCoord", { uid: "minorCoord", orgId: "orgA", role: "coordinator", canViewContacts: false });

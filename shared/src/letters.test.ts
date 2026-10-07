@@ -25,9 +25,9 @@ const logs: EvidenceLog[] = [
   { id: "g", orgId: "pantry", minutes: 30, dateMs: FROM - 1 } // before the range
 ];
 const orgs = {
-  pantry: { name: "Alamo Community Pantry", verified: true },
+  pantry: { name: "Common Table Pantry", verified: true },
   literacy: { name: "Westside Literacy Project", verified: true },
-  garden: { name: "Mission Garden Collective", verified: false }
+  garden: { name: "Neighborhood Garden Collective", verified: false }
 };
 
 describe("summarizeEvidence (SPEC#fn-issueletter, G19)", () => {
@@ -39,9 +39,9 @@ describe("summarizeEvidence (SPEC#fn-issueletter, G19)", () => {
     expect(summary.excludedUnverifiedCount).toBe(2);
     expect(summary.orgIds).toEqual(["pantry", "literacy"]);
     expect(summary.perOrg).toEqual([
-      { orgId: "pantry", orgName: "Alamo Community Pantry", verified: true, minutes: 735 },
+      { orgId: "pantry", orgName: "Common Table Pantry", verified: true, minutes: 735 },
       { orgId: "literacy", orgName: "Westside Literacy Project", verified: true, minutes: 360 },
-      { orgId: "garden", orgName: "Mission Garden Collective", verified: false, minutes: 120 },
+      { orgId: "garden", orgName: "Neighborhood Garden Collective", verified: false, minutes: 120 },
       { orgId: "ghost", orgName: UNKNOWN_ORG_NAME, verified: false, minutes: 60 }
     ]);
   });

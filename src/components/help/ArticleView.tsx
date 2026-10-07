@@ -10,6 +10,7 @@ import { parseMarkdown, type HelpArticle, type HelpLibrary } from "@/lib/help";
 import { ArticleResultList } from "./ArticleResultList";
 import { audienceLabel, renderPageArticleLink, type RenderArticleLink } from "./articleLinks";
 import { MarkdownView } from "./MarkdownView";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface ArticleViewProps {
   readonly article: HelpArticle;
@@ -35,18 +36,15 @@ export const ArticleView = ({
 
   return (
     <article aria-labelledby={titleId} className="flex max-w-[68ch] flex-col">
-      <p className="text-sm font-medium text-fg-subtle">{audienceLabel(article)}</p>
-      <Title
-        id={titleId}
-        className={
-          titleLevel === 1
-            ? "mt-1 text-3xl font-semibold tracking-tight text-fg md:text-4xl"
-            : "mt-1 text-xl font-semibold tracking-tight text-fg"
-        }
-      >
-        {article.title}
-      </Title>
-      <p className="mt-3 text-lg text-fg-muted">{article.summary}</p>
+      {titleLevel === 1 ? (
+        <PageHeader id={titleId} title={article.title}>{article.summary}</PageHeader>
+      ) : (
+        <>
+          <p className="text-sm font-medium text-fg-subtle">{audienceLabel(article)}</p>
+          <Title id={titleId} className="mt-1 text-xl font-semibold tracking-tight text-fg">{article.title}</Title>
+          <p className="mt-3 text-lg text-fg-muted">{article.summary}</p>
+        </>
+      )}
       <div className="mt-6 border-t border-border pt-6">
         <MarkdownView blocks={blocks} headingOffset={titleLevel === 1 ? 0 : 1} />
       </div>

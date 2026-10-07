@@ -28,7 +28,7 @@ interface KioskCodeDisplayProps {
  * 1024 px and wider (D19) and stay on one line, whatever text size the
  * device's display preference sets for the rest of the page.
  */
-const CODE_CLASSES = "font-mono font-bold whitespace-nowrap leading-none tracking-[0.06em] tabular-nums text-[clamp(72px,11.5vw,168px)]";
+const CODE_CLASSES = "font-mono font-bold whitespace-nowrap leading-none tracking-[0.06em] tabular-nums text-[clamp(72px,12vw,168px)]";
 
 /** "482913" -> "482 913": easier to read across a table. */
 const spaced = (code: string): string => `${code.slice(0, 3)} ${code.slice(3)}`;

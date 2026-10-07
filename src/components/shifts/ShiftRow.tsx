@@ -42,9 +42,10 @@ export const ShiftRow = ({ instance, signup, birthDate, signedIn, nowMs }: Shift
   const left = seatsLeft(instance.capacity, instance.signupCount);
   const titleId = `shift-${instance.id}-title`;
   return (
-    <li aria-labelledby={titleId} className="grid grid-cols-1 gap-4 py-5 md:grid-cols-[7.5rem_minmax(0,1fr)_auto] md:items-start md:gap-6">
-      <p className="font-mono text-sm font-semibold text-fg md:pt-1">
-        <time dateTime={instance.start.toDate().toISOString()}>{formatTimeRange(instance)}</time>
+    <li aria-labelledby={titleId} className="grid grid-cols-1 gap-4 py-6 md:grid-cols-[8.5rem_minmax(0,1fr)_auto] md:items-start md:gap-6">
+      <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-fg md:flex-col md:gap-0 md:pt-0.5">
+        <time dateTime={instance.start.toDate().toISOString()} className="text-base font-semibold text-fg">{formatInTimeZone(instance.start.toDate(), instance.timeZone, "h:mm a")}</time>
+        <span className="text-fg-muted">to {formatInTimeZone(instance.end.toDate(), instance.timeZone, "h:mm a zzz")}</span>
       </p>
       <div className="flex min-w-0 flex-col gap-1.5">
         <h3 id={titleId} className="text-lg font-semibold text-fg">

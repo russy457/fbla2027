@@ -46,7 +46,7 @@ describe("scripts/set-admin.mjs", () => {
   });
 
   it("prints the plan and changes nothing without --yes", async () => {
-    const account = await auth.createUser({ email: EMAIL, password: "pitchin-demo-2027" });
+    const account = await auth.createUser({ email: EMAIL, password: "fbla2027-demo-2027" });
     const result = await run(["--project", PROJECT_ID, "--email", EMAIL]);
     expect(result.code).toBe(2);
     expect(result.stdout).toContain(`{ admin: true } on ${EMAIL}`);
@@ -56,7 +56,7 @@ describe("scripts/set-admin.mjs", () => {
   });
 
   it("sets admin with --yes and keeps the account's other claims", async () => {
-    const account = await auth.createUser({ email: EMAIL, password: "pitchin-demo-2027" });
+    const account = await auth.createUser({ email: EMAIL, password: "fbla2027-demo-2027" });
     await auth.setCustomUserClaims(account.uid, { team: "blue" });
     const result = await run([`--project=${PROJECT_ID}`, "--email", EMAIL.toUpperCase(), "--yes"]);
     expect(result.code).toBe(0);

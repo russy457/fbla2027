@@ -25,4 +25,4 @@ export const DEMO_ACCOUNTS = Object.freeze([
   { role: "Admin", email: "admin@demo.fbla2027.test" }
 ] as const);
 
-export const DEMO_PASSWORD = "pitchin-demo-2027";
+export const DEMO_PASSWORD = "fbla2027-demo-2027";

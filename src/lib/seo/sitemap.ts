@@ -21,8 +21,8 @@
 /** SPEC 10.6 local default for APP_BASE_URL. */
 export const DEFAULT_BASE_URL = "http://localhost:5173";
 
-/** Public screens worth indexing ("/explore" is the same screen as "/"). */
-export const PUBLIC_STATIC_PATHS: readonly string[] = Object.freeze(["/", "/help", "/verify", "/privacy", "/terms", "/accessibility"]);
+/** Public screens worth indexing. */
+export const PUBLIC_STATIC_PATHS: readonly string[] = Object.freeze(["/", "/explore", "/help", "/verify", "/privacy", "/terms", "/accessibility"]);
 
 /** Never crawl: personal, coordinator, kiosk, admin, and per-letter screens. */
 export const ROBOTS_DISALLOW: readonly string[] = Object.freeze([

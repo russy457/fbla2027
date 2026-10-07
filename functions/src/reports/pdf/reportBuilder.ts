@@ -6,7 +6,7 @@
  * the page, ensureSpace/addPage for page breaks, section headings, paragraphs,
  * stat and key-value grids, and "Page X of Y" footers written last through
  * buffered pages. Changes from the port: Trove strings removed (product name
- * "Pitch In"), no image loader, the generation time comes from the request
+ * "fbla 2027"), no image loader, the generation time comes from the request
  * clock (SPEC#clock), colors come from a preset theme (D16), and two new
  * helpers draw a table and a server-side bar chart (SPEC 8.6).
  * Fonts are the PDF standard Helvetica family (no font files to embed), the

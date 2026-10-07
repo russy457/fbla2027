@@ -17,7 +17,7 @@ const baseInput: LetterPdfInput = {
   from: "2026-08-01",
   to: "2026-10-15",
   rows: [
-    { orgId: "a", orgName: "Alamo Community Pantry", verified: true, minutes: 735 },
+    { orgId: "a", orgName: "Common Table Pantry", verified: true, minutes: 735 },
     { orgId: "b", orgName: "Westside Literacy Project", verified: true, minutes: 360 }
   ],
   totalMinutes: 1095,

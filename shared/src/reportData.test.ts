@@ -139,7 +139,7 @@ describe("buildOrgReport", () => {
 });
 
 describe("buildVolunteerReport", () => {
-  const orgs = { orgA: { name: "Alamo", verified: true }, orgB: { name: "Bexar", verified: false } };
+  const orgs = { orgA: { name: "Common Table", verified: true }, orgB: { name: "Open Book", verified: false } };
 
   it("aggregates the range, ignores rejected logs, and names unknown orgs", () => {
     const logs = [
@@ -153,14 +153,14 @@ describe("buildVolunteerReport", () => {
     const report = buildVolunteerReport({ logs, orgs, shifts, range, timeZone: TZ });
     expect(report.summary).toEqual({ approvedMinutes: 240, pendingMinutes: 30, orgsHelped: 3, shiftsCompleted: 2, manualEntries: 1 });
     expect(report.hoursByOrg).toEqual([
-      { orgId: "orgA", orgName: "Alamo", verified: true, minutes: 120 },
-      { orgId: "orgB", orgName: "Bexar", verified: false, minutes: 60 },
+      { orgId: "orgA", orgName: "Common Table", verified: true, minutes: 120 },
+      { orgId: "orgB", orgName: "Open Book", verified: false, minutes: 60 },
       { orgId: "ghost", orgName: UNKNOWN_ORG_LABEL, verified: false, minutes: 60 }
     ]);
     expect(report.shiftList.map((item) => item.id)).toEqual(["b", "a", "c", "d"]);
-    expect(report.shiftList[0]).toMatchObject({ title: MANUAL_ENTRY_TITLE, orgName: "Bexar" });
+    expect(report.shiftList[0]).toMatchObject({ title: MANUAL_ENTRY_TITLE, orgName: "Open Book" });
     expect(report.milestones).toEqual({ lifetimeHours: 29, reached: [25], next: 50, hoursToNext: 21 });
-    expect(report.rows[0]).toMatchObject({ organization: "Bexar", volunteer: "", hours: 1 });
+    expect(report.rows[0]).toMatchObject({ organization: "Open Book", volunteer: "", hours: 1 });
   });
 
   it("reports progress before and after every milestone", () => {
@@ -181,7 +181,7 @@ describe("CSV", () => {
   });
 
   it("writes a header and the chosen columns with CRLF line endings", () => {
-    const row = { date: "2026-09-02", volunteer: "Jordan R.", organization: "Alamo", shift: "Sort, food", status: "approved", minutes: 60, hours: 1, source: "kiosk" };
+    const row = { date: "2026-09-02", volunteer: "Jordan R.", organization: "Common Table", shift: "Sort, food", status: "approved", minutes: 60, hours: 1, source: "kiosk" };
     expect(reportCsv(["date", "shift", "hours"], [row])).toBe('Date,Shift,Hours\r\n2026-09-02,"Sort, food",1');
     expect(reportCsv(ORG_CSV_COLUMNS, [])).toBe("Date,Volunteer,Shift,Status,Minutes,Hours,Source");
     expect(reportCsv(VOLUNTEER_CSV_COLUMNS, [row]).split("\r\n")).toHaveLength(2);

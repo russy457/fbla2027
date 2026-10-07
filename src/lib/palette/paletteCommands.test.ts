@@ -8,7 +8,7 @@ import { PALETTE_LIMITS, buildPaletteGroups, flattenGroups, matchesQuery, queryT
 
 const VISITOR = { signedIn: false, isAdmin: false, memberships: [] };
 const VOLUNTEER = { signedIn: true, isAdmin: false, memberships: [] };
-const COORDINATOR = { signedIn: true, isAdmin: false, memberships: [{ orgId: "alamo", orgName: "Alamo Pantry" }] };
+const COORDINATOR = { signedIn: true, isAdmin: false, memberships: [{ orgId: "common-table", orgName: "Common Table Pantry" }] };
 const ADMIN = { signedIn: true, isAdmin: true, memberships: [] };
 
 const paths = (context: Parameters<typeof routeCommandsFor>[0]): string[] => routeCommandsFor(context).map((item) => item.to);
@@ -32,10 +32,10 @@ describe("routeCommandsFor", () => {
 
   it("adds each organization's workspace for coordinators, named by org", () => {
     const items = routeCommandsFor(COORDINATOR);
-    const dashboard = items.find((item) => item.to === "/org/alamo/dashboard");
-    expect(dashboard?.label).toBe("Alamo Pantry: Dashboard");
-    expect(dashboard?.keywords).toContain("Alamo Pantry");
-    expect(items.map((item) => item.to)).toContain("/org/alamo/shifts/new");
+    const dashboard = items.find((item) => item.to === "/org/common-table/dashboard");
+    expect(dashboard?.label).toBe("Common Table Pantry: Dashboard");
+    expect(dashboard?.keywords).toContain("Common Table Pantry");
+    expect(items.map((item) => item.to)).toContain("/org/common-table/shifts/new");
   });
 
   it("shows the admin console only with the admin claim", () => {
@@ -65,7 +65,7 @@ describe("buildPaletteGroups", () => {
   const routes = routeCommandsFor(VOLUNTEER);
   const articles = [{ slug: "kiosk-check-in", title: "Checking in at the kiosk", summary: "How the code works." }];
   const orgs = [
-    { id: "alamo", name: "Alamo Community Pantry", hint: "Hunger relief" },
+    { id: "common-table", name: "Common Table Pantry", hint: "Hunger relief" },
     { id: "river", name: "Riverwalk Cleanup", hint: "Environment" }
   ];
 
@@ -81,7 +81,7 @@ describe("buildPaletteGroups", () => {
     expect(groups.map((group) => group.id)).toEqual(["shifts", "organizations"]);
     const [shiftSearch, org] = flattenGroups(groups);
     expect(shiftSearch?.to).toBe("/explore?q=pantry");
-    expect(org).toMatchObject({ label: "Alamo Community Pantry", to: "/organizations/alamo" });
+    expect(org).toMatchObject({ label: "Common Table Pantry", to: "/organizations/common-table" });
   });
 
   it("ranks pages whose label starts with the query first", () => {

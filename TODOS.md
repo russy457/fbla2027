@@ -12,7 +12,7 @@
 
 ## Spanish UI
 - **What:** Spanish translation of the volunteer-facing UI.
-- **Why:** San Antonio audience is heavily bilingual.
+- **Why:** Volunteers and coordinators may prefer to use the app in Spanish.
 - **Pros:** Accessibility and inclusion story for judges.
 - **Cons:** Large; every string needs extraction.
 - **Context:** Deferred in CEO review (E6).

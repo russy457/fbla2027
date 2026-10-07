@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET?: string;
   readonly VITE_FIREBASE_APP_ID?: string;
   readonly VITE_USE_EMULATORS?: string;
+  readonly VITE_FUNCTIONS_EMULATOR?: string;
+  readonly VITE_STORAGE_EMULATOR?: string;
   readonly VITE_TURNSTILE_SITE_KEY?: string;
   readonly VITE_MAPBOX_TOKEN?: string;
   readonly VITE_APPCHECK_SITE_KEY?: string;

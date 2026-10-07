@@ -12,6 +12,7 @@ import {
   signInWithEmailAndPassword,
   signOut
 } from "firebase/auth";
+import { readClientEnv } from "./env";
 import { getFirebase } from "./firebase";
 
 /** Error with a sentence that is safe to show as-is. */
@@ -39,6 +40,10 @@ const FALLBACK_MESSAGE = "We couldn't sign you in. Try again.";
 /** Maps a Firebase Auth error to a friendly sentence. */
 export const authErrorMessage = (error: unknown): string => {
   const code = typeof error === "object" && error !== null ? (error as { code?: unknown }).code : undefined;
+  if (code === "auth/network-request-failed") {
+    const env = readClientEnv();
+    if (env.ok && env.env.VITE_USE_EMULATORS) return "Local sign-in service is offline. Run npm run demo:restart in a terminal.";
+  }
   return typeof code === "string" ? (AUTH_MESSAGES[code] ?? FALLBACK_MESSAGE) : FALLBACK_MESSAGE;
 };
 

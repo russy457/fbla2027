@@ -45,9 +45,9 @@ describe("ReportPreview", () => {
   });
 
   it("renders volunteer sections and empty notes", () => {
-    const data = buildVolunteerReport({ logs: [log("a", "u1", 120)], orgs: { orgA: { name: "Alamo", verified: true } }, shifts, range, timeZone: TZ });
+    const data = buildVolunteerReport({ logs: [log("a", "u1", 120)], orgs: { orgA: { name: "Common Table", verified: true } }, shifts, range, timeZone: TZ });
     render(<ReportPreview preview={{ kind: "volunteer-hours", data }} sections={["hoursByOrg", "hoursByMonth", "milestones"]} from="2026-09-01" to="2026-09-30" />);
-    expect(screen.getByRole("cell", { name: "Alamo" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Common Table" })).toBeInTheDocument();
     expect(screen.getByText("2.00 h")).toBeInTheDocument();
     expect(screen.getByText(/2\.00 lifetime hours/)).toBeInTheDocument();
   });

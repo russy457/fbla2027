@@ -31,7 +31,7 @@ export const org = (name: string, verified: boolean): OrganizationDoc => ({
   mission: "Test mission",
   causeAreas: ["hunger-food-security"],
   ein: "74-1234567",
-  address: { line1: "1 Main St", city: "San Antonio", state: "TX", zip: "78205" },
+  address: { line1: "1 Main St", city: "Example City", state: "TX", zip: "78205" },
   geo: null,
   contactEmail: "org@example.test",
   contactPhone: null,
@@ -101,9 +101,9 @@ export const VOLUNTEERS = ["vol1", "vol2", "vol3", "vol4", "vol5", "vol6", "vol7
 export const seedWorld = async (): Promise<void> => {
   const batch = db.batch();
   const orgs: Array<[string, string, boolean]> = [
-    ["orgA", "Alamo Community Pantry", true],
-    ["orgB", "Bexar Book Bank", true],
-    ["orgU", "Mission Garden Collective", false]
+    ["orgA", "Common Table Pantry", true],
+    ["orgB", "Open Book Bank", true],
+    ["orgU", "Neighborhood Garden Collective", false]
   ];
   orgs.forEach(([id, name, verified]) => {
     batch.set(db.collection(COLLECTIONS.organizations).doc(id), org(name, verified));
@@ -145,7 +145,7 @@ export const seedInstance = async (instanceId: string, options: InstanceOptions 
     opportunityId: "opp1",
     seriesId: null,
     title: "Sort food donations",
-    orgName: options.orgId === "orgB" ? "Bexar Book Bank" : options.orgId === "orgU" ? "Mission Garden Collective" : "Alamo Community Pantry",
+    orgName: options.orgId === "orgB" ? "Open Book Bank" : options.orgId === "orgU" ? "Neighborhood Garden Collective" : "Common Table Pantry",
     orgVerified: options.orgVerified ?? options.orgId !== "orgU",
     minAge: options.minAge ?? 13,
     timeZone: "America/Chicago",

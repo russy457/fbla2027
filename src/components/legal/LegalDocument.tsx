@@ -7,6 +7,7 @@
  */
 import type { ReactElement, ReactNode } from "react";
 import { LEGAL_LAST_UPDATED } from "@/lib/legal";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export interface LegalSection {
   /** Anchor id, used in the table of contents link (#id). */
@@ -34,18 +35,11 @@ const formatUpdated = (isoDate: string): string => {
 const LINK_CLASS = "font-medium text-accent underline underline-offset-2 hover:text-accent-hover";
 
 export const LegalDocument = ({ title, intro, sections }: LegalDocumentProps): ReactElement => (
-  <article aria-labelledby="legal-title" className="flex max-w-[68ch] flex-col gap-8">
-    <header className="flex flex-col gap-3">
-      <h1 id="legal-title" tabIndex={-1} className="text-3xl font-semibold tracking-tight text-fg outline-none md:text-4xl">
-        {title}
-      </h1>
-      <p className="text-sm text-fg-muted">
-        Last updated <time dateTime={LEGAL_LAST_UPDATED}>{formatUpdated(LEGAL_LAST_UPDATED)}</time>
-      </p>
-      <div className="text-lg text-fg-muted">{intro}</div>
-    </header>
+  <article aria-labelledby="legal-title" className="flex max-w-5xl flex-col gap-8">
+    <PageHeader id="legal-title" title={title}>{intro}</PageHeader>
+    <p className="text-sm text-fg-muted">Last updated <time dateTime={LEGAL_LAST_UPDATED}>{formatUpdated(LEGAL_LAST_UPDATED)}</time></p>
 
-    <nav aria-labelledby="legal-toc-title" className="rounded-md border border-border bg-surface-sunken p-4">
+    <nav aria-labelledby="legal-toc-title" className="max-w-[68ch] border-y border-border py-4">
       <h2 id="legal-toc-title" className="text-sm font-semibold text-fg">
         On this page
       </h2>
@@ -61,7 +55,7 @@ export const LegalDocument = ({ title, intro, sections }: LegalDocumentProps): R
     </nav>
 
     {sections.map(({ id, heading, body }) => (
-      <section key={id} id={id} aria-labelledby={`${id}-heading`} className="scroll-mt-24">
+      <section key={id} id={id} aria-labelledby={`${id}-heading`} className="max-w-[68ch] scroll-mt-24">
         <h2 id={`${id}-heading`} className="text-xl font-semibold tracking-tight text-fg">
           {heading}
         </h2>

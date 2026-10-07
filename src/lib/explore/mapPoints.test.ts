@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import { decodeGeohash } from "./geohash";
 import { COARSE_GEOHASH_PRECISION, coarsePoint, mapboxTokenFrom, orgMapPoints, shiftCountText } from "./mapPoints";
 
-const EXACT_HASH = "9v1zsqyk2m"; // a precise point in San Antonio
+const EXACT_HASH = "9v1zsqyk2m"; // a precise demo point
 
 describe("mapboxTokenFrom", () => {
   it("accepts only public pk. tokens", () => {
@@ -31,7 +31,7 @@ describe("coarsePoint", () => {
 
 describe("orgMapPoints", () => {
   const orgs = [
-    { id: "alamo", name: "Alamo Pantry", archived: false, geo: { geohash: EXACT_HASH } },
+    { id: "common-table", name: "Common Table Pantry", archived: false, geo: { geohash: EXACT_HASH } },
     { id: "river", name: "River Cleanup", archived: false, geo: { geohash: "9v1zt" } },
     { id: "nogeo", name: "No Location", archived: false, geo: null },
     { id: "closed", name: "Closed Org", archived: true, geo: { geohash: "9v1zt" } },
@@ -39,16 +39,16 @@ describe("orgMapPoints", () => {
   ];
 
   it("plots organizations with listed shifts, most shifts first", () => {
-    const points = orgMapPoints(orgs, ["river", "alamo", "alamo", "nogeo", "closed"]);
+    const points = orgMapPoints(orgs, ["river", "common-table", "common-table", "nogeo", "closed"]);
     expect(points.map((point) => [point.orgId, point.shiftCount])).toEqual([
-      ["alamo", 2],
+      ["common-table", 2],
       ["river", 1]
     ]);
     expect(points[0]).toMatchObject(decodeGeohash(EXACT_HASH.slice(0, COARSE_GEOHASH_PRECISION)));
   });
 
   it("breaks ties by name and returns nothing for an empty list", () => {
-    expect(orgMapPoints(orgs, ["river", "alamo"]).map((point) => point.name)).toEqual(["Alamo Pantry", "River Cleanup"]);
+    expect(orgMapPoints(orgs, ["river", "common-table"]).map((point) => point.name)).toEqual(["Common Table Pantry", "River Cleanup"]);
     expect(orgMapPoints(orgs, [])).toEqual([]);
   });
 });

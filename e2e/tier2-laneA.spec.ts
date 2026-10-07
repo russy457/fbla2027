@@ -83,6 +83,6 @@ test("coordinator ranks and invites; the volunteer sees the invite alert", async
   await signInWithForm(volunteer, ACCOUNTS.volunteer, "/me/notifications");
   await volunteer.goto("/me/notifications");
   await expect(volunteer.getByRole("heading", { level: 1, name: "Notifications" })).toBeVisible();
-  await expect(volunteer.getByText(`Alamo Community Pantry invited you to ${INVITE_SHIFT.title}`)).toBeVisible();
+  await expect(volunteer.getByText(`Common Table Pantry invited you to ${INVITE_SHIFT.title}`)).toBeVisible();
   await phone.close();
 });

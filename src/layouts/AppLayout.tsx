@@ -1,18 +1,19 @@
 /**
  * AppLayout.tsx
  * The volunteer app shell (plan D2, D20): skip link, header with the product
- * name and desktop top nav, the routed page inside <main>, a footer with
- * display preferences, and a bottom tab bar on mobile. Landmarks (header,
+ * name and an adaptive top nav, the routed page inside <main>, and a footer
+ * with display preferences. Landmarks (header,
  * nav, main, footer) are real elements so screen reader users can jump
  * between them. After each navigation, focus moves to the new screen's h1
  * (or <main> when the screen has none) so keyboard and screen reader users
  * start reading from the top (D20). The header also holds the Quick help
  * button that opens the help slide-over, the Coordinator and Admin links for
- * those roles, and Sign in / Sign out (AccountControls). On phones the
- * footer carries the Profile link, which the header shows from md up.
+ * those roles, and Sign in / Sign out (AccountControls). The full top row
+ * collapses to a four-route icon pill after scrolling.
  */
-import { Suspense, useEffect, useRef, type ReactElement } from "react";
+import { Suspense, useEffect, useRef, useState, type ReactElement } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { UserCircle } from "@phosphor-icons/react";
 import FadeContent from "@/components/bits/FadeContent";
 import { DevEnvironmentBanner } from "@/components/DevEnvironmentBanner";
 import { DisplayPreferences } from "@/components/DisplayPreferences";
@@ -20,6 +21,7 @@ import { HelpPanelLauncher } from "@/components/help/HelpPanelLauncher";
 import { LoadingState } from "@/components/LoadingState";
 import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
+import { isHostingPreview } from "@/lib/hostingPreview";
 import { useSessionUser } from "@/store/authStore";
 import { AccountControls } from "./AccountControls";
 import { LegalLinks } from "./LegalLinks"; // Tier 1 lane C
@@ -29,17 +31,27 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { RouteHead } from "@/components/seo/RouteHead";
 import { VOLUNTEER_NAV_ITEMS } from "./navItems";
 
-const desktopLinkClass = ({ isActive }: { isActive: boolean }): string =>
-  cn(
-    "inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors duration-(--duration-fast)",
-    isActive ? "bg-accent-subtle text-accent" : "text-fg-muted hover:bg-surface-sunken hover:text-fg"
-  );
+const navLinkClass = ({ isActive }: { isActive: boolean }): string => cn("site-nav__link", isActive && "is-active");
+const COMPACT_AT_SCROLL_Y = 132;
 
-const tabLinkClass = ({ isActive }: { isActive: boolean }): string =>
-  cn(
-    "flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors duration-(--duration-fast)",
-    isActive ? "text-accent" : "text-fg-muted hover:text-fg"
+const HeaderAccount = ({ condensed }: { readonly condensed: boolean }): ReactElement => {
+  const { pathname } = useLocation();
+  const user = useSessionUser();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    detailsRef.current?.removeAttribute("open");
+  }, [pathname, condensed]);
+  if (!user) return <AccountControls />;
+  return (
+    <details ref={detailsRef} className="header-account-menu">
+      <summary aria-label="Account menu">
+        <UserCircle aria-hidden="true" size={20} />
+        <span>Account</span>
+      </summary>
+      <div className="header-account-panel"><AccountControls /></div>
+    </details>
   );
+};
 
 const useFocusMainOnNavigate = (): void => {
   const { pathname } = useLocation();
@@ -62,7 +74,17 @@ const useFocusMainOnNavigate = (): void => {
 export const AppLayout = (): ReactElement => {
   const { pathname } = useLocation();
   const user = useSessionUser();
+  const [condensed, setCondensed] = useState(false);
   useFocusMainOnNavigate();
+
+  useEffect(() => {
+    const update = (): void => setCondensed(window.scrollY > COMPACT_AT_SCROLL_Y);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [pathname]);
+
+  const isHome = pathname === "/" || pathname === "/explore";
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -73,32 +95,42 @@ export const AppLayout = (): ReactElement => {
         Skip to main content
       </a>
       {import.meta.env.DEV ? <DevEnvironmentBanner /> : null}
+      {isHostingPreview() ? (
+        <div role="status" className="border-b border-border bg-surface-sunken px-4 py-2 text-center text-sm text-fg-muted">
+          Browse the site here. Shift signups and account changes are available in the guided demo.
+        </div>
+      ) : null}
       {/* Tier 2 lane C: per-route title, description, canonical, Open Graph (SPEC Tier 3 SEO). */}
       <RouteHead />
 
-      <header className="sticky top-0 z-(--z-header) border-b border-border bg-surface/95 backdrop-blur-sm">
-        <div className="mx-auto flex min-h-16 w-full max-w-5xl items-center justify-between gap-4 px-4">
-          <Link to="/" className="inline-flex min-h-touch items-center rounded-md text-lg font-semibold tracking-tight text-fg">
+      <header className="site-header" data-condensed={condensed} data-home={isHome} data-explore={pathname === "/explore"}>
+        <div className="site-header__inner">
+          <Link to="/" className="site-header__brand">
             {APP_NAME}
           </Link>
-          <div className="flex items-center gap-2">
-            <nav aria-label="Main" className="hidden lg:block">
-              <ul className="flex items-center gap-1">
-                {VOLUNTEER_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-                  <li key={to}>
-                    <NavLink to={to} end={end} className={desktopLinkClass}>
-                      <Icon aria-hidden="true" size={18} weight="regular" />
-                      {label}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+          <nav aria-label="Main" className="site-nav">
+            <ul>
+              {VOLUNTEER_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={end}
+                    aria-label={label}
+                    className={navLinkClass}
+                  >
+                    <Icon aria-hidden="true" size={20} weight="regular" />
+                    <span className="site-nav__label">{label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="site-header__tools">
             {/* Tier 2 lane C: command palette, also opened with Ctrl/Cmd+K (SPEC 9.1). */}
             <CommandPaletteLauncher />
             {/* Quick help slide-over, also opened with the "?" key (SPEC 9.6). */}
             <HelpPanelLauncher />
-            <AccountControls />
+            <HeaderAccount condensed={condensed} />
           </div>
         </div>
       </header>
@@ -106,7 +138,7 @@ export const AppLayout = (): ReactElement => {
       {/* Tier 2 lane C: storage notice, in flow so it never covers controls. */}
       <CookieConsent />
 
-      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-10 pb-12 outline-none">
+      <main id="main" tabIndex={-1} className={cn("w-full flex-1 outline-none", pathname === "/" || pathname === "/explore" ? "" : "mx-auto max-w-6xl px-4 pt-8 pb-16 sm:px-6 md:pt-12", pathname === "/onboarding" && "onboarding-main")}>
         <FadeContent key={pathname}>
           <Suspense fallback={<LoadingState label="Loading this screen" />}>
             <Outlet />
@@ -114,8 +146,8 @@ export const AppLayout = (): ReactElement => {
         </FadeContent>
       </main>
 
-      <footer className="border-t border-border bg-surface pb-20 lg:pb-0">
-        <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <footer className="border-t border-border bg-surface">
+        <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
           {/* Linked from /me/profile ("Display settings"). */}
           <div id="display-preferences" tabIndex={-1} className="outline-none">
             <DisplayPreferences />
@@ -128,9 +160,12 @@ export const AppLayout = (): ReactElement => {
               </Link>
             </p>
           ) : null}
-          <p className="mt-4 text-sm">
+          <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <Link to="/verify" className="font-medium text-accent underline-offset-4 hover:underline">
+              Verify a letter
+            </Link>
             <Link to="/org/register" className="font-medium text-accent underline-offset-4 hover:underline">
-              For organizations: register your nonprofit
+              Register your nonprofit
             </Link>
           </p>
           {/* Tier 1 lane C */}
@@ -138,21 +173,6 @@ export const AppLayout = (): ReactElement => {
         </div>
       </footer>
 
-      <nav
-        aria-label="Main tabs"
-        className="fixed inset-x-0 bottom-0 z-(--z-tabbar) border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
-      >
-        <ul className="flex">
-          {VOLUNTEER_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-            <li key={to} className="flex flex-1">
-              <NavLink to={to} end={end} className={tabLinkClass}>
-                <Icon aria-hidden="true" size={22} weight="regular" />
-                {label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </div>
   );
 };

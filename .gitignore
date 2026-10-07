@@ -39,3 +39,7 @@ Thumbs.db
 .claude/worktrees/
 # Private emulator temp dir (avoids Storage emulator clashes)
 .tmp-emu/
+
+# Local project reference material
+Coding-and-Programming.pdf
+inspopic.jpg

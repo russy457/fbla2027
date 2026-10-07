@@ -24,8 +24,9 @@ import { shiftCountText, type MapPoint } from "@/lib/explore/mapPoints";
 import type { GeoPoint } from "@/lib/search";
 
 const MAP_STYLE = "mapbox://styles/mapbox/light-v11";
-/** San Antonio, where the demo organizations are (SPEC 10.7), when nothing else is known. */
-const FALLBACK_CENTER: GeoPoint = { lat: 29.4241, lng: -98.4936 };
+/** Neutral overview when neither a home area nor organization markers are available. */
+const FALLBACK_CENTER: GeoPoint = { lat: 39.8283, lng: -98.5795 };
+const OVERVIEW_ZOOM = 3;
 const HOME_ZOOM = 10;
 const SINGLE_MARKER_ZOOM = 11;
 const BOUNDS_PADDING_PX = 48;
@@ -53,7 +54,7 @@ const OrgMap = ({ accessToken, points, homeArea }: OrgMapProps): ReactElement =>
       accessToken,
       style: MAP_STYLE,
       center: [(homeArea ?? FALLBACK_CENTER).lng, (homeArea ?? FALLBACK_CENTER).lat],
-      zoom: HOME_ZOOM,
+      zoom: homeArea || points.length > 0 ? HOME_ZOOM : OVERVIEW_ZOOM,
       cooperativeGestures: true
     });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");

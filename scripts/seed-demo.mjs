@@ -22,7 +22,7 @@ import { build } from "esbuild";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PROJECT_ID = process.env.GCLOUD_PROJECT || "demo-fbla2027";
 /** Fixed password for emulator accounts only; deployed demo accounts use the DEMO_ACCOUNT_PASSWORD secret. */
-const DEMO_PASSWORD = "pitchin-demo-2027";
+const DEMO_PASSWORD = "fbla2027-demo-2027";
 const APP_URL = "http://localhost:5173";
 const EMULATOR_UI_URL = "http://localhost:4000";
 const MINUTE_MS = 60_000;

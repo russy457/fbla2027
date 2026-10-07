@@ -23,7 +23,7 @@ import type { FunctionsEnv } from "../lib/env";
 import { applyDemoSeed, clearDemoData, clearDemoFiles } from "../seed/applyDemoSeed";
 
 /** Emulator-only demo password; matches scripts/seed-demo.mjs and the e2e helpers. */
-export const LOCAL_DEMO_PASSWORD = "pitchin-demo-2027";
+export const LOCAL_DEMO_PASSWORD = "fbla2027-demo-2027";
 
 const demoPassword = (env: FunctionsEnv, secret: string | undefined): string => {
   if (env.isEmulator) return LOCAL_DEMO_PASSWORD;
@@ -36,7 +36,11 @@ export const resetDemoData = defineCallable({
   op: "resetDemoData",
   auth: admin(),
   handler: async ({ input, deps, caller, fn }) => {
-    if (!deps.env.demoMode) throw new AppError("DEMO_MODE_REQUIRED");
+    // A local Functions emulator can be aimed at live Firestore. Its reset
+    // must never recursively delete collections in a real project.
+    if (!deps.env.demoMode || (deps.env.isEmulator && !deps.env.projectId.startsWith("demo-"))) {
+      throw new AppError("DEMO_MODE_REQUIRED");
+    }
     const password = demoPassword(deps.env, process.env.DEMO_ACCOUNT_PASSWORD);
     const minutes = input.shiftStartsInMin ?? DEFAULT_DEMO_SHIFT_STARTS_IN_MIN;
     const nowMs = deps.nowMs();

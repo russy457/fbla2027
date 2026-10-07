@@ -12,10 +12,10 @@ import { expect as baseExpect, type Locator, type Page } from "@playwright/test"
 const expect = baseExpect.configure({ timeout: 30_000 });
 
 export const PROJECT_ID = "demo-fbla2027";
-export const ORG_ID = "alamo-community-pantry";
+export const ORG_ID = "common-table-pantry";
 export const INSTANCE_ID = "demo-shift";
 /** Emulator-only demo password printed by scripts/seed-demo.mjs. */
-export const DEMO_PASSWORD = "pitchin-demo-2027";
+export const DEMO_PASSWORD = "fbla2027-demo-2027";
 export const ACCOUNTS = {
   admin: "admin@demo.fbla2027.test",
   coordinator: "coordinator@demo.fbla2027.test",

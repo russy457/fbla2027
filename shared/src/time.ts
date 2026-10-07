@@ -3,7 +3,7 @@
  * Time zone and calendar helpers (SPEC#formulas 7.5). Instants are stored as
  * UTC; every calendar-day rule (age on a date, letter ranges, display) is
  * evaluated in an IANA zone through date-fns-tz, so a shift at 9:00 AM in
- * San Antonio stays 9:00 AM across daylight saving changes.
+ * Local wall time stays 9:00 AM across daylight saving changes.
  */
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 

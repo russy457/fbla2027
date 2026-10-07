@@ -99,7 +99,7 @@ describe("contact refresh jobs", () => {
 
     await call("admin", "verifyOrganization", { orgId: "orgA", verified: true }, adminUser());
     expect(await hiddenMinors()).toBe(0);
-    await call("coordinator", "updateOrganization", { orgId: "orgA", action: "update", patch: { name: "Alamo Pantry" } }, user("coordA"));
+    await call("coordinator", "updateOrganization", { orgId: "orgA", action: "update", patch: { name: "Common Table Pantry" } }, user("coordA"));
     expect(await hiddenMinors()).toBe(MINORS);
     expect(await job("orgA")).toBeUndefined();
   });

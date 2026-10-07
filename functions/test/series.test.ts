@@ -24,7 +24,7 @@ const fields = {
   type: "recurring",
   skills: ["Lifting"],
   minAge: 13,
-  location: { address: { line1: "1 Main St", city: "San Antonio", state: "TX", zip: "78205" } }
+  location: { address: { line1: "1 Main St", city: "Example City", state: "TX", zip: "78205" } }
 };
 
 const weekly = (weekdays: number[] = [SATURDAY]) => ({ frequency: "weekly", weekdays, startTime: "09:00", endTime: "13:00" });

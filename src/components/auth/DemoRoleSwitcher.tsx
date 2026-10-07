@@ -26,7 +26,8 @@ export const DemoRoleSwitcher = ({ onSignedIn }: DemoRoleSwitcherProps): ReactEl
       await signInWithEmail(email, DEMO_PASSWORD);
       onSignedIn();
     } catch (signInError) {
-      setError(signInError instanceof AuthFormError ? `${signInError.message} Is the demo seeded? Run npm run seed:demo.` : "Sign-in failed.");
+      const message = signInError instanceof AuthFormError ? signInError.message : "Sign-in failed.";
+      setError(message.startsWith("That email and password don't match") ? `${message} Is the demo seeded? Run npm run seed:demo.` : message);
     } finally {
       setPendingEmail(null);
     }

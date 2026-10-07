@@ -77,12 +77,12 @@ describe("QR check-in", () => {
     renderPanel();
     fireEvent.click(screen.getByRole("button", { name: "Check in" }));
     expect(screen.queryByRole("button", { name: "Scan QR" })).toBeNull();
-    const { container } = render(<KioskQr payload="https://pitchin.example/checkin?i=a&c=123456" />);
+    const { container } = render(<KioskQr payload="https://fbla2027.example/checkin?i=a&c=123456" />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it("shows the kiosk QR in a secure context", () => {
-    render(<KioskQr payload="https://pitchin.example/checkin?i=a&c=123456" />);
+    render(<KioskQr payload="https://fbla2027.example/checkin?i=a&c=123456" />);
     expect(screen.getByTestId("kiosk-qr")).toBeInTheDocument();
   });
 });

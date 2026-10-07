@@ -36,7 +36,7 @@ const registration = {
   mission: "Lends tools.",
   causeAreas: ["community-development"],
   ein: "anything",
-  address: { line1: "1 Main", city: "San Antonio", state: "TX", zip: "78205" },
+  address: { line1: "1 Main", city: "Example City", state: "TX", zip: "78205" },
   contactEmail: "a@example.test",
   timeZone: "America/Denver",
   requestNonce: NONCE

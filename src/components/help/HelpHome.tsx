@@ -9,6 +9,7 @@
 import { useMemo, type ReactElement } from "react";
 import { useSearchParams } from "react-router-dom";
 import { APP_NAME } from "@/lib/brand";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { HelpLibrary } from "@/lib/help";
 import { ArticleResultList } from "./ArticleResultList";
 import { AssistantPanel } from "./AssistantPanel";
@@ -55,10 +56,7 @@ export const HelpHome = ({ library }: HelpHomeProps): ReactElement => {
 
   return (
     <div className="flex flex-col gap-10">
-      <header className="flex max-w-2xl flex-col gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight text-fg md:text-4xl">Help Center</h1>
-        <p className="text-lg text-fg-muted">Step-by-step answers for volunteers and coordinators using {APP_NAME}.</p>
-      </header>
+      <PageHeader title="Help Center">Step-by-step answers for volunteers and coordinators using {APP_NAME}.</PageHeader>
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_19rem] lg:gap-14">
         <section aria-label="Article search" className="flex min-w-0 flex-col gap-4">

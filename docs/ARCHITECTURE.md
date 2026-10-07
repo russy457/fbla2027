@@ -1,6 +1,6 @@
 # Architecture
 
-How Pitch In is put together, for new contributors and for explaining the code to judges. `docs/SPEC.md` is the source of truth for behavior; this file is the map. Every path below exists in the repo.
+How fbla 2027 is put together, for new contributors and for explaining the code to judges. `docs/SPEC.md` is the source of truth for behavior; this file is the map. Every path below exists in the repo.
 
 ## 1. The big picture
 

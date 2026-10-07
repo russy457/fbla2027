@@ -58,7 +58,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `npm run dev -- --port ${E2E_PORT} --strictPort`,
+    command: `npm run dev:web -- --port ${E2E_PORT} --strictPort`,
     url: E2E_URL,
     reuseExistingServer: false,
     timeout: 120_000,

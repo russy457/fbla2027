@@ -56,8 +56,8 @@ const signup = (id: string, uid: string, status: string, orgId = "orgA") => seed
 
 beforeEach(async () => {
   await env.clearFirestore();
-  await seed("organizations/orgA", { name: "Alamo" });
-  await seed("organizations/orgB", { name: "Bexar" });
+  await seed("organizations/orgA", { name: "Common Table" });
+  await seed("organizations/orgB", { name: "Open Book" });
   await member("orgA", "coordA");
   await member("orgA", "ownerA", "owner");
   await member("orgB", "coordB");

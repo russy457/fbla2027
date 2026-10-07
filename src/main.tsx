@@ -6,7 +6,9 @@
  */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@fontsource-variable/instrument-sans";
+import "@fontsource-variable/besley/wght.css";
+import "@fontsource-variable/besley/wght-italic.css";
+import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
 import "@fontsource-variable/jetbrains-mono";
 import "./styles/app.css";
 import { App } from "./App";

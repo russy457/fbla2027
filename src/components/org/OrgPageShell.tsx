@@ -18,11 +18,11 @@ interface OrgPageShellProps {
 export const OrgPageShell = ({ title, intro, children }: OrgPageShellProps): ReactElement => {
   const { orgId = "" } = useParams();
   return (
-    <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
-      <OrgNav orgId={orgId} />
-      <div className="flex min-w-0 flex-1 flex-col gap-10">
-        <PageHeader title={title}>{intro}</PageHeader>
-        {children}
+    <div className="flex flex-col gap-8">
+      <PageHeader title={title}>{intro}</PageHeader>
+      <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
+        <OrgNav orgId={orgId} />
+        <div className="flex min-w-0 flex-1 flex-col gap-10">{children}</div>
       </div>
     </div>
   );

@@ -36,6 +36,7 @@ export const MatchesStep = ({ uid, onContinue }: MatchesStepProps): ReactElement
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="onboarding-scene w-full max-w-xl" aria-hidden="true" />
       <RecommendedShifts picks={picks} hasInterests={(profile.data?.interests.length ?? 0) > 0} title="3 shifts that match you" headingLevel={1} />
       {picks.length === 0 && (profile.data?.interests.length ?? 0) > 0 ? (
         <p className="text-fg-muted">No open shifts match yet. New ones appear on Explore as organizations post them.</p>

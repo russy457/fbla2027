@@ -3,9 +3,8 @@
  * Cloudflare Turnstile human check for onboarding (SPEC 5.9, G13, X11).
  * Loads Cloudflare's script once (allowed by the hosting CSP), renders the
  * widget explicitly, and reports the token (or null when it expires). With
- * the emulators, VITE_TURNSTILE_SITE_KEY is Cloudflare's published always-pass
- * test key and the Functions skip verification, so a failed script load
- * there is reported as "skipped" instead of blocking local work.
+ * a local Functions server, verification is disabled server-side, so the
+ * client skips the widget too. This includes the cloud Firestore demo.
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { readClientEnv } from "@/lib/env";
@@ -62,15 +61,19 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
   const [status, setStatus] = useState<TurnstileStatus>("loading");
   const env = readClientEnv();
   const siteKey = env.ok ? env.env.VITE_TURNSTILE_SITE_KEY : undefined;
-  const usingEmulators = env.ok && env.env.VITE_USE_EMULATORS;
+  const usingLocalFunctions = env.ok && (env.env.VITE_USE_EMULATORS || env.env.VITE_FUNCTIONS_EMULATOR);
 
   useEffect(() => {
     onStatus(status);
   }, [status, onStatus]);
 
   useEffect(() => {
+    if (usingLocalFunctions) {
+      setStatus("skipped");
+      return undefined;
+    }
     if (!siteKey) {
-      setStatus(usingEmulators ? "skipped" : "unavailable");
+      setStatus("unavailable");
       return undefined;
     }
     let widgetId: string | null = null;
@@ -88,19 +91,19 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
             onToken(null);
             setStatus("ready");
           },
-          "error-callback": () => setStatus(usingEmulators ? "skipped" : "unavailable")
+          "error-callback": () => setStatus("unavailable")
         });
         setStatus("ready");
       })
       .catch(() => {
-        if (isActive) setStatus(usingEmulators ? "skipped" : "unavailable");
+        if (isActive) setStatus("unavailable");
       });
     return () => {
       isActive = false;
       const api = (window as TurnstileWindow).turnstile;
       if (widgetId && api) api.remove(widgetId);
     };
-  }, [siteKey, usingEmulators, onToken]);
+  }, [siteKey, usingLocalFunctions, onToken]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -108,7 +111,7 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
       <p aria-live="polite" className="text-sm text-fg-muted">
         {status === "loading" ? "Loading a quick human check..." : null}
         {status === "verified" ? "Human check done." : null}
-        {status === "skipped" ? "Human check skipped on the local emulators." : null}
+        {status === "skipped" ? "Human check skipped for this local demo." : null}
         {status === "unavailable" ? "We couldn't load the human check. Check your connection, then reload this page." : null}
       </p>
     </div>

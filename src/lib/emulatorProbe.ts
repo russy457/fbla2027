@@ -40,6 +40,7 @@ export interface ProbeOptions {
   readonly host?: string;
   readonly timeoutMs?: number;
   readonly fetchImpl?: typeof fetch;
+  readonly services?: readonly EmulatorService[];
 }
 
 const DEFAULT_PROBE_TIMEOUT_MS = 1500;
@@ -63,7 +64,8 @@ export const probeEmulators = async (options: ProbeOptions = {}): Promise<Emulat
   const host = options.host ?? getEmulatorHost();
   const fetchImpl = options.fetchImpl ?? fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_PROBE_TIMEOUT_MS;
-  const entries = Object.entries(EMULATOR_PORTS) as Array<[EmulatorService, number]>;
+  const entries = (Object.entries(EMULATOR_PORTS) as Array<[EmulatorService, number]>)
+    .filter(([service]) => !options.services || options.services.includes(service));
   const results = await Promise.all(
     entries.map(async ([service, port]) => ({
       service,

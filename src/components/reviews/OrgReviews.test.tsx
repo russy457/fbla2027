@@ -44,7 +44,7 @@ const review = (id: string, extra: Partial<Review> = {}): Review => ({
 const renderReviews = () =>
   render(
     <MemoryRouter>
-      <OrgReviews orgId="org-1" orgName="Alamo Pantry" timeZone="America/Chicago" />
+      <OrgReviews orgId="org-1" orgName="Common Table Pantry" timeZone="America/Chicago" />
     </MemoryRouter>
   );
 
@@ -128,7 +128,7 @@ describe("OrgReviews", () => {
 
     state.reviews = [review("r1", { response: { text: "Thanks for coming!", by: "coord", at: ts(0) } })];
     renderReviews();
-    expect(screen.getByText("Response from Alamo Pantry")).toBeInTheDocument();
+    expect(screen.getByText("Response from Common Table Pantry")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove review by Sam L." })).not.toBeInTheDocument();
   });
 

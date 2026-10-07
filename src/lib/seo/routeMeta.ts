@@ -7,7 +7,7 @@
  * shared link can reach a crawler that never reads robots.txt.
  */
 import { matchPath } from "react-router-dom";
-import { APP_NAME, APP_TAGLINE } from "@/lib/brand";
+import { APP_NAME } from "@/lib/brand";
 
 export interface RouteMeta {
   /** Page name without the app name; null means the home title. */
@@ -71,11 +71,11 @@ export const metaForPath = (pathname: string): RouteMeta => {
   return entry ? { title: entry.title, description: entry.description, noindex: entry.noindex } : NOT_FOUND;
 };
 
-/** "Help Center | Pitch In"; the home page uses the tagline instead. */
-export const documentTitle = (title: string | null): string => (title === null ? `${APP_NAME}: ${APP_TAGLINE}` : `${title} | ${APP_NAME}`);
+/** Keep the home tab title to the plain product name. */
+export const documentTitle = (title: string | null): string => (title === null ? APP_NAME : `${title} | ${APP_NAME}`);
 
-/** "/" and "/explore" are one screen; both canonicalize to "/". */
+/** Landing and Explore are separate indexable screens. */
 export const canonicalPath = (pathname: string): string => {
   const trimmed = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
-  return trimmed === "/explore" ? "/" : trimmed;
+  return trimmed;
 };

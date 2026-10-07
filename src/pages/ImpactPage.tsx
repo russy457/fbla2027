@@ -60,7 +60,7 @@ const ImpactPage = (): ReactElement => {
           <MilestoneProgress hours={hours} />
         </div>
         {hours === 0 ? (
-          <Link to="/" className={buttonClassName("secondary", "w-fit")}>
+          <Link to="/explore" className={buttonClassName("secondary", "w-fit")}>
             Find shifts
           </Link>
         ) : null}
@@ -80,7 +80,7 @@ const ImpactPage = (): ReactElement => {
         <section className="flex flex-col items-start gap-3">
           <h2 className="text-xl font-semibold text-fg">Get a verified letter</h2>
           <p className="text-fg-muted">No approved hours yet. Hours appear after you check out of a shift.</p>
-          <Link to="/" className={buttonClassName("primary")}>
+          <Link to="/explore" className={buttonClassName("primary")}>
             Find shifts
           </Link>
         </section>

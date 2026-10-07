@@ -127,10 +127,10 @@ describe("SPEC 10.7 facts", () => {
     expect(finished).toHaveLength(8);
   });
 
-  it("has three San Antonio orgs, exactly one unverified", () => {
+  it("has three fictional orgs, exactly one unverified", () => {
     const orgs = docsIn<OrganizationDoc>("organizations");
     expect(orgs).toHaveLength(3);
-    expect(orgs.every((org) => org.data.address.city === "San Antonio")).toBe(true);
+    expect(orgs.every((org) => org.data.address.city === "Example City")).toBe(true);
     expect(orgs.filter((org) => !org.data.verified)).toHaveLength(1);
     expect(new Set(docsIn<{ causeArea: string }>("opportunities").map((opportunity) => opportunity.data.causeArea)).size).toBeGreaterThanOrEqual(3);
   });
@@ -194,7 +194,7 @@ describe("Tier 1 inbox for the demo volunteer", () => {
 
   it("saves one organization for Jordan", () => {
     const saved = seed.writes.filter((write) => write.path.startsWith(`users/${VOLUNTEER.uid}/saved/`));
-    expect(saved.map((write) => write.path)).toEqual([`users/${VOLUNTEER.uid}/saved/org_alamo-community-pantry`]);
+    expect(saved.map((write) => write.path)).toEqual([`users/${VOLUNTEER.uid}/saved/org_common-table-pantry`]);
   });
 
   it("puts the demo volunteer's ZIP on the map and the orgs at their ZIP centroids", () => {

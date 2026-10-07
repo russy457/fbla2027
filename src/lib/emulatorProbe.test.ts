@@ -29,4 +29,12 @@ describe("probeEmulators", () => {
     const result = await probeEmulators({ host: "localhost", fetchImpl, timeoutMs: 5 });
     expect(result.unreachable).toHaveLength(Object.keys(EMULATOR_PORTS).length);
   });
+
+  it("checks only the local services used by the cloud presentation", async () => {
+    const fetchImpl = vi.fn(async () => new Response(null)) as unknown as typeof fetch;
+    await probeEmulators({ host: "127.0.0.1", services: ["functions", "storage"], fetchImpl });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(fetchImpl).toHaveBeenCalledWith("http://127.0.0.1:5001/", expect.anything());
+    expect(fetchImpl).toHaveBeenCalledWith("http://127.0.0.1:9199/", expect.anything());
+  });
 });

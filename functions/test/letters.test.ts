@@ -74,7 +74,7 @@ describe("volunteer.issueLetter", () => {
 
     expect(await verification(result.verifyCode)).toMatchObject({
       displayName: "Volunteer1 R.",
-      orgNames: ["Alamo Community Pantry", "Bexar Book Bank"],
+      orgNames: ["Common Table Pantry", "Open Book Bank"],
       totalMinutes: 1095,
       status: "valid",
       revokeReasonLabel: null

@@ -20,7 +20,7 @@ describe("DevEnvironmentBanner", () => {
   it("tells the developer which emulator port is down", async () => {
     const probe = vi.fn(async () => ({ reachable: false, unreachable: [{ service: "firestore" as const, port: 8080 }] }));
     render(<DevEnvironmentBanner envResult={VALID_ENV} probe={probe} />);
-    expect(await screen.findByText("Emulators not reachable on :8080, run npm run demo")).toBeInTheDocument();
+    expect(await screen.findByText("Local Firebase services are offline (firestore :8080). Run npm run demo:restart in a terminal.")).toBeInTheDocument();
   });
 
   it("renders nothing when the emulators answer", async () => {
@@ -45,6 +45,25 @@ describe("DevEnvironmentBanner", () => {
     render(<DevEnvironmentBanner envResult={VALID_ENV} probe={probe} />);
     expect(await screen.findByText(/npm run doctor/)).toBeInTheDocument();
   });
+
+  it("names the cloud presentation command when its local action server is down", async () => {
+    const envResult: ClientEnvResult = {
+      ok: true,
+      env: parseClientEnv({
+        VITE_FIREBASE_API_KEY: "public-key",
+        VITE_FIREBASE_AUTH_DOMAIN: "fbla2027-ethanteng.firebaseapp.com",
+        VITE_FIREBASE_PROJECT_ID: "fbla2027-ethanteng",
+        VITE_FIREBASE_STORAGE_BUCKET: "fbla2027-ethanteng.firebasestorage.app",
+        VITE_FIREBASE_APP_ID: "app-id",
+        VITE_USE_EMULATORS: "false",
+        VITE_FUNCTIONS_EMULATOR: "true"
+      })
+    };
+    const probe = vi.fn(async () => ({ reachable: false, unreachable: [{ service: "functions" as const, port: 5001 }] }));
+    render(<DevEnvironmentBanner envResult={envResult} probe={probe} />);
+    expect(await screen.findByText(/Run npm run demo:cloud in a terminal/)).toBeInTheDocument();
+    expect(probe).toHaveBeenCalledWith({ services: ["functions"] });
+  });
 });
 
 describe("banner copy helpers", () => {
@@ -57,7 +76,7 @@ describe("banner copy helpers", () => {
           { service: "functions", port: 5001 }
         ]
       })
-    ).toBe("Emulators not reachable on :9099, :5001, run npm run demo");
+    ).toBe("Local Firebase services are offline (auth :9099, functions :5001). Run npm run demo:restart in a terminal.");
   });
 
   it("explains a generic env error", () => {

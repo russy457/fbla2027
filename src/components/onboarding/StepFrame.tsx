@@ -38,6 +38,7 @@ export const StepFrame = ({
 
   return (
     <form noValidate onSubmit={onSubmit} className="flex max-w-xl flex-col gap-6">
+      <div className="onboarding-scene" aria-hidden="true" />
       <div className="flex flex-col gap-3">
         <p className="text-sm font-semibold text-fg-muted">
           Step {stepNumber} of {stepCount}

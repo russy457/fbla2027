@@ -28,6 +28,7 @@ export const UnderAgeStop = ({ onChangeDate, accountDeleted }: UnderAgeStopProps
   useEffect(() => headingRef.current?.focus(), []);
   return (
     <section aria-labelledby="under-age-title" className="flex max-w-xl flex-col items-start gap-4">
+      <div className="onboarding-scene w-full" aria-hidden="true" />
       <HandHeart aria-hidden="true" size={40} className="text-accent" />
       <h1 id="under-age-title" ref={headingRef} tabIndex={-1} className="text-3xl font-semibold tracking-tight text-fg outline-none">
         You must be 13 or older to use this app

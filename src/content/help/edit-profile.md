@@ -15,7 +15,7 @@ Your profile helps Explore suggest shifts that fit you. Open it with **Profile**
 - **Interests**: the causes you care about. These power the Recommended row on Explore.
 - **Skills**, such as tutoring or Spanish.
 - **Availability**: mornings, afternoons, and evenings for each day of the week.
-- **ZIP code** (optional). The app keeps only a rough area about 5 km wide, never your address. It lets you filter by distance. San Antonio area ZIP codes work with the distance filter; other ZIP codes are kept but the filter stays off.
+- **ZIP code** (optional). The app keeps only a rough area about 5 km wide, never your address. It lets you filter by distance. If we cannot locate your ZIP yet, the distance filter stays off.
 
 Press **Save profile** when you are done. Only the things you changed are sent.
 

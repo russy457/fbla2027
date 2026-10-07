@@ -76,7 +76,7 @@ const SeriesBody = ({ orgId, series, nowMs }: { orgId: string; series: Series; n
 
   return (
     <>
-      <section aria-label="Series status" className="flex flex-col gap-3 border-l-4 border-accent bg-surface py-4 pr-4 pl-5">
+      <section aria-label="Series status" className="feature-panel flex flex-col gap-3">
         <p className="text-xl font-semibold text-fg">{describeSeriesRule(series.rule)}</p>
         <p className="text-fg-muted">
           {series.capacity} seats per shift. Starts {formatYmd(series.startsOn)}

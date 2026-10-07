@@ -90,7 +90,7 @@ describe("reliability chart sections", () => {
     const org = await renderReport({
       ...common,
       kind: "org-participation",
-      orgName: "Alamo",
+      orgName: "Common Table",
       opportunityTitle: null,
       data: buildOrgReport({ logs: [], signups: SIGNUPS, shifts: {}, range, timeZone: TZ, opportunityId: null }),
       sections: ["reliability"]

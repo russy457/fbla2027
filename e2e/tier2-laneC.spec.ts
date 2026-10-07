@@ -38,8 +38,8 @@ const resetSeededAlertsToUnread = async (): Promise<number> => {
 };
 
 test("Ctrl+K opens the command palette and navigates with the keyboard", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Explore" })).toBeVisible();
+  await page.goto("/explore");
+  await expect(page.getByRole("heading", { level: 1, name: /Find a time that fits your life/ })).toBeVisible();
 
   await page.keyboard.press("Control+k");
   const palette = page.getByRole("dialog", { name: "Search and jump" });
@@ -114,8 +114,8 @@ test("the bell menu shows the seeded unread alerts and marks them read", async (
 });
 
 test("Explore with the command palette open has no serious accessibility violations", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Explore" })).toBeVisible();
+  await page.goto("/explore");
+  await expect(page.getByRole("heading", { level: 1, name: /Find a time that fits your life/ })).toBeVisible();
   await page.keyboard.press("Control+k");
   await expect(page.getByRole("dialog", { name: "Search and jump" })).toBeVisible();
   await page.getByRole("combobox").pressSequentially("pantry");

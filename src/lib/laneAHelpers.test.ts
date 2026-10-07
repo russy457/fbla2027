@@ -11,7 +11,7 @@ import { signupIcs } from "./icsDownload";
 import { fromProfilePreferences, samePreferences, toProfilePreferences } from "./preferenceSync";
 import { parseCheckinPayload, qrPath, readCheckinParams } from "./qr";
 
-const ORIGIN = "https://pitchin.example";
+const ORIGIN = "https://fbla2027.example";
 
 describe("check-in QR payload", () => {
   it("accepts this app's /checkin link", () => {
@@ -38,19 +38,19 @@ describe("signupIcs", () => {
   it("builds a file named after the shift with the app host in the UID", () => {
     const { fileName, text } = signupIcs({ signupId: "shift-1_uid-1", instance: makeInstance(), opportunity: null, cancelled: false, origin: ORIGIN, nowMs: 0 });
     expect(fileName).toBe("sort-and-pack-food-boxes.ics");
-    expect(text).toContain("UID:shift-1_uid-1@pitchin.example");
-    expect(text).toContain("LOCATION:Alamo Community Pantry");
+    expect(text).toContain("UID:shift-1_uid-1@fbla2027.example");
+    expect(text).toContain("LOCATION:Common Table Pantry");
   });
 
   it("uses the opportunity address and marks a cancellation", () => {
     const opportunity = {
       id: "opp-1",
       description: "Bring gloves",
-      location: { address: { line1: "1 Main St", city: "San Antonio", state: "TX", zip: "78205" }, geo: null }
+      location: { address: { line1: "1 Main St", city: "Example City", state: "TX", zip: "78205" }, geo: null }
     } as unknown as Parameters<typeof signupIcs>[0]["opportunity"];
     const { fileName, text } = signupIcs({ signupId: "s", instance: makeInstance(), opportunity, cancelled: true, origin: ORIGIN, nowMs: 0 });
     expect(fileName).toBe("sort-and-pack-food-boxes-cancelled.ics");
-    expect(text).toContain("LOCATION:1 Main St\\, San Antonio\\, TX 78205");
+    expect(text).toContain("LOCATION:1 Main St\\, Example City\\, TX 78205");
     expect(text).toContain("METHOD:CANCEL");
   });
 });

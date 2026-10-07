@@ -254,7 +254,7 @@ a confirmed shift). Email and push are out of scope for the port.
 
 **Maps and geocoding.** Mapbox with a public `pk.` token from env, URL-restricted to the
 deployed domain and localhost. Without a token: maps are hidden, org coordinates come from
-seed data, and volunteers set location from a bundled ZIP-centroid table (San Antonio area) or
+seed data, and volunteers set location from a bundled demo ZIP-centroid lookup or
 optional browser geolocation.
 
 **Demo topology.** Primary: deploy to the team's new Firebase project (Hosting + Functions)

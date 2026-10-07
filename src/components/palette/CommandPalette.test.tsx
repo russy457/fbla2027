@@ -15,11 +15,11 @@ import { useAuthStore } from "@/store/authStore";
 import { CommandPaletteLauncher } from "./CommandPaletteLauncher";
 
 vi.mock("@/hooks/useMemberships", () => ({
-  useMyMemberships: () => ({ data: [{ orgId: "alamo", orgName: "Alamo Community Pantry", role: "owner" }] })
+  useMyMemberships: () => ({ data: [{ orgId: "common-table", orgName: "Common Table Pantry", role: "owner" }] })
 }));
 vi.mock("@/lib/data/orgs", () => ({
   getOrganizations: async () => [
-    { id: "alamo", name: "Alamo Community Pantry", causeAreas: ["hunger-food-security"], archived: false },
+    { id: "common-table", name: "Common Table Pantry", causeAreas: ["hunger-food-security"], archived: false },
     { id: "gone", name: "Closed Pantry Project", causeAreas: ["hunger-food-security"], archived: true }
   ]
 }));
@@ -116,7 +116,7 @@ describe("CommandPaletteLauncher", () => {
     pressKey("k", { ctrlKey: true });
     expect(screen.getByRole("group", { name: "Pages" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: /My Shifts/ })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: /Alamo Community Pantry: Dashboard/ })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Common Table Pantry: Dashboard/ })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: /Admin console/ })).toBeNull();
     expect(screen.getByRole("group", { name: "Help for this page" })).toBeInTheDocument();
   });
@@ -137,7 +137,7 @@ describe("CommandPaletteLauncher", () => {
     renderLauncher();
     pressKey("k", { ctrlKey: true });
     fireEvent.change(combobox(), { target: { value: "pantry" } });
-    expect(await screen.findByRole("option", { name: /^Alamo Community Pantry\s?Hunger and food/ })).toBeInTheDocument();
+    expect(await screen.findByRole("option", { name: /^Common Table Pantry\s?Hunger and food/ })).toBeInTheDocument();
     expect(screen.queryByRole("option", { name: /Closed Pantry Project/ })).toBeNull();
     // The coordinator's own org pages match by org name too; the count is announced.
     expect(screen.getByText(/^\d+ results\.$/)).toBeInTheDocument();
@@ -176,8 +176,8 @@ describe("CommandPaletteLauncher", () => {
   });
 
   it("is not available on a kiosk session", () => {
-    useAuthStore.setState({ session: { status: "kiosk", uid: "kiosk-1", kiosk: { instanceId: "i1", orgId: "alamo", expMs: 0 } } });
-    renderLauncher("/org/alamo/kiosk/i1");
+    useAuthStore.setState({ session: { status: "kiosk", uid: "kiosk-1", kiosk: { instanceId: "i1", orgId: "common-table", expMs: 0 } } });
+    renderLauncher("/org/common-table/kiosk/i1");
     expect(screen.queryByRole("button", { name: "Search" })).toBeNull();
     pressKey("k", { ctrlKey: true }, document.body);
     expect(screen.queryByRole("dialog")).toBeNull();

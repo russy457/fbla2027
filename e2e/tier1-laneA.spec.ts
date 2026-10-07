@@ -43,9 +43,9 @@ test("keyboard-only waitlist signup, then promotion notification and banner", as
 
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
   const page = await context.newPage();
-  await signInWithForm(page, ACCOUNTS.volunteer, "/");
+  await signInWithForm(page, ACCOUNTS.volunteer, "/explore");
   // The search box narrows Explore to this shift (filters live in the URL).
-  await page.goto(`/?q=${encodeURIComponent("Restock pantry")}`);
+  await page.goto(`/explore?q=${encodeURIComponent("Restock pantry")}`);
   const join = page.getByRole("button", { name: `Join waitlist (#1): ${WAITLIST_SHIFT.title}` });
   await expect(join).toBeVisible();
   await tabTo(page, join);
@@ -122,19 +122,21 @@ test("150% text + high contrast: Tier 0 screens have no horizontal overflow at 3
     expect(await hasHorizontalOverflow(page), `${path} scrolls sideways`).toBe(false);
   };
 
-  await check("/", "Explore");
+  await check("/", /Make time for good work/);
+  await check("/explore", /Find a time that fits your life/);
   await check(`/opportunity/${INSTANCE_ID}`, /.+/);
   await check("/verify", /Verify/);
   await check("/login", /Sign in/);
   await signInWithForm(page, ACCOUNTS.volunteer, "/");
-  await check("/", "Explore");
+  await check("/", /Make time for good work/);
+  await check("/explore", /Find a time that fits your life/);
   await check("/me/shifts", "My Shifts");
   await check("/impact", "Impact");
   await check("/me/notifications", "Notifications");
   await check("/me/saved", "Saved");
   // Tier 1 integration screens.
   await check("/me/profile", "Profile");
-  await check("/organizations/alamo-community-pantry", "Alamo Community Pantry");
+  await check("/organizations/common-table-pantry", "Common Table Pantry");
   await context.close();
 });
 
@@ -148,14 +150,14 @@ test("reduced motion: the OS setting and the in-app toggle zero the motion token
   const reduced = await browser.newContext({ reducedMotion: "reduce" });
   const reducedPage = await reduced.newPage();
   await reducedPage.goto("/");
-  await expect(reducedPage.getByRole("heading", { level: 1, name: "Explore" })).toBeVisible();
+  await expect(reducedPage.getByRole("heading", { level: 1, name: /Make time for good work/ })).toBeVisible();
   expect(await durationBase(reducedPage)).toBe("0ms");
   await reduced.close();
 
   const normal = await browser.newContext({ reducedMotion: "no-preference" });
   const page = await normal.newPage();
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Explore" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Make time for good work/ })).toBeVisible();
   expect(await durationBase(page)).not.toBe("0ms");
   await page.getByRole("checkbox", { name: "Reduce motion" }).check();
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");

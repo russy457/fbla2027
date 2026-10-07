@@ -22,7 +22,7 @@ export const makeInstance = (overrides: Partial<Instance> = {}): Instance => ({
   opportunityId: "opp-1",
   seriesId: null,
   title: "Sort and pack food boxes",
-  orgName: "Alamo Community Pantry",
+  orgName: "Common Table Pantry",
   orgVerified: true,
   minAge: 13,
   timeZone: "America/Chicago",

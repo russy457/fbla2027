@@ -27,11 +27,11 @@ vi.mock("@/components/reviews/OrgReviews", () => ({ OrgReviews: () => null }));
 
 const pantry = (overrides: Partial<OrganizationDoc> = {}): OrganizationDoc & { id: string } => ({
   id: "org-1",
-  name: "Alamo Community Pantry",
-  mission: "We sort, pack, and share donated groceries with San Antonio families.",
+  name: "Common Table Pantry",
+  mission: "We sort, pack, and share donated groceries with families.",
   causeAreas: ["hunger-food-security"],
   ein: "74-5550123",
-  address: { line1: "418 Mission Commons Dr", city: "San Antonio", state: "TX", zip: "78204" },
+  address: { line1: "418 Community Commons Dr", city: "Example City", state: "TX", zip: "78204" },
   geo: null,
   contactEmail: "hello@example.test",
   contactPhone: null,
@@ -74,14 +74,14 @@ describe("OrganizationPage", () => {
 
   it("shows the name, Verified chip, mission, and only upcoming shifts, with Open next shift and Save", async () => {
     renderAt();
-    expect(await screen.findByRole("heading", { level: 1, name: "Alamo Community Pantry" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Common Table Pantry" })).toBeInTheDocument();
     expect(screen.getByText("Verified organization")).toBeInTheDocument();
     expect(screen.getByText(/We sort, pack, and share donated groceries/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open next shift: Sort and pack food boxes" })).toHaveAttribute("href", "/opportunity/next");
     expect(screen.getByRole("link", { name: "Sort and pack food boxes" })).toHaveAttribute("href", "/opportunity/next");
     expect(screen.queryByText("Past shift")).not.toBeInTheDocument();
     expect(screen.queryByText("Cancelled shift")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save: Alamo Community Pantry" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Save: Common Table Pantry" })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByRole("link", { name: "Website" })).toHaveAttribute("rel", "noopener noreferrer");
   });
 

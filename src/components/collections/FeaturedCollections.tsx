@@ -35,13 +35,13 @@ export const FeaturedCollections = (): ReactElement | null => {
         </h2>
         <p className="text-sm text-fg-muted">Shifts and organizations picked by local coordinators.</p>
       </div>
-      <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+      <ol className="grid grid-cols-1 border-t border-border sm:grid-cols-2">
         {shown.map((item, index) => (
-          <li key={item.id} className="group relative flex min-w-0 flex-col gap-2 bg-surface p-4 transition-colors duration-(--duration-fast) hover:bg-surface-sunken">
-            <span aria-hidden="true" className="font-mono text-sm text-fg-subtle">
+          <li key={item.id} className="group relative flex min-w-0 flex-col gap-2 border-b border-border py-5 sm:pr-6 sm:even:border-l sm:even:pl-6">
+            <span aria-hidden="true" className="font-mono text-xs text-editorial-accent">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <h3 className="text-lg font-semibold text-fg">
+            <h3 className="font-display text-xl font-semibold text-fg">
               {/* The stretched link makes the whole card clickable while keeping one accessible name. */}
               <Link to={collectionPathFor(item.id)} className="underline-offset-4 after:absolute after:inset-0 hover:text-accent hover:underline focus-visible:underline">
                 {item.title}

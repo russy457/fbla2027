@@ -19,7 +19,7 @@ import { DAY_MS, MINUTE_MS } from "./time";
 
 export interface SignupIcsInput {
   readonly signupId: string;
-  /** Host of the app, for example "pitchin.web.app"; makes the UID globally unique. */
+  /** Host of the app, for example "fbla2027.web.app"; makes the UID globally unique. */
   readonly appHost: string;
   /** Product name for PRODID. */
   readonly productName: string;

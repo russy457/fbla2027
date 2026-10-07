@@ -46,7 +46,7 @@ describe("suggestedSlugsForRoute", () => {
   });
 
   it("covers the Tier 1 screens", () => {
-    expect(suggestedSlugsForRoute("/organizations/alamo-community-pantry")[0]).toBe("organization-page");
+    expect(suggestedSlugsForRoute("/organizations/common-table-pantry")[0]).toBe("organization-page");
     expect(suggestedSlugsForRoute("/me/profile")[0]).toBe("edit-profile");
     expect(suggestedSlugsForRoute("/me/notifications")[0]).toBe("alerts-are-in-app");
     expect(suggestedSlugsForRoute("/me/saved")[0]).toBe("saved-items");

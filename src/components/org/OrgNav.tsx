@@ -30,7 +30,7 @@ const ITEMS: readonly OrgNavItem[] = [
 
 const linkClass = ({ isActive }: { isActive: boolean }): string =>
   cn(
-    "inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-fast)",
+    "inline-flex min-h-touch items-center gap-2 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-fast)",
     isActive ? "bg-accent-subtle text-accent" : "text-fg-muted hover:bg-surface-sunken hover:text-fg"
   );
 

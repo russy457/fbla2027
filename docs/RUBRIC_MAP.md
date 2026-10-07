@@ -4,9 +4,9 @@
 |---|---|
 | Date | 2026-10-07 |
 | Event | FBLA 2026-27 Coding & Programming, "Serving the Community: Nonprofit Volunteer Management" |
-| App | Pitch In (working name; constant in `src/lib/brand.ts`) |
+| App | fbla 2027 (constant in `src/lib/brand.ts`) |
 | Required by | `docs/SPEC.md` 10.14 ("Each rubric row to the screen and file that earns it; competitor table") |
-| Status of this doc | Tier 0 is built. Tier 1 lanes A, B, and C are merged and joined by an integration pass (alerts from coordinator ops, profile page, organization page, planner UI). Every path below exists in the repo. |
+| Status of this doc | The downloaded `Coding-and-Programming.pdf` rating sheet was reviewed on 2026-10-07. All feature paths below exist locally and the design system is being applied. The cloud project remains on Spark, so Functions-dependent flows are available only in the local emulator demo. |
 
 How to read the status column:
 
@@ -19,7 +19,7 @@ How to read the status column:
 | built (Tier 1 integration) | The seams between lanes: alerts from coordinator ops, capacity-increase promotion, Request review in My Shifts, the planner box on the new-shift form, `/me/profile` with `volunteer.updateProfile`, `/organizations/:orgId`, demo reset of Tier 1 data. |
 | planned (Tier 2) | Scheduled after Tier 1 (SPEC 1.2). Listed only where it strengthens a row. |
 
-Rubric row names follow the 2026-27 rubric topics as summarized in `docs/designs/volunteer-management-port.md` (110 points: language rationale, comments, modular design, UX and accessibility, intuitive navigation with an interactive help menu, an intelligent feature, syntactic and semantic validation, full prompt coverage explained in the instructions, customizable reports, appropriate data structures). Before Round 1, match each row name to the official rubric sheet wording.
+Rubric row names paraphrase the official 2026-27 rating sheet in [`Coding-and-Programming.pdf`](../Coding-and-Programming.pdf): language choice, comments and naming, modularity, UX and accessibility, navigation and help, validation, prompt coverage, customizable reports, storage and data structures, and presentation. The sheet totals 110 points, including presentation and event-rule scoring.
 
 ---
 
@@ -81,7 +81,7 @@ Rubric row names follow the 2026-27 rubric topics as summarized in `docs/designs
 
 Competitor cells describe typical, publicly described capabilities as of 2026, stated with hedges on purpose. Plans and features change and differ by tier. **The team must re-check every competitor cell against each vendor's current site before presenting**, and should say "as far as we found" when asked.
 
-| Capability | Pitch In | VolunteerHub | SignUpGenius | Golden | Better Impact | Galaxy Digital | Paper sign-in sheets |
+| Capability | fbla 2027 | VolunteerHub | SignUpGenius | Golden | Better Impact | Galaxy Digital | Paper sign-in sheets |
 |---|---|---|---|---|---|---|---|
 | Live 3-device kiosk check-in with rotating code | yes (built, Tier 0) | kiosk check-in typical; rotating code not typical | check-in on some plans (varies); rotating code not typical | mobile/kiosk check-in typical; rotating code not typical | kiosk check-in typical; rotating code not typical | kiosk check-in typical; rotating code not typical | no (anyone can sign any name) |
 | Verified hours letters with public verification page | yes (built, Tier 0) | hour reports typical; public verify page not typical | not typical | hour records typical; public verify page not typical | hour records typical; public verify page not typical | hour records typical; public verify page not typical | no (signature only) |

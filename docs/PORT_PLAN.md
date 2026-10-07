@@ -73,7 +73,7 @@ Plus in-app notifications, recurring series/instances, roles/membership/admin cl
    `styles/tokens.css`, brand constant. (git init + remote already done.)
 2. **Core domain layer** — `src/lib/types.ts`, `firestore.ts` (split by domain into
    `src/lib/data/*.ts` to fix the 1,335-line file), `api.ts`, `appStore.ts`, mock/seed data
-   (San Antonio nonprofits), search adapter, match score, validation schemas (zod) in
+   (fictional nonprofits), search adapter, match score, validation schemas (zod) in
    `src/lib/validation/`.
 3. **Tier 1 demo loop (parallel agents, gated by the Tier 1 e2e test)** —
    A. Volunteer: auth + onboarding, Explore (orgs + opportunities, smart filters), Organization
@@ -387,7 +387,7 @@ to a file. Platform potential: the verification record is reusable by any school
 | E3 | Accessibility controls: text-size + high-contrast toggle, full keyboard path through signup and kiosk | S | ACCEPTED | P1: rubric UX row explicitly scores accessibility features |
 | E4 | Milestone celebration + shareable badge card at 25/50/100 approved hours | S | ACCEPTED | P2: impact dashboard already planned; CountUp reuse |
 | E5 | Coordinator CSV import of an existing volunteer roster | M | DEFERRED | P3: outside the demo loop; TODOS.md |
-| E6 | Spanish UI (San Antonio audience) | L | DEFERRED | P3: large, outside blast radius; TODOS.md |
+| E6 | Spanish UI | L | DEFERRED | P3: large, outside blast radius; TODOS.md |
 | E7 | Training/certification prerequisites per opportunity | M | DEFERRED | P3: new domain object; TODOS.md |
 | E8 | Public org "impact this month" chart | S | SKIPPED | P4: duplicates org participation report |
 

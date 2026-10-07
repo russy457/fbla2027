@@ -56,7 +56,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactElement => {
     setPending(true);
     try {
       const saved = await api.volunteer.updateProfile(result.request);
-      const zipNote = result.request.zip && saved.homeGeohash === null ? " That ZIP is outside our San Antonio area list, so distance filters stay off." : "";
+      const zipNote = result.request.zip && saved.homeGeohash === null ? " We cannot locate that ZIP yet, so distance filters stay off." : "";
       setMessage(`Profile saved.${zipNote}`);
     } catch (saveError) {
       setError(toUserErrorOrNetwork(saveError));

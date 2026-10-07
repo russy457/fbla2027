@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 export type ButtonVariant = "primary" | "secondary" | "quiet";
 
 const BASE =
-  "inline-flex min-h-touch min-w-touch items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold " +
+  "inline-flex min-h-touch min-w-touch items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold " +
   "transition-[background-color,color,border-color,transform] duration-(--duration-fast) ease-out " +
   "active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60";
 

@@ -17,6 +17,9 @@ export const clientEnvSchema = z.object({
   VITE_FIREBASE_STORAGE_BUCKET: required(),
   VITE_FIREBASE_APP_ID: required(),
   VITE_USE_EMULATORS: envFlag(),
+  /** Presentation mode: cloud Auth/Firestore with a local callable server and file emulator. */
+  VITE_FUNCTIONS_EMULATOR: envFlag(),
+  VITE_STORAGE_EMULATOR: envFlag(),
   /** Demo controls ("Sign in as...", Advance clock, Run due jobs). Unset means: on when using emulators. */
   VITE_DEMO_MODE: z.enum(["true", "false"]).optional(),
   VITE_TURNSTILE_SITE_KEY: optionalEnvString(),

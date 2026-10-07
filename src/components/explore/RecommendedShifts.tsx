@@ -53,7 +53,7 @@ export const RecommendedShifts = ({ picks, hasInterests, title = "Recommended fo
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {picks.map(({ row, why }) => (
           <li key={row.instance.id} className="min-w-0">
-            <SpotlightCard className="h-full rounded-lg border border-border bg-surface p-4 shadow-sm">
+            <SpotlightCard className="h-full rounded-md border border-border bg-surface p-5">
               <div className="flex h-full flex-col gap-2">
                 <p className="flex items-start gap-1.5 text-sm font-semibold text-accent">
                   <Sparkle aria-hidden="true" size={16} weight="fill" className="mt-0.5 shrink-0" />

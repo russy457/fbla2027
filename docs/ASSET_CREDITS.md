@@ -1,0 +1,17 @@
+# Asset credits
+
+| Asset | Creator and source | License | Use |
+|---|---|---|---|
+| `public/images/community-donations.jpg` | [Julia M Cameron, Pexels](https://www.pexels.com/photo/people-sorting-donations-6994963/) | [Pexels License](https://www.pexels.com/license/), checked 2026-10-07 | Landing hero, mobile Explore scene, account and impact openings, onboarding. Illustrative, not a listed shift. |
+| `public/images/food-sorting-joel-muniz.jpg` | [Joel Muniz, Unsplash](https://unsplash.com/photos/volunteers-sorting-canned-food-donations-3k3l2brxmwQ) | [Unsplash License](https://unsplash.com/license), checked 2026-10-07 | Food cause and kiosk header. Illustrative. |
+| `public/images/tree-planting.jpg` | [Anna Shvets, Pexels](https://www.pexels.com/photo/people-planting-plant-together-5029923/) | [Pexels License](https://www.pexels.com/license/), checked 2026-10-07 | Outdoors cause and volunteer route openings. Illustrative. |
+| `public/images/reading-together.jpg` | [Anastasia Shuraeva, Pexels](https://www.pexels.com/photo/man-helping-girl-turning-book-pages-8466772/) | [Pexels License](https://www.pexels.com/license/), checked 2026-10-07 | Learning cause, home photo note, help and legal openings. Illustrative. |
+| `public/images/shelter-cat.jpg` | [Judy Beth Morris, Unsplash](https://unsplash.com/photos/a-man-holding-a-white-cat-in-his-arms-9BHdzgNltZ8) | [Unsplash License](https://unsplash.com/license), checked 2026-10-07 | Animal care cause and Saved opening. Illustrative. |
+| `public/images/packing-donations.jpg` | [Julia M Cameron, Pexels](https://www.pexels.com/photo/a-volunteer-wearing-a-face-mask-preparing-donations-6995213/) | [Pexels License](https://www.pexels.com/license/), checked 2026-10-07 | Desktop Explore scene, food gallery story, coordinator pages, kiosk access. Illustrative. |
+| `public/images/park-cleanup.jpg` | [Galib Rahman Nadim, Pexels](https://www.pexels.com/photo/volunteers-clean-up-park-environmental-awareness-39038090/) | [Pexels License](https://www.pexels.com/license/), checked 2026-10-07 | Green spaces gallery story and shift page opening. Illustrative. |
+| `public/images/storytime.jpg` | [Ksenia Chernaya, Pexels](https://www.pexels.com/photo/children-in-the-school-reading-a-book-with-a-teacher-8535177/) | [Pexels License](https://www.pexels.com/license/), checked 2026-10-07 | Youth gallery story and Help Center opening. Illustrative. |
+| Besley variable font | [The Besley Project Authors](https://github.com/google/fonts/tree/main/ofl/besley) | [SIL Open Font License 1.1](../public/licenses/Besley-OFL.txt) | Display headings, self-hosted via Fontsource. |
+| Atkinson Hyperlegible Next variable font | [Atkinson Hyperlegible Next Project Authors](https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegiblenext) | [SIL Open Font License 1.1](../public/licenses/Atkinson-Hyperlegible-Next-OFL.txt) | Body and UI text, self-hosted via Fontsource. |
+| JetBrains Mono variable font | [JetBrains Mono Project Authors](https://github.com/google/fonts/tree/main/ofl/jetbrainsmono) | [SIL Open Font License 1.1](../public/licenses/JetBrains-Mono-OFL.txt) | Codes and tabular numbers, self-hosted via Fontsource. |
+
+Photo sources and attribution are also stored with their UI metadata in `src/content/editorialMedia.ts`. Fontsource package metadata records the original copyright notices and font versions in `node_modules/@fontsource-variable/*/metadata.json`.

@@ -76,6 +76,7 @@ export const KioskAccessPanel = ({ mode, instanceId, orgId, shiftTitle, onExited
   return (
     <main id="main" className="flex min-h-dvh items-center justify-center bg-bg px-4 py-10">
       <section aria-labelledby="kiosk-access-title" className="flex w-full max-w-sm flex-col gap-5">
+        <div className="kiosk-access-scene" aria-hidden="true" />
         <LockKey aria-hidden="true" size={36} className="text-accent" />
         <div className="flex flex-col gap-2" role={mode === "expired" ? "alert" : undefined}>
           <h1 id="kiosk-access-title" ref={headingRef} tabIndex={-1} className="text-2xl font-semibold text-fg outline-none">

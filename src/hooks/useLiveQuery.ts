@@ -41,13 +41,20 @@ export const useLiveQuery = <T>({ queryKey, subscribe, enabled = true }: LiveQue
   useEffect(() => {
     if (!enabled) return undefined;
     setError(null);
-    return subscribe(
-      (data) => {
-        setError(null);
-        queryClient.setQueryData(queryKey, data);
-      },
-      (listenError) => setError(listenError)
-    );
+    try {
+      return subscribe(
+        (data) => {
+          setError(null);
+          queryClient.setQueryData(queryKey, data);
+        },
+        (listenError) => setError(listenError)
+      );
+    } catch (cause) {
+      // Configuration and SDK setup can fail before a listener exists. Keep
+      // that failure in the query state so the screen can show its error UI.
+      setError(cause instanceof Error ? cause : new Error(String(cause)));
+      return undefined;
+    }
     // subscribe and queryKey are captured by content through keyHash on purpose.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyHash, enabled, queryClient]);

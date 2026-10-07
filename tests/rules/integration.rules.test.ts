@@ -33,7 +33,7 @@ const anon = (): Firestore => env.unauthenticatedContext().firestore() as unknow
 
 beforeEach(async () => {
   await env.clearFirestore();
-  await seed("organizations/orgA", { name: "Alamo Community Pantry", verified: true, ownerUid: "coordA" });
+  await seed("organizations/orgA", { name: "Common Table Pantry", verified: true, ownerUid: "coordA" });
   await seed("instances/inst1", { orgId: "orgA", title: "Sort food", start: Timestamp.fromMillis(Date.now() + 86_400_000), status: "scheduled" });
   await seed("users/vol1/private/profile", { firstName: "Jordan", birthDate: "2007-01-01", isMinor: false, interests: [], zip: null, homeGeohash: null });
 });

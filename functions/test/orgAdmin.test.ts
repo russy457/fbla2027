@@ -27,7 +27,7 @@ const registration = {
   mission: "Lends tools to neighbors.",
   causeAreas: ["community-development"],
   ein: "74-7654321",
-  address: { line1: "9 Elm St", city: "San Antonio", state: "TX", zip: "78210" },
+  address: { line1: "9 Elm St", city: "Example City", state: "TX", zip: "78210" },
   contactEmail: "hello@tools.example.test",
   timeZone: "America/Chicago",
   requestNonce: NONCE
@@ -64,17 +64,17 @@ describe("coordinator.registerOrganization", () => {
 describe("coordinator.updateOrganization", () => {
   it("a name change resets verification and refreshes listings and T4 contact hiding", async () => {
     await seedInstance("inst1", { startMs: BASE_MS + 5 * DAY });
-    await db.collection(COLLECTIONS.opportunities).doc("opp1").set({ orgId: "orgA", orgName: "Alamo Community Pantry", orgVerified: true } as Partial<OpportunityDoc>);
+    await db.collection(COLLECTIONS.opportunities).doc("opp1").set({ orgId: "orgA", orgName: "Common Table Pantry", orgVerified: true } as Partial<OpportunityDoc>);
     await db.collection(COLLECTIONS.signupContacts).doc("inst1_minor").set({
       orgId: "orgA", instanceId: "inst1", uid: "minor", hidden: false, fullName: "Sam Lee", email: "sam@example.test", phone: null,
       isMinor: true, frozen: false, refreshedAt: tsAt(BASE_MS), createdAt: tsAt(BASE_MS), updatedAt: tsAt(BASE_MS)
     } as unknown as SignupContactDoc);
 
-    const result = await call("coordinator", "updateOrganization", { orgId: "orgA", action: "update", patch: { name: "Alamo Pantry" } }, user("coordA"));
+    const result = await call("coordinator", "updateOrganization", { orgId: "orgA", action: "update", patch: { name: "Common Table Pantry" } }, user("coordA"));
     expect(result).toEqual({ orgId: "orgA", verified: false, archived: false, deleted: false });
-    expect(await orgDoc("orgA")).toMatchObject({ name: "Alamo Pantry", verified: false, verifiedBy: null });
-    expect((await db.collection(COLLECTIONS.instances).doc("inst1").get()).data()).toMatchObject({ orgName: "Alamo Pantry", orgVerified: false });
-    expect((await db.collection(COLLECTIONS.opportunities).doc("opp1").get()).data()).toMatchObject({ orgName: "Alamo Pantry", orgVerified: false });
+    expect(await orgDoc("orgA")).toMatchObject({ name: "Common Table Pantry", verified: false, verifiedBy: null });
+    expect((await db.collection(COLLECTIONS.instances).doc("inst1").get()).data()).toMatchObject({ orgName: "Common Table Pantry", orgVerified: false });
+    expect((await db.collection(COLLECTIONS.opportunities).doc("opp1").get()).data()).toMatchObject({ orgName: "Common Table Pantry", orgVerified: false });
     const contact = (await db.collection(COLLECTIONS.signupContacts).doc("inst1_minor").get()).data() as SignupContactDoc;
     expect(contact.hidden).toBe(true);
     expect(contact.fullName).toBeUndefined();

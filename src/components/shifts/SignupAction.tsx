@@ -29,7 +29,7 @@ interface SignupActionProps {
   readonly birthDate: string | null;
   readonly signedIn: boolean;
   readonly nowMs: number;
-  /** Where sign-in returns a signed-out visitor (D5 "opens sign-in, then returns"); Explore by default. */
+  /** Where sign-in returns a signed-out visitor (D5 "opens sign-in, then returns"); opportunity detail by default. */
   readonly returnPath?: string;
 }
 
@@ -94,7 +94,7 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
 
   const onPrimary = (): void => {
     if (state.kind === "signed-out") {
-      navigate(loginPathFor(returnPath ?? `/?shift=${encodeURIComponent(instance.id)}`));
+      navigate(loginPathFor(returnPath ?? `/opportunity/${encodeURIComponent(instance.id)}`));
       return;
     }
     if (state.kind === "available" || state.kind === "join-waitlist") void run("signup", () => api.volunteer.signup({ instanceId: instance.id }));

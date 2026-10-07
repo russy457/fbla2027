@@ -19,7 +19,7 @@ import { mixHexColor, normalizeHexColor } from "../reports/pdf/helpers/colorUtil
 import { CONTENT_WIDTH, PAGE_MARGIN, PAGE_WIDTH, SECTION_GAP } from "../reports/pdf/helpers/layoutConstants";
 
 /** Mirrors APP_NAME in src/lib/brand.ts (functions cannot import the web app). */
-export const LETTER_PRODUCT_NAME = "Pitch In";
+export const LETTER_PRODUCT_NAME = "fbla 2027";
 /** Bump when the layout changes; stored on each letter as rendererVersion. */
 export const LETTER_RENDERER_VERSION = "letter-v1";
 

@@ -1,30 +1,25 @@
 /**
  * ExplorePage.tsx
- * Routes "/" and "/explore" (SPEC#screen-inventory: Explore; Tier 0 list,
- * Tier 1 recommended + filters). Above the fold, in SPEC order:
- *   1. the promotion / upcoming banner (signed in; D13),
- *   2. Recommended (SpotlightCard, one-line why; signed in),
- *   3. search + smart filters (URL state),
- *   4. upcoming shifts grouped by day in each shift's own zone, each row
- *      with the signup button matrix (D5) and Save.
+ * Route "/explore": full-width photography with search and a live schedule
+ * that scrolls over the image. Shifts are grouped by day in each shift's own
+ * zone, with the signup button matrix (D5) and Save in each row.
  * Visitors can browse; "Sign up" sends them to sign in first. Live: seat
  * counts and the viewer's signup status update without a reload.
  * Tier 2 lane C: with a public Mapbox token configured, a List / Map switch
  * shows the filtered shifts' organizations on a map (list stays default).
  */
 import { useMemo, useState, type ReactElement } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ErrorState } from "@/components/ErrorState";
+import { ArrowDown } from "@phosphor-icons/react";
 import { ExploreFilters } from "@/components/explore/ExploreFilters";
 // Tier 2 lane B
 import { FeaturedCollections } from "@/components/collections/FeaturedCollections";
+import { ExploreCauseRibbon } from "@/components/editorial/ExploreCauseRibbon";
 import { RecommendedShifts } from "@/components/explore/RecommendedShifts";
-import { LoadingState } from "@/components/LoadingState";
+import { ScheduleBoard } from "@/components/explore/ScheduleBoard";
 import { PromotionBanner } from "@/components/shifts/PromotionBanner";
-import { ShiftRow } from "@/components/shifts/ShiftRow";
-import { buttonClassName } from "@/components/ui/buttonStyles";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { EXPLORE_SCENE_PHOTOS } from "@/content/pageVisuals";
 import { useActiveOpportunities } from "@/hooks/useInbox";
 import { useNow } from "@/hooks/useNow";
 import { useInstanceDays } from "@/hooks/useInstanceDays";
@@ -97,69 +92,51 @@ const ExplorePage = (): ReactElement => {
   const setFilters = (next: Filters): void => setParams(filtersToParams(next), { replace: true });
 
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader title="Explore">Upcoming volunteer shifts from local nonprofits. Times show in each organization's time zone.</PageHeader>
-
-      {uid !== null ? <PromotionBanner uid={uid} signups={signups.data ?? []} nowMs={nowMs} /> : null}
-      {me !== null && rows.length > 0 ? <RecommendedShifts picks={picks} hasInterests={me.interests.length > 0} /> : null}
-      {/* Tier 2 lane B: published curated collections */}
-      <FeaturedCollections />
-
-      {instances.error ? (
-        <ErrorState title="We couldn't load shifts" description="Check your connection, then reload the page." />
-      ) : instances.isLoading ? (
-        <LoadingState label="Loading shifts" />
-      ) : rows.length === 0 ? (
-        <section className="flex max-w-xl flex-col items-start gap-3 border-t border-border pt-6">
-          <h2 className="text-xl font-semibold text-fg">No upcoming shifts right now.</h2>
-          <p className="text-fg-muted">New shifts appear here as organizations post them. Check back soon, or read how signing up works.</p>
-          <Link to="/help/find-and-sign-up" className={buttonClassName("secondary")}>
-            How signing up works
-          </Link>
-        </section>
-      ) : (
-        <>
-          <ExploreFilters
-            filters={filters}
-            onChange={setFilters}
-            resultCount={visibleCount}
-            signedIn={user !== null}
-            canUseDistance={me?.homeGeohash != null}
-            orgName={orgName}
-          />
-          {MAPBOX_TOKEN !== null ? <ExploreViewToggle view={view} onChange={setView} /> : null}
-          {isMapView && MAPBOX_TOKEN !== null ? (
-            <ExploreMapView accessToken={MAPBOX_TOKEN} points={mapPoints} homeArea={homeArea} isLoading={orgs.isLoading} />
-          ) : days.length === 0 ? (
-            <section className="flex max-w-xl flex-col items-start gap-3 border-t border-border pt-6">
-              <h2 className="text-xl font-semibold text-fg">No shifts match these filters.</h2>
-              <button type="button" onClick={() => setFilters(parseFilters(new URLSearchParams()))} className={buttonClassName("secondary")}>
-                Clear filters
-              </button>
-            </section>
-          ) : (
-            days.map((day) => (
-              <section key={day.key} aria-labelledby={`day-${day.key}`} className="flex flex-col">
-                <h2 id={`day-${day.key}`} className="border-b border-border-strong pb-2 text-sm font-semibold tracking-wide text-fg-muted">
-                  {day.label}
-                </h2>
-                <ul className="divide-y divide-border">
-                  {day.instances.map((instance) => (
-                    <ShiftRow
-                      key={instance.id}
-                      instance={instance}
-                      signup={signupByInstance.get(instance.id) ?? null}
-                      birthDate={me?.birthDate ?? null}
-                      signedIn={user !== null}
-                      nowMs={nowMs}
-                    />
-                  ))}
-                </ul>
-              </section>
-            ))
-          )}
-        </>
-      )}
+    <div className="explore-page">
+      <section className="explore-scene" aria-labelledby="explore-title">
+        <div className="explore-scene__media" aria-hidden="true">
+          <picture>
+            <source media="(max-width: 58rem)" srcSet={EXPLORE_SCENE_PHOTOS.mobile.src} />
+            <img src={EXPLORE_SCENE_PHOTOS.desktop.src} alt="" fetchPriority="high" decoding="async" />
+          </picture>
+        </div>
+        <div className="explore-scene__flow">
+          <div className="explore-scene__intro">
+            <p className="explore-scene__eyebrow">Volunteer schedule</p>
+            <h1 id="explore-title" tabIndex={-1}>Find a time that <em>fits your life.</em></h1>
+            <p>Choose a day, find a shift, and save your spot.</p>
+            <a href="#schedule" className="explore-scene__jump">Browse shifts <ArrowDown aria-hidden="true" size={18} /></a>
+          </div>
+          <div id="schedule" className="explore-schedule-wrap">
+            {uid !== null ? <PromotionBanner uid={uid} signups={signups.data ?? []} nowMs={nowMs} /> : null}
+            {!instances.error && !instances.isLoading && rows.length > 0 ? (
+              <div className="explore-controls">
+                <ExploreFilters filters={filters} onChange={setFilters} resultCount={visibleCount} signedIn={user !== null} canUseDistance={me?.homeGeohash != null} orgName={orgName} />
+                {MAPBOX_TOKEN !== null ? <ExploreViewToggle view={view} onChange={setView} /> : null}
+              </div>
+            ) : null}
+            <ScheduleBoard
+              days={days}
+              unfilteredCount={rows.length}
+              signups={signupByInstance}
+              birthDate={me?.birthDate ?? null}
+              signedIn={user !== null}
+              nowMs={nowMs}
+              isLoading={instances.isLoading}
+              hasError={Boolean(instances.error)}
+              onClearFilters={() => setFilters(parseFilters(new URLSearchParams()))}
+              mapContent={isMapView && MAPBOX_TOKEN !== null ? <ExploreMapView accessToken={MAPBOX_TOKEN} points={mapPoints} homeArea={homeArea} isLoading={orgs.isLoading} /> : undefined}
+            />
+          </div>
+        </div>
+      </section>
+      <div className="explore-after">
+        <div className="explore-after__inner">
+          <ExploreCauseRibbon />
+          {me !== null && rows.length > 0 ? <RecommendedShifts picks={picks} hasInterests={me.interests.length > 0} /> : null}
+          <FeaturedCollections />
+        </div>
+      </div>
     </div>
   );
 };

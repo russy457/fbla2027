@@ -36,6 +36,19 @@ describe("client env", () => {
     const result = readClientEnv(EXAMPLE_DEFAULTS);
     expect(result.ok && result.env.VITE_FIREBASE_PROJECT_ID).toBe("demo-fbla2027");
   });
+
+  it("allows cloud Auth and Firestore with only the action and file emulators", () => {
+    const env = parseClientEnv({
+      ...EXAMPLE_DEFAULTS,
+      VITE_FIREBASE_PROJECT_ID: "fbla2027-ethanteng",
+      VITE_USE_EMULATORS: "false",
+      VITE_FUNCTIONS_EMULATOR: "true",
+      VITE_STORAGE_EMULATOR: "true"
+    });
+    expect(env.VITE_USE_EMULATORS).toBe(false);
+    expect(env.VITE_FUNCTIONS_EMULATOR).toBe(true);
+    expect(env.VITE_STORAGE_EMULATOR).toBe(true);
+  });
 });
 
 describe("demo mode flag", () => {

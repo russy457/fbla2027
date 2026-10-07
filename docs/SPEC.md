@@ -755,7 +755,7 @@ updateOrganization (owner only):
 
 1. Age from birthDate at `clock.now()`. Under 13: delete the Auth user and any docs and files under the uid, then `AGE_UNDER_13`. Age runs before Turnstile so a signed-in under-13 user is always deleted, even though the stop screen shows no Turnstile widget.
 2. If `TURNSTILE_ENABLED`, POST the token to Cloudflare siteverify with `TURNSTILE_SECRET`, then in a transaction create `turnstileTokens/{sha256(token)}` with a 10-minute expiry; an existing record means replay. Missing, invalid, or replayed: `TURNSTILE_FAILED`. When disabled (emulator), Functions log one warning line at startup.
-3. Validate profile fields: interests from CauseArea, skills <= 20 items of <= 40 chars, availability flags, phone E.164, zip 5 digits mapped to a geohash-5 centroid from the bundled San Antonio ZIP table (or null).
+3. Validate profile fields: interests from CauseArea, skills <= 20 items of <= 40 chars, availability flags, phone E.164, zip 5 digits mapped to a geohash-5 centroid from the bundled demo ZIP lookup (or null).
 4. Write the private profile (`profileComplete true`) and `users/{uid}` (displayName = first name + last initial).
 
 ### 5.10 Kiosk tokens and codes (G15, G21)
@@ -971,7 +971,7 @@ PDF (pdfkit, embedded fonts, server-side QR, one page, Letter size):
 | Period: Aug 1, 2026 to Oct 15, 2026                             |
 +-----------------------------------------------------------------+
 | Organization                         Verified   Hours           |
-| Alamo Community Pantry               Yes        12.25           |
+| Common Table Pantry               Yes        12.25           |
 | Westside Literacy Project            Yes         6.00           |
 |                                       Total     18.25           |
 | (Hours from unverified organizations are not included.)         |
@@ -1064,15 +1064,15 @@ Ranking (Tier 2): candidates are the org's past volunteers (completed signups) p
 <a id="screens"></a>
 ## 9. Screens and UX
 
-Screen classes: volunteer, coordinator, kiosk, and admin screens are OPERATE (app UI, no marketing sections); `/verify` and Help are READ; the signed-out home is PERSUADE with one section only.
+Screen classes: volunteer, coordinator, kiosk, and admin screens are OPERATE; `/verify` and Help are READ. The landing page `/` introduces the service with photographic cause paths. Explore `/explore` is the separate scheduling screen.
 
 <a id="screen-nav"></a>
 ### 9.1 Navigation shell (D2)
 
 | Role | Shell | Routes |
 |---|---|---|
-| Visitor | Top bar: Explore, Help, Verify, Sign in | `/`, `/explore`, `/opportunity/:instanceId`, `/organizations/:orgId`, `/help`, `/help/:slug`, `/verify`, `/verify/:code`, `/login`, `/privacy`, `/terms`, `/accessibility`, 404 |
-| Volunteer | Mobile: bottom tab bar Explore, My Shifts, Impact, Help. Desktop (>= 1024 px): top nav with the same items. Header: notification badge, avatar menu (Profile, Saved, Organizations, Sign out) | adds `/onboarding`, `/me/shifts`, `/checkin`, `/impact`, `/impact/letters/new`, `/impact/report`, `/me/notifications`, `/me/profile`, `/me/saved`, `/join` |
+| Visitor | Top bar: Explore, My Shifts, Impact, Help, plus account access | `/`, `/explore`, `/opportunity/:instanceId`, `/organizations/:orgId`, `/help`, `/help/:slug`, `/verify`, `/verify/:code`, `/login`, `/privacy`, `/terms`, `/accessibility`, 404 |
+| Volunteer | Top nav: Explore, My Shifts, Impact, Help. After scrolling, a centered icon pill keeps those routes. Header account menu: Profile, Saved, Organizations, Sign out | adds `/onboarding`, `/me/shifts`, `/checkin`, `/impact`, `/impact/letters/new`, `/impact/report`, `/me/notifications`, `/me/profile`, `/me/saved`, `/join` |
 | Coordinator | Under `/org/:orgId/*`; org switcher shown only when the user has at least one membership; side nav on desktop, top tabs under 768 px | `/org/register`, `/org/:orgId/dashboard`, `/org/:orgId/shifts`, `/org/:orgId/shifts/new`, `/org/:orgId/shifts/:instanceId`, `/org/:orgId/reports`, `/org/:orgId/settings` |
 | Kiosk | No shell, locked | `/org/:orgId/kiosk/:instanceId` |
 | Admin | `/admin`, gated by the admin claim | `/admin` |
@@ -1084,8 +1084,8 @@ Users without a complete profile are routed to `/onboarding` before any voluntee
 
 | Screen | Job | Above the fold, in order | Primary action | Secondary | Tier |
 |---|---|---|---|---|---|
-| Home `/` (signed out) | Say what this is | One-line pitch; Find shifts; "Verify a letter" link | Find shifts | Sign in | 1 |
-| Explore `/explore` | Find a shift worth doing | Promotion/upcoming banner; Recommended (SpotlightCard, one-line why); search + filters; organizations | Open the top recommended shift | Clear filters, save, map (Tier 2) | 0 (list), 1 (recommended, filters) |
+| Landing `/` | Introduce volunteering | Photographic opening; cause links; full width photo with words in open space | Explore shifts | Nonprofit registration | 1 |
+| Explore `/explore` | Find a shift that fits a day | Full width photographic opening; live search and filters; dark schedule with day choices and shift rows; cause links and recommendations below | Sign up for a shift | Clear filters, save, map (Tier 2) | 0 (list), 1 (recommended, filters) |
 | Opportunity `/opportunity/:instanceId` | Decide and sign up | Date, time with zone, place, seats left; signup button ([#signup-matrix](#signup-matrix)); description; organization with Unverified chip if needed | Signup button | Other dates, Add to calendar, save | 0 |
 | Organization `/organizations/:orgId` | Trust the org | Name + verification chip; mission; upcoming shifts | Open next shift | Reviews (Tier 2), save | 1 |
 | My Shifts `/me/shifts` | Get to the next shift and check in | Next shift with Check in / Check out entry and "Check-in opens H:MM"; reminders; upcoming list; past list | Check in (when open) | Cancel, calendar, Request review on a no-show | 0 |
@@ -1388,11 +1388,11 @@ Each check has a unit test.
 | Role | Email | Name | Notes |
 |---|---|---|---|
 | Admin | `admin@demo.fbla2027.test` | Ada Admin | admin claim set by the seed |
-| Owner / coordinator | `coordinator@demo.fbla2027.test` | Olivia Ortiz | owner of Alamo Community Pantry (verified) |
+| Owner / coordinator | `coordinator@demo.fbla2027.test` | Olivia Ortiz | owner of Common Table Pantry (verified) |
 | Adult volunteer | `volunteer@demo.fbla2027.test` | Jordan Rivera (19) | history: 22.5 approved hours, so the demo check-out crosses the 25-hour milestone; reliability from 8 past shifts |
 | Minor volunteer | `minor@demo.fbla2027.test` | Sam Lee (15) | shows minor rules (hidden contact at the unverified org, blocked unverified signup) |
 
-Local password is a fixed value printed by the seed; deployed accounts use `DEMO_ACCOUNT_PASSWORD`. Seed data: three San Antonio nonprofits (two verified, one unverified), opportunities across cause areas, one instance starting in `--shift-starts-in` minutes with capacity 3 and one seat left, a full instance with a waitlist, past finalized instances with logs and one valid letter. All seeded accounts have `emailVerified` and complete profiles. The DEMO_MODE login screen shows "Sign in as..." with the four roles. `admin.resetDemoData` (admin + DEMO_MODE) runs the same seed module server-side for the deployed site.
+Local password is a fixed value printed by the seed; deployed accounts use `DEMO_ACCOUNT_PASSWORD`. Seed data: three fictional nonprofits (two verified, one unverified), opportunities across cause areas, one instance starting in `--shift-starts-in` minutes with capacity 3 and one seat left, a full instance with a waitlist, past finalized instances with logs and one valid letter. All seeded accounts have `emailVerified` and complete profiles. The DEMO_MODE login screen shows "Sign in as..." with the four roles. `admin.resetDemoData` (admin + DEMO_MODE) runs the same seed module server-side for the deployed site.
 
 ### 10.8 Workspaces and Functions build (X6, G3)
 
@@ -1929,7 +1929,7 @@ Each item names the competing wording and the final behavior. Later obligations 
 42. **Assistant limits and provider.** SPEC 8.4 names Anthropic and per-user AI call limits only. Final: `askAssistant` also has a request rate limit (bucket `assistant`, 30 per 10 minutes, fallback answers included), and `AI_PROVIDER` may select an optional OpenRouter provider; Anthropic stays the default.
 43. **"For organizations" link.** The header link to `/org/register` overflowed narrow screens at 150% text. Final: shown in the header from the md breakpoint up; below md it lives in the footer.
 44. **Demo shift length.** SPEC 10.7 fixes the demo shift's start and seats but not its length. Final: 3 hours, so a full check-in to check-out takes Jordan from 22.5 past the 25-hour milestone.
-45. **Profile ZIP areas.** SPEC 5.9 names a bundled San Antonio ZIP table without its contents. Final: `shared/src/zipAreas.ts` holds approximate ZIP centroids with their geohash-5; unknown ZIPs store `homeGeohash: null`. `updateProfile` returns `{displayName, homeGeohash}` so the page can say when distance filters stay off; seeded orgs sit at their ZIP centroid.
+45. **Profile ZIP areas.** SPEC 5.9 names a bundled demo ZIP lookup without its contents. Final: `shared/src/zipAreas.ts` holds approximate ZIP centroids with their geohash-5; unknown ZIPs store `homeGeohash: null`. `updateProfile` returns `{displayName, homeGeohash}` so the page can say when distance filters stay off; seeded orgs sit at their ZIP centroid. The lookup data can be replaced independently of the profile and Explore screens.
 46. **Alert ids and coverage.** Final: ids are `{type}_{key}` with the signup, log, or letter id as key (`shift-changed` adds the instance `sequence`, so each time change is its own alert), written in the same transaction or batch as the change. SPEC 8.3 has no type for org verification or invites, so those ops send none.
 47. **Invite rate limits.** SPEC 5.2 gives createInvite and redeemInvite no limit, which lets a signed-in user guess 50-bit codes at speed and an owner mint codes in bulk. Final: rate limits through defineCallable like check-in: `redeemInvite` 10 attempts per user per 10 minutes (bucket `redeemInvite`, wrong codes included), `createInvite` 20 per user per hour (bucket `createInvite`); excess gives `RATE_LIMITED` with `retryAfterSec`.
 48. **PDF download links.** SPEC 3.22 lets the owner read letter and report PDFs through Storage rules, and the client used `getDownloadURL`, whose token is a permanent bearer link. Final: `volunteer.getPdfUrl` (path `letters/{uid}/{letterId}.pdf` or `reports/{uid}/{reportId}.pdf` only, uid == caller, document ready; org reports refused) and `coordinator.getOrgReportUrl` (coordinatorOfOrg plus report owner == caller) return a V4 signed URL valid 5 minutes, measured on the real clock. On the emulator, which cannot sign or verify signed URLs, the same checks run and the link is the Storage emulator download path. The Functions service account needs Service Account Token Creator on itself to sign. Storage rules stay owner-read.

@@ -67,6 +67,10 @@ const createServices = (env: ClientEnv): FirebaseServices => {
     connectFirestoreEmulator(db, host, EMULATOR_PORTS.firestore);
     connectFunctionsEmulator(functions, host, EMULATOR_PORTS.functions);
     connectStorageEmulator(storage, host, EMULATOR_PORTS.storage);
+  } else {
+    const host = getEmulatorHost();
+    if (env.VITE_FUNCTIONS_EMULATOR) connectFunctionsEmulator(functions, host, EMULATOR_PORTS.functions);
+    if (env.VITE_STORAGE_EMULATOR) connectStorageEmulator(storage, host, EMULATOR_PORTS.storage);
   }
 
   return Object.freeze({ app, auth, db, functions, storage, usingEmulators: env.VITE_USE_EMULATORS });

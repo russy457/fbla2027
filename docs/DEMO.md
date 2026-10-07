@@ -1,29 +1,43 @@
 # Demo Runbook
 
-How the team sets up, runs, and recovers the live demo for the pre-judged round. The deployed website is the only demo target (PORT_PLAN gate decision): the coordinator laptop, the kiosk tablet, and the volunteer phone all open the same HTTPS site. There is no LAN, hotspot, or emulator fallback on competition day; local emulators are for development and rehearsal only.
+How the team sets up, runs, and recovers the demo. The current no-cost plan uses the Firebase Emulator Suite on a team laptop, so the complete workflow can run without a Blaze upgrade or venue internet. A browsing preview is deployed to Firebase Hosting on Spark; the full Functions and Storage deployment steps below are conditional on upgrading to Blaze. Before the event, rehearse with separate browser profiles for coordinator, kiosk, and volunteer roles on the laptop and confirm the presentation setup meets current event rules.
 
 | | |
 |---|---|
 | Source of truth | `docs/SPEC.md` (10.6 env, 10.7 demo accounts, 10.12 App Check, 10.14 docs) |
 | Rehearsal owner | (name) |
 | Explainers owner | (name) |
-| Status | First deploy not done yet. Nothing in this file has been run against a real project. Fill the rehearsal log as each step is tried. |
+| Status | Project, web app, Firestore database, rules, and indexes created on 2026-10-07. The project stays on Spark. The Hosting browsing preview is live; the local emulator demo runs full workflows. See `docs/FIREBASE_STATUS.md`. |
 
 Contents: [1. First deploy](#1-first-deploy) · [2. Competition day](#2-competition-day) · [3. Demo script](#3-demo-script) · [4. Reset and recovery](#4-reset-and-recovery) · [5. Explainers](#5-explainers) · [6. Questions judges ask](#6-questions-judges-ask) · [7. Rehearsal log](#7-rehearsal-log)
 
 ---
 
+## Current Spark demo
+
+Run `npm run demo` from a machine with Node 22, Java 21, installed dependencies, and the local emulator files cached. It starts Auth, Firestore, Functions, and Storage emulators, seeds fictional data, and serves the app at `http://localhost:5173`. The local Functions build skips the deploy lockfile, so no package download is needed during a rehearsal. The emulator project id starts with `demo-` and cannot reach the real Firebase project. The coordinator, kiosk, and volunteer roles can use separate browser profiles or contexts on that same machine. Rehearse the full script below on this setup and keep the machine's power and local files ready before entering the presentation area.
+
+This local setup covers the application's core workflows at no Firebase cost. The AI help assistant uses its deterministic article fallback unless a server-side provider key is configured. The Firebase Hosting site on Spark cannot host the backend operations because the deployed Cloud Functions require Blaze. The downloaded competition guidelines say Internet access is provided but may be unreliable, so the local setup is also the connection-loss backup.
+
+### Cloud Firestore presentation on Spark
+
+The cloud project now has Email/Password Auth and 140 fictional seed documents. Run `npm run demo:cloud` on the presentation laptop to point the browser at the real `fbla2027-ethanteng` Auth and Firestore services while keeping trusted callable actions and file storage local. This command must stay open. Sign in manually using a demo email and its corresponding private password in `.cloud-demo-accounts.local`. The cloud Firebase console then shows live signups; a test signup and shift seat-count update have been verified. Run only one of `npm run demo:cloud` and `npm run demo` at once.
+
+The cloud mode does not run Firestore-triggered or scheduled Functions, and it cannot serve the complete app from Firebase Hosting. The local demo remains the full workflow and the offline fallback. The cloud seed is a one-time operation: `npm run seed:cloud -- --yes` refuses to overwrite a nonempty Firestore database or Auth user list. Never share or commit `.cloud-demo-accounts.local`.
+
+---
+
 ## 1. First deploy
 
-Do these once, with the team adult who owns billing, on a new Firebase project. Never reuse the old Trove project. Every command below names the project explicitly; the repo has no `.firebaserc` on purpose, so nothing deploys by accident.
+This section is for a future full deployment only if the team explicitly chooses Blaze. The current project remains on Spark. Every command below names the project explicitly; the repo has no `.firebaserc` on purpose, so nothing deploys by accident.
 
 ### 1.1 Project setup (Firebase console)
 
-1. Create a project, for example `pitchin-fbla-2027`. Upgrade to **Blaze** (Cloud Functions v2 needs it) and set a budget alert at $5 (PORT_PLAN AI limits).
-2. **Authentication**: enable Email/Password.
-3. **Firestore**: create the default database in `us-central1` (the Functions region).
+1. The separate project `fbla2027-ethanteng` already exists with display name **fbla 2027**. A full hosted version needs **Blaze** for Cloud Functions v2 and Storage. Link billing only after an explicit team decision, then set a budget alert at $5 (PORT_PLAN AI limits).
+2. **Authentication**: enable Email/Password. This part is available on Spark and does not need billing.
+3. **Firestore**: the default Native database in `us-central1`, its rules, and indexes are already deployed.
 4. **Storage**: create the default bucket.
-5. **Hosting**: add a site. Note its URL (`https://<project>.web.app`); it is `APP_BASE_URL` below.
+5. **Hosting**: the default site already exists at `https://fbla2027-ethanteng.web.app`; it is `APP_BASE_URL` below.
 6. **App Check**: register the web app with reCAPTCHA Enterprise and note the site key. Register debug tokens only for development browsers; the three demo devices use the real provider on the deployed site (SPEC 10.12).
 7. **Cloudflare Turnstile**: create a widget for the hosting domain; note the site key and secret.
 8. Optional **Mapbox** map: create a public `pk.` token whose URL restrictions list only the hosting domains. Never create or paste an `sk.` token anywhere in this repo. Leave it out to hide the map toggle.
@@ -118,22 +132,21 @@ In Cloud Monitoring, add an alert on Cloud Functions error count for the `volunt
 
 | When | Step | Who |
 |---|---|---|
-| Day before | Set `KIOSK_MIN_INSTANCES=1` in `functions-dist/.env.<projectId>` and redeploy functions (keeps the kiosk warm; costs a little) | (name) |
-| Day before | Charge all three devices; install nothing (it is a website) | (name) |
-| 30 min before | Health check (1.5 step 1); sign in as admin and press **Reset demo data** so the shift starts in 10 minutes | (name) |
-| 15 min before | Open the three devices (below) and leave them signed in | (name) |
-| After the round | Set `KIOSK_MIN_INSTANCES` back to `0` and redeploy functions | (name) |
+| Day before | Run `npm run demo` once with Wi-Fi off to confirm Node, Java, dependencies, and emulator files are cached. Rehearse the complete flow. | (name) |
+| 30 min before | Start `npm run demo`, then run `npm run demo:windows` in a second terminal. The launcher opens four isolated Chrome sessions. | (name) |
+| 15 min before | Confirm the coordinator roster, volunteer Explore, admin controls, and kiosk setup all load. Reset demo data if the shift time needs refreshing. | (name) |
+| After the round | Close the demo windows and stop `npm run demo` with Ctrl+C. | (name) |
 
-Devices (FBLA allows no more than three personal devices):
+Role windows on one laptop (FBLA allows no more than three personal devices):
 
-| Device | Window | Signed in as | Opens |
-|---|---|---|---|
-| Laptop | normal window | Olivia Ortiz, `coordinator@demo.fbla2027.test` | `/org/alamo-community-pantry/dashboard` |
-| Laptop | private window (separate sign-in) | Ada Admin, `admin@demo.fbla2027.test` | `/admin` (demo controls: Advance clock 15 min, Reset clock, Run due jobs) |
-| Tablet | full screen | starts as the coordinator, then becomes the kiosk | `/org/alamo-community-pantry/dashboard`, then Start kiosk |
-| Phone | browser | Jordan Rivera, `volunteer@demo.fbla2027.test` | `/` (Explore) |
+| Role | Browser context | Opens |
+|---|---|---|
+| Coordinator | Isolated coordinator session | `/org/common-table-pantry/dashboard` |
+| Kiosk setup | Second isolated coordinator session | `/org/common-table-pantry/dashboard`, then Start kiosk |
+| Volunteer | Isolated 390px-wide volunteer session | `/explore` |
+| Admin | Isolated admin session | `/admin` (demo controls and clock) |
 
-All passwords are the `DEMO_ACCOUNT_PASSWORD` secret. With `VITE_DEMO_MODE=true` the login page also shows "Sign in as..." buttons for the four roles.
+`npm run demo:windows` signs in through the emulator-only role buttons. It stores no passwords. The four windows run on one physical device; the "Phone" and "Tablet" labels in the script below refer to volunteer and kiosk views. Keep all windows open so the live updates are visible when switching between them.
 
 ---
 
@@ -166,7 +179,7 @@ The demo clock is a server-side offset (`demoClock/global`, `shared/src/clock.ts
 ## 4. Reset and recovery
 
 - **Between rehearsals**: admin window, `/admin`, **Reset demo data**. It reseeds everything (demo shift starts in 10 minutes) and zeroes the demo clock.
-- **Local development** (emulators, never on competition day): `npm run demo`, then `npm run demo:reset` in a second terminal.
+- **Local demo**: while `npm run demo` is running, use the admin window's **Reset demo data** or run `npm run demo:reset` in a second terminal.
 
 | Symptom | Likely cause | Check | Fix |
 |---|---|---|---|
@@ -179,7 +192,7 @@ The demo clock is a server-side offset (`demoClock/global`, `shared/src/clock.ts
 | Help assistant shows only article links | AI off, over limit, or key missing (this is the designed fallback) | `ai` endpoint logs | Set `AI_ENABLED=true` and the key, or present the fallback |
 | Admin page says the account is not an admin | Claim not on the ID token yet | Sign out and in again | Re-run the claim bootstrap (1.4, `scripts/set-admin.mjs`) |
 
-Fallback answers if something breaks mid-demo: say what would happen, show the relevant e2e test (`e2e/tier0.spec.ts` runs the exact same loop on three browser contexts), and continue from the next step. Never switch to a local or LAN copy.
+If something breaks mid-demo, state the error, try the listed recovery once, and continue from the next step. The matching automated flow is in `e2e/tier0.spec.ts` for reference.
 
 ---
 

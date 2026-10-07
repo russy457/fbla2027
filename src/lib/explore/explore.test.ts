@@ -11,7 +11,7 @@ import { EMPTY_FILTERS, type FilterContext, activeFilterCount, applyFilters, fil
 import { decodeGeohash } from "./geohash";
 import { recommendShifts, whyText } from "./recommendations";
 
-const SA = { lat: 29.4241, lng: -98.4936 }; // San Antonio
+const DEMO_POINT = { lat: 29.4241, lng: -98.4936 };
 const AUSTIN = { lat: 30.2672, lng: -97.7431 };
 
 const opportunity = (overrides: Partial<NonNullable<ExploreRow["opportunity"]>> = {}): NonNullable<ExploreRow["opportunity"]> => ({
@@ -19,7 +19,7 @@ const opportunity = (overrides: Partial<NonNullable<ExploreRow["opportunity"]>> 
   type: "one-time",
   description: "Sort cans and pack boxes",
   skills: ["Lifting"],
-  location: { address: { line1: "1 Main St", city: "San Antonio", state: "TX", zip: "78205" }, geo: { ...SA, geohash: encodeGeohash(SA.lat, SA.lng, 7) } },
+  location: { address: { line1: "1 Main St", city: "Example City", state: "TX", zip: "78205" }, geo: { ...DEMO_POINT, geohash: encodeGeohash(DEMO_POINT.lat, DEMO_POINT.lng, 7) } },
   ...overrides
 });
 
@@ -28,7 +28,7 @@ const row = (id: string, instance: Partial<ExploreRow["instance"]> = {}, opp: Ex
   opportunity: opp
 });
 
-const context: FilterContext = { birthDate: "2007-01-01", homeGeohash: encodeGeohash(SA.lat, SA.lng, 5) };
+const context: FilterContext = { birthDate: "2007-01-01", homeGeohash: encodeGeohash(DEMO_POINT.lat, DEMO_POINT.lng, 5) };
 
 describe("filters in the URL", () => {
   it("round-trips every filter and drops unset ones", () => {
@@ -89,9 +89,9 @@ describe("applyFilters", () => {
 
 describe("decodeGeohash", () => {
   it("returns the center of the cell", () => {
-    const point = decodeGeohash(encodeGeohash(SA.lat, SA.lng, 7));
-    expect(point.lat).toBeCloseTo(SA.lat, 2);
-    expect(point.lng).toBeCloseTo(SA.lng, 2);
+    const point = decodeGeohash(encodeGeohash(DEMO_POINT.lat, DEMO_POINT.lng, 7));
+    expect(point.lat).toBeCloseTo(DEMO_POINT.lat, 2);
+    expect(point.lng).toBeCloseTo(DEMO_POINT.lng, 2);
     expect(decodeGeohash("9V1!x")).toEqual(decodeGeohash("9v1"));
   });
 });

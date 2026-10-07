@@ -403,7 +403,7 @@ Domain check: `bm25`, `geo`, `invertedIndex`, `levenshtein`, `searchEngine`, `to
 | `seed/lib/chainFilter.ts` | DROP | — | Chain-business filter for OSM ingest. |
 | `seed/lib/chainFilter.test.ts` | DROP | — | Module dropped. |
 | `seed/lib/clean.ts` | REWRITE | `seed/demo/clean.ts` | Same "delete everything tagged with seedSource" idea for `demo:reset` and `resetDemoData`. |
-| `seed/lib/content.ts` | REWRITE | `shared/demo/dataset.ts` | Deterministic demo content (San Antonio nonprofits, shifts, signups, hours, schemaVersion per X18). In `shared/` so `resetDemoData` can reuse it. |
+| `seed/lib/content.ts` | REWRITE | `shared/demo/dataset.ts` | Deterministic demo content (fictional nonprofits, shifts, signups, hours, schemaVersion per X18). In `shared/` so `resetDemoData` can reuse it. |
 | `seed/lib/content.test.ts` | REWRITE | `shared/demo/dataset.test.ts` | Same determinism and shape checks. |
 | `seed/lib/firebase.ts` | REWRITE | `seed/demo/firebase.ts` | Admin SDK pointed at emulators under `demo-fbla2027`; no service account. |
 | `seed/lib/ingest.ts` | DROP | — | OSM ingest. |

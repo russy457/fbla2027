@@ -18,7 +18,7 @@ const fillValid = (): void => {
   fireEvent.click(screen.getByRole("checkbox", { name: "Community building" }));
   fill("EIN", "74-1234567");
   fill("Street address", "1 Main St");
-  fill("City", "San Antonio");
+  fill("City", "Example City");
   fill("ZIP", "78205");
   fill("Contact email", "hello@tools.example.org");
 };

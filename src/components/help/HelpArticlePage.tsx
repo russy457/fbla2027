@@ -9,6 +9,7 @@ import type { ReactElement } from "react";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { buttonClassName } from "@/components/ui/buttonStyles";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { HelpLibrary } from "@/lib/help";
 import { ArticleView } from "./ArticleView";
 
@@ -31,9 +32,7 @@ export const HelpArticlePage = ({ library, slug }: HelpArticlePageProps): ReactE
     return (
       <section aria-labelledby="help-missing-title" className="flex max-w-2xl flex-col gap-4">
         <BackToTopics />
-        <h1 id="help-missing-title" className="text-3xl font-semibold tracking-tight text-fg">
-          We couldn't find that article
-        </h1>
+        <PageHeader id="help-missing-title" title="We couldn't find that article" />
         <p className="text-lg text-fg-muted">The link may be old. Search the Help Center or browse its topics.</p>
       </section>
     );

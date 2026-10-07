@@ -22,7 +22,7 @@ const ISSUED_MS = Date.UTC(2026, 9, 17, 17, 0, 0);
 const verification = (overrides: Partial<LetterVerification> = {}): LetterVerification => ({
   id: CODE,
   displayName: "Jordan R.",
-  orgNames: ["Alamo Community Pantry"],
+  orgNames: ["Common Table Pantry"],
   totalMinutes: 135,
   from: "2026-08-01",
   to: "2026-10-17",
@@ -59,7 +59,7 @@ describe("VerifyPage", () => {
     expect(screen.getByText("Jordan R.")).toBeInTheDocument();
     expect(screen.getByText("2.25 hours")).toBeInTheDocument();
     expect(screen.getByText("Aug 1, 2026 to Oct 17, 2026")).toBeInTheDocument();
-    expect(screen.getByText("Alamo Community Pantry")).toBeInTheDocument();
+    expect(screen.getByText("Common Table Pantry")).toBeInTheDocument();
     expect(screen.getByText("Oct 17, 2026")).toBeInTheDocument();
     expect(screen.getByText("ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "What this means" })).toBeInTheDocument();

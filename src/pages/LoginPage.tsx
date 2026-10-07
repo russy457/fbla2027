@@ -34,9 +34,10 @@ const LoginPage = (): ReactElement => {
   const goNext = (): void => navigate(next, { replace: true });
 
   return (
-    <div className="grid max-w-3xl grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-      <div className="flex flex-col gap-6">
-        <PageHeader title="Sign in">Sign in to sign up for shifts, check in, and get your hours verified.</PageHeader>
+    <div className="flex max-w-5xl flex-col gap-10">
+      <PageHeader title="Sign in">Sign in to sign up for shifts, check in, and get your hours verified.</PageHeader>
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="flex max-w-md flex-col gap-6">
         <SignInForm onSignedIn={goNext} />
         <p className="text-sm text-fg-muted">
           New here?{" "}
@@ -46,6 +47,7 @@ const LoginPage = (): ReactElement => {
         </p>
       </div>
       {showDemoSwitcher() ? <DemoRoleSwitcher onSignedIn={goNext} /> : null}
+      </div>
     </div>
   );
 };

@@ -96,10 +96,10 @@ describe("rankCandidates", () => {
 
 describe("shiftInviteNotification", () => {
   it("names the org and shift and links to the shift", () => {
-    const content = shiftInviteNotification({ instanceId: "s1_20261017", title: "Saturday sort", orgName: "Alamo Community Pantry", startMs: SAT_9AM, timeZone: "America/Chicago" });
+    const content = shiftInviteNotification({ instanceId: "s1_20261017", title: "Saturday sort", orgName: "Common Table Pantry", startMs: SAT_9AM, timeZone: "America/Chicago" });
     expect(content).toMatchObject({
       type: "shift-invite",
-      title: "Alamo Community Pantry invited you to Saturday sort",
+      title: "Common Table Pantry invited you to Saturday sort",
       link: "/opportunity/s1_20261017",
       data: { instanceId: "s1_20261017" }
     });

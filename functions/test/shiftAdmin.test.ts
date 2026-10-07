@@ -22,7 +22,7 @@ const fields = {
   type: "one-time",
   skills: ["gardening"],
   minAge: 14,
-  location: { address: { line1: "1 Main St", city: "San Antonio", state: "TX", zip: "78205" } }
+  location: { address: { line1: "1 Main St", city: "Example City", state: "TX", zip: "78205" } }
 };
 
 const iso = (ms: number) => new Date(ms).toISOString();
@@ -43,7 +43,7 @@ describe("coordinator.upsertOpportunity", () => {
     expect(created).toBe(true);
     expect(await createOpportunity()).toEqual({ opportunityId, created: false });
     const opportunity = (await db.collection(COLLECTIONS.opportunities).doc(opportunityId).get()).data() as OpportunityDoc;
-    expect(opportunity).toMatchObject({ orgId: "orgA", orgName: "Alamo Community Pantry", orgVerified: true, status: "active", createdBy: "coordA" });
+    expect(opportunity).toMatchObject({ orgId: "orgA", orgName: "Common Table Pantry", orgVerified: true, status: "active", createdBy: "coordA" });
     expect(opportunity.location?.geo).toBeNull();
 
     await seedInstance("inst1", { startMs: BASE_MS + DAY });

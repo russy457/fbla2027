@@ -3,11 +3,12 @@
  * demo.mjs
  * One command to see the app running locally (docs/SPEC.md#demo):
  *   1. runs npm run doctor and stops on a blocking failure (Node, Java, ports),
- *   2. builds the Functions bundle (npm run build:functions -> functions-dist/),
+ *   2. builds the Functions bundle without a deploy lockfile, so this local
+ *      run does not need registry access after dependencies are installed,
  *   3. starts the Auth, Firestore, Functions, and Storage emulators for the
  *      "demo-fbla2027" project (no real Firebase project is touched), and
  *      inside them runs the seed (shift starts in 10 minutes) and then Vite,
- *   4. prints localhost links only (no LAN URL or QR; phones use the deployed site).
+ *   4. prints localhost links for separate browser profiles on one laptop.
  * Functions on the emulator default to DEMO_MODE on, Turnstile off, and an
  * emulator-only kiosk secret (functions/src/lib/env.ts), so no secret file is needed.
  * Ctrl+C stops everything (firebase emulators:exec shuts the emulators down).
@@ -46,7 +47,7 @@ if (!existsSync(join(ROOT, ".env.local"))) {
 }
 
 run("npm run doctor", "doctor found a blocking problem (see Fix lines above). Resolve it, then run npm run demo again.");
-run("npm run build:functions", "the Functions build failed. Fix the error above, then run npm run demo again.");
+run("node scripts/build-functions.mjs --skip-lock", "the Functions build failed. Fix the error above, then run npm run demo again.");
 
 console.log(`
 demo: starting emulators for ${PROJECT_ID}. The seed prints demo accounts and links; Vite starts after it.
@@ -54,8 +55,8 @@ demo: starting emulators for ${PROJECT_ID}. The seed prints demo accounts and li
   Emulator UI  ${EMULATOR_UI_URL}
 `);
 
-const inner = `node scripts/seed-demo.mjs ${shiftArg} && npm run dev`;
-const child = spawn(`npx firebase emulators:exec --project ${PROJECT_ID} --only auth,firestore,functions,storage "${inner}"`, {
+const inner = `node scripts/seed-demo.mjs ${shiftArg} && npm run dev:web`;
+const child = spawn(`npx firebase emulators:exec --ui --project ${PROJECT_ID} --only auth,firestore,functions,storage "${inner}"`, {
   cwd: ROOT,
   stdio: "inherit",
   shell: true,

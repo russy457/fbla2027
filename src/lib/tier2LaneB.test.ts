@@ -14,9 +14,9 @@ import { aiSourceNote, prefillFromAi } from "@/lib/plannerAiPrefill";
 import { SHIFT_START_MS, makeInstance, ts } from "@/test/fixtures";
 
 const opportunity = (id: string, extra: Partial<Opportunity> = {}): Opportunity =>
-  ({ id, orgId: "org-1", orgName: "Alamo Pantry", orgVerified: true, title: "Sort food", description: "Sort donations.", status: "active", ...extra }) as Opportunity;
+  ({ id, orgId: "org-1", orgName: "Common Table Pantry", orgVerified: true, title: "Sort food", description: "Sort donations.", status: "active", ...extra }) as Opportunity;
 const org = (id: string, extra: Partial<OrganizationDoc> = {}): Organization =>
-  ({ id, name: "Alamo Pantry", mission: "Feed families.", verified: false, archived: false, ...extra }) as Organization;
+  ({ id, name: "Common Table Pantry", mission: "Feed families.", verified: false, archived: false, ...extra }) as Organization;
 
 describe("resolveCollectionItems", () => {
   const sources = {
@@ -42,7 +42,7 @@ describe("resolveCollectionItems", () => {
     );
     expect(rows[0]).toMatchObject({ title: "Sort food", href: "/opportunity/soon", verified: true, next: { instanceId: "soon" } });
     expect(rows[1]).toMatchObject({ href: null, detail: null, next: null, verified: false, missing: false });
-    expect(rows[2]).toMatchObject({ title: "Alamo Pantry", href: "/organizations/org-1", detail: "Feed families.", verified: false });
+    expect(rows[2]).toMatchObject({ title: "Common Table Pantry", href: "/organizations/org-1", detail: "Feed families.", verified: false });
   });
 
   it("keeps missing targets as unlinked rows", () => {
@@ -66,8 +66,8 @@ describe("resolveCollectionItems", () => {
   });
 
   it("credits the org or the app team, never a person", () => {
-    const names = new Map([["org-1", "Alamo Pantry"]]);
-    expect(curatorName("org-1", names)).toBe("Alamo Pantry");
+    const names = new Map([["org-1", "Common Table Pantry"]]);
+    expect(curatorName("org-1", names)).toBe("Common Table Pantry");
     expect(curatorName(null, names)).toBe(ADMIN_CURATOR);
     expect(curatorName("org-x", names)).toBe("a local organization");
   });

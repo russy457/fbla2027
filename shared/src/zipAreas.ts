@@ -1,6 +1,6 @@
 /**
  * zipAreas.ts
- * The bundled San Antonio ZIP table (SPEC 5.9 step 3, SPEC 4.2 "volunteer
+ * The bundled demo ZIP lookup (SPEC 5.9 step 3, SPEC 4.2 "volunteer
  * location is coarse"). A volunteer's 5-digit ZIP becomes the precision-5
  * geohash of an approximate ZIP centroid (a cell about 5 km across), which is
  * all the app ever stores about where someone lives. ZIPs outside the table
@@ -8,13 +8,14 @@
  *
  * Centroids are approximate (two to three decimals), good enough for "within
  * 5 / 10 / 25 miles"; they are not addresses. The seed also uses them to
- * place the fictional demo organizations near their ZIP.
+ * place the fictional demo organizations near their ZIP. Replace this data
+ * source to support additional ZIP codes without changing callers.
  */
 
 /** [latitude, longitude, geohash-5 of that point]. */
 type ZipArea = readonly [number, number, string];
 
-const SAN_ANTONIO_ZIPS: Readonly<Record<string, ZipArea>> = {
+const DEMO_ZIP_AREAS: Readonly<Record<string, ZipArea>> = {
   "78201": [29.468, -98.526, "9v1zt"],
   "78202": [29.428, -98.461, "9v1zr"],
   "78203": [29.415, -98.460, "9v1zr"],
@@ -86,7 +87,7 @@ export interface ZipCentroid {
 
 /** The approximate centroid of a bundled ZIP, or null when the ZIP is not in the table. */
 export const zipCentroid = (zip: string | null | undefined): ZipCentroid | null => {
-  const area = zip && Object.hasOwn(SAN_ANTONIO_ZIPS, zip) ? SAN_ANTONIO_ZIPS[zip] : undefined;
+  const area = zip && Object.hasOwn(DEMO_ZIP_AREAS, zip) ? DEMO_ZIP_AREAS[zip] : undefined;
   return area === undefined ? null : { lat: area[0], lng: area[1], geohash: area[2] };
 };
 

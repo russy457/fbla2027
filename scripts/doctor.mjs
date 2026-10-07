@@ -73,17 +73,27 @@ const checkJava = () => {
   );
 };
 
-const isPortFree = (port) =>
+const portStatus = (port) =>
   new Promise((resolve) => {
     const server = createServer();
-    server.once("error", () => resolve(false));
-    server.once("listening", () => server.close(() => resolve(true)));
+    server.once("error", (error) => resolve({ free: false, code: error.code }));
+    server.once("listening", () => server.close(() => resolve({ free: true, code: null })));
     server.listen(port, "127.0.0.1");
   });
 
 const checkPorts = async () => {
   for (const { port, name } of PORTS) {
-    if (await isPortFree(port)) continue;
+    const status = await portStatus(port);
+    if (status.free) continue;
+    if (status.code === "EPERM" || status.code === "EACCES") {
+      failCheck(
+        `Port ${port}`,
+        `This environment will not let the app open port ${port} (${name}).`,
+        `The operating system denied the listen call (${status.code}); the port may be free.`,
+        "Run the demo command in a normal Terminal window on your computer."
+      );
+      continue;
+    }
     failCheck(
       `Port ${port}`,
       `Port ${port} (${name}) is already in use.`,

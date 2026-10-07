@@ -38,6 +38,11 @@ describe("admin.resetDemoData", () => {
     expect((await db.doc("organizations/stray-org").get()).exists).toBe(true);
   });
 
+  it("cannot wipe a real cloud project through the local Functions emulator", async () => {
+    await expectCode(call("admin", "resetDemoData", {}, adminUser(), makeDeps({ GCLOUD_PROJECT: "fbla2027-ethanteng" })), "DEMO_MODE_REQUIRED");
+    expect((await db.doc("organizations/stray-org").get()).exists).toBe(true);
+  });
+
   it("validates the shift offset", async () => {
     await expectCode(call("admin", "resetDemoData", { shiftStartsInMin: 0 }, adminUser()), "INVALID_INPUT");
   });

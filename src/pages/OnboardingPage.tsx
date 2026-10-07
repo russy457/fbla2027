@@ -12,7 +12,7 @@
  * the final step. People with a finished profile are sent on to ?next=.
  */
 import { useState, type ReactElement } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { clock } from "@fbla/shared";
 import { LoadingState } from "@/components/LoadingState";
 import { AccountStep } from "@/components/onboarding/AccountStep";
@@ -25,6 +25,7 @@ import { AvailabilityStep, InterestsStep, SkillsStep, ZipStep } from "@/componen
 import { UnderAgeStop } from "@/components/onboarding/UnderAgeStop";
 import { usePrivateProfile } from "@/hooks/useVolunteerData";
 import { EMPTY_DRAFT, type OnboardingDraft } from "@/lib/onboardingDraft";
+import { isHostingPreview } from "@/lib/hostingPreview";
 import { deleteUnderAgeAccount } from "@/lib/underAgeAccount";
 import { safeNextPath } from "@/lib/safeRedirect";
 import { isUnderMinimumAge } from "@/lib/validation/formSchemas";
@@ -56,6 +57,16 @@ const OnboardingPage = (): ReactElement => {
 
   if (needsAccount === null || (uid !== null && profile.isLoading)) return <LoadingState label="Getting set up" />;
   if (profile.data?.profileComplete === true) return <Navigate to={next} replace />;
+  if (isHostingPreview()) {
+    return (
+      <section className="flex max-w-xl flex-col items-start gap-5">
+        <div className="onboarding-scene w-full" aria-hidden="true" />
+        <h1 className="text-3xl font-semibold tracking-tight text-fg">Account creation is unavailable in this preview</h1>
+        <p className="text-fg-muted">You can browse opportunities here. The full signup flow is available in the guided demo.</p>
+        <Link to="/explore" className={buttonClassName("primary")}>Explore opportunities</Link>
+      </section>
+    );
+  }
 
   const steps = needsAccount ? ALL_STEPS : ALL_STEPS.filter((step) => step !== "account");
   const step = steps[stepIndex] ?? "finish";
@@ -121,6 +132,7 @@ const OnboardingPage = (): ReactElement => {
 
 const AccountCreated = ({ onContinue }: { onContinue: () => void }): ReactElement => (
   <section className="flex max-w-xl flex-col items-start gap-4">
+    <div className="onboarding-scene w-full" aria-hidden="true" />
     <h1 className="text-3xl font-semibold tracking-tight text-fg">Your account is ready</h1>
     <button type="button" onClick={onContinue} className={buttonClassName("primary")}>
       Continue

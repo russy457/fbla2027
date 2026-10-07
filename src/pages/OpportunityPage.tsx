@@ -83,7 +83,7 @@ const OpportunityPage = (): ReactElement => {
   return (
     <article className="flex max-w-3xl flex-col gap-8">
       <PageHeader title={shift.title} />
-      <div className="flex flex-col gap-6 border-l-4 border-accent bg-surface py-5 pr-4 pl-5 shadow-sm md:flex-row md:items-start md:justify-between">
+      <div className="feature-panel flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <ShiftFacts instance={shift} place={placeOf(opportunity.data)} />
         <SignupAction
           instance={shift}

@@ -12,7 +12,7 @@ const NotFoundPage = (): ReactElement => (
     <ScreenPlaceholder title="Page not found">
       The link may be old or mistyped. You can find open shifts from the Explore screen.
     </ScreenPlaceholder>
-    <Link to="/" className={buttonClassName("primary")}>
+    <Link to="/explore" className={buttonClassName("primary")}>
       Go to Explore
     </Link>
   </div>

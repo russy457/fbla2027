@@ -54,7 +54,7 @@ export const FinishStep = ({ stepNumber, stepCount, draft, onBack, onDone }: Fin
       stepNumber={stepNumber}
       stepCount={stepCount}
       title="Almost done"
-      description="One quick check that you're a person, then you can start finding shifts."
+      description="Complete your profile, then you can start finding shifts."
       onSubmit={(event) => {
         event.preventDefault();
         void finish();

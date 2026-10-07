@@ -52,7 +52,7 @@ beforeEach(async () => {
   await seedInstance("instU", { orgId: "orgU", startMs: BASE_MS + 24 * HOUR });
   await seedInstance("instB", { orgId: "orgB", startMs: BASE_MS + 24 * HOUR });
   await seedInstance("past", { startMs: BASE_MS - 48 * HOUR });
-  await db.collection(COLLECTIONS.opportunities).doc("opp1").set(opportunity("orgA", "Alamo Community Pantry"));
+  await db.collection(COLLECTIONS.opportunities).doc("opp1").set(opportunity("orgA", "Common Table Pantry"));
   // vol1: discoverable, interested. vol2: served orgA before, not discoverable. vol3: neither.
   // minor: discoverable. vol4: discoverable but already on inst1. coordA (the caller): discoverable.
   await Promise.all(["vol1", "minor", "vol4", "coordA"].map((uid) => setProfile(uid, discoverable)));
@@ -103,7 +103,7 @@ describe("coordinator.inviteVolunteers", () => {
     const refs = candidates.map((candidate) => candidate.ref);
     await expect(invite(refs)).resolves.toEqual({ sent: 3, skipped: 0 });
     const alert = (await db.doc(PATHS.notificationItem("vol1", "shift-invite_inst1_vol1")).get()).data() as NotificationDoc;
-    expect(alert).toMatchObject({ type: "shift-invite", title: "Alamo Community Pantry invited you to Sort food donations", link: "/opportunity/inst1", read: false, data: { instanceId: "inst1" } });
+    expect(alert).toMatchObject({ type: "shift-invite", title: "Common Table Pantry invited you to Sort food donations", link: "/opportunity/inst1", read: false, data: { instanceId: "inst1" } });
 
     // A second invite (or the same ref twice) is skipped, and a read alert stays read.
     await db.doc(PATHS.notificationItem("vol1", "shift-invite_inst1_vol1")).update({ read: true });

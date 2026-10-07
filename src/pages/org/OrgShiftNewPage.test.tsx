@@ -15,7 +15,7 @@ import OrgShiftNewPage from "./OrgShiftNewPage";
 const ops = vi.hoisted(() => ({ upsertOpportunity: vi.fn(), createInstance: vi.fn() }));
 const state = vi.hoisted(() => ({ opportunities: [] as Array<{ id: string; title: string; status: string }> }));
 
-/** Wednesday 2026-10-14, noon in San Antonio: "Sat" is 2026-10-17. */
+/** Wednesday 2026-10-14, noon in the demo time zone: "Sat" is 2026-10-17. */
 const NOW = Date.UTC(2026, 9, 14, 17, 0, 0);
 
 vi.mock("@/hooks/useNow", () => ({ useNow: () => NOW }));

@@ -39,9 +39,9 @@ vi.mock("@/lib/api", () => ({ api: {}, ApiError: class ApiError extends Error {}
 
 const renderExit = () => {
   const onExited = vi.fn();
-  render(<KioskAccessPanel mode="exit" orgId="alamo-community-pantry" instanceId="demo-shift" shiftTitle="Sort and pack food boxes" onExited={onExited} onCancelExit={vi.fn()} />);
+  render(<KioskAccessPanel mode="exit" orgId="common-table-pantry" instanceId="demo-shift" shiftTitle="Sort and pack food boxes" onExited={onExited} onCancelExit={vi.fn()} />);
   fireEvent.change(screen.getByLabelText("Email"), { target: { value: "someone@demo.fbla2027.test" } });
-  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "pitchin-demo-2027" } });
+  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "fbla2027-demo-2027" } });
   fireEvent.click(screen.getByRole("button", { name: "Sign in and exit kiosk" }));
   return { onExited };
 };
@@ -61,7 +61,7 @@ describe("KioskAccessPanel exit", () => {
     expect(onExited).not.toHaveBeenCalled();
     expect(mocks.dispose).toHaveBeenCalledTimes(1);
     // The check reads the caller's own members doc in the shift's org.
-    expect(mocks.isolatedSignIn).toHaveBeenCalledWith({ name: "isolated" }, "someone@demo.fbla2027.test", "pitchin-demo-2027");
+    expect(mocks.isolatedSignIn).toHaveBeenCalledWith({ name: "isolated" }, "someone@demo.fbla2027.test", "fbla2027-demo-2027");
   });
 
   it("a wrong password is refused on the isolated app, before touching this device", async () => {
@@ -77,7 +77,7 @@ describe("KioskAccessPanel exit", () => {
     mocks.memberRole = "owner";
     const { onExited } = renderExit();
     await waitFor(() => expect(onExited).toHaveBeenCalledTimes(1));
-    expect(mocks.mainSignIn).toHaveBeenCalledWith("someone@demo.fbla2027.test", "pitchin-demo-2027");
+    expect(mocks.mainSignIn).toHaveBeenCalledWith("someone@demo.fbla2027.test", "fbla2027-demo-2027");
     expect(mocks.isolatedSignIn.mock.invocationCallOrder[0]).toBeLessThan(mocks.mainSignIn.mock.invocationCallOrder[0] ?? 0);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });

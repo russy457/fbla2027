@@ -68,16 +68,16 @@ export interface DemoOrg {
   readonly verified: boolean;
 }
 
-/** Three San Antonio nonprofits (fictional): two verified, one unverified (SPEC 10.7). */
+/** Three fictional demo nonprofits: two verified, one unverified (SPEC 10.7). */
 export const ORGS = {
   pantry: {
-    id: "alamo-community-pantry",
-    name: "Alamo Community Pantry",
-    mission: "We sort, pack, and share donated groceries with San Antonio families every week. (Fictional demo organization.)",
+    id: "common-table-pantry",
+    name: "Common Table Pantry",
+    mission: "We sort, pack, and share donated groceries with families every week. (Fictional demo organization.)",
     causeAreas: ["hunger-food-security", "community-development"],
     ein: "74-5550123",
-    address: { line1: "418 Mission Commons Dr", city: "San Antonio", state: "TX", zip: "78204" },
-    contactEmail: "hello@alamopantry.demo.fbla2027.test",
+    address: { line1: "418 Community Commons Dr", city: "Example City", state: "TX", zip: "78204" },
+    contactEmail: "hello@common-tablepantry.demo.fbla2027.test",
     owner: COORDINATOR,
     verified: true
   },
@@ -87,19 +87,19 @@ export const ORGS = {
     mission: "Volunteers read one on one with early readers at Westside elementary schools. (Fictional demo organization.)",
     causeAreas: ["education-youth"],
     ein: "74-5550456",
-    address: { line1: "2210 Guadalupe Learning Ln", city: "San Antonio", state: "TX", zip: "78207" },
+    address: { line1: "2210 Learning Ln", city: "Example City", state: "TX", zip: "78207" },
     contactEmail: "hello@westsidereading.demo.fbla2027.test",
     owner: BACKGROUND.westsideOwner,
     verified: true
   },
   trails: {
-    id: "mission-trails-animal-rescue",
-    name: "Mission Trails Animal Rescue",
+    id: "greenway-animal-rescue",
+    name: "Greenway Animal Rescue",
     mission: "A small foster network that walks, socializes, and rehomes shelter dogs. Verification pending. (Fictional demo organization.)",
     causeAreas: ["animal-welfare"],
     ein: "74-5550789",
-    address: { line1: "77 Espada Trail Rd", city: "San Antonio", state: "TX", zip: "78214" },
-    contactEmail: "hello@missiontrails.demo.fbla2027.test",
+    address: { line1: "77 Greenway Rd", city: "Example City", state: "TX", zip: "78214" },
+    contactEmail: "hello@greenway.demo.fbla2027.test",
     owner: BACKGROUND.trailsOwner,
     verified: false
   }

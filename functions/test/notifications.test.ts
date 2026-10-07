@@ -122,7 +122,7 @@ describe("hours review", () => {
     await seedLog("a");
     await seedLog("zero", { minutes: 0, uid: "vol2" });
     await call("coordinator", "approveHours", { logIds: ["a", "zero"] }, user("coordA"));
-    expect(await item("vol1", "hours-approved", "a")).toMatchObject({ title: "2.5 hours approved at Alamo Community Pantry", link: "/impact" });
+    expect(await item("vol1", "hours-approved", "a")).toMatchObject({ title: "2.5 hours approved at Common Table Pantry", link: "/impact" });
     expect(await inbox("vol2")).toHaveLength(0);
     await call("coordinator", "approveHours", { logIds: ["a"] }, user("coordA"));
     expect(await inbox("vol1")).toHaveLength(1);
@@ -131,7 +131,7 @@ describe("hours review", () => {
   it("rejectHours sends hours-rejected with the reason", async () => {
     await seedLog("a");
     await call("coordinator", "rejectHours", { logId: "a", reason: "Not on the roster" }, user("coordA"));
-    expect(await item("vol1", "hours-rejected", "a")).toMatchObject({ title: "Hours at Alamo Community Pantry were not approved: Not on the roster" });
+    expect(await item("vol1", "hours-rejected", "a")).toMatchObject({ title: "Hours at Common Table Pantry were not approved: Not on the roster" });
   });
 
   it("setAttendance sends attendance-changed, also when only closing a dispute; a no-op sends nothing", async () => {

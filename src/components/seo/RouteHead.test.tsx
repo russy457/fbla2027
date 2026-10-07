@@ -18,7 +18,7 @@ const NavigateHandle = () => {
 };
 
 const OrgScreen = () => {
-  usePageHead({ title: "Alamo Community Pantry", description: "Feeding families.", jsonLd: { "@type": "Organization", name: "Alamo" } });
+  usePageHead({ title: "Common Table Pantry", description: "Feeding families.", jsonLd: { "@type": "Organization", name: "Common Table" } });
   return <h1>Org</h1>;
 };
 
@@ -45,32 +45,32 @@ describe("RouteHead", () => {
 
   it("applies route defaults with an absolute canonical URL", () => {
     renderAt("/help");
-    expect(document.title).toBe("Help Center | Pitch In");
+    expect(document.title).toBe("Help Center | fbla 2027");
     expect(description()).toMatch(/^Answers about signing up/);
     expect(canonical()).toBe(`${window.location.origin}/help`);
   });
 
   it("uses a screen's override while mounted and drops it after navigating away", () => {
-    renderAt("/organizations/alamo");
-    expect(document.title).toBe("Alamo Community Pantry | Pitch In");
+    renderAt("/organizations/common-table");
+    expect(document.title).toBe("Common Table Pantry | fbla 2027");
     expect(description()).toBe("Feeding families.");
     expect(JSON.parse(jsonLd()?.textContent ?? "{}")).toMatchObject({ "@type": "Organization" });
 
     act(() => goTo("/me/shifts"));
-    expect(document.title).toBe("My Shifts | Pitch In");
+    expect(document.title).toBe("My Shifts | fbla 2027");
     expect(jsonLd()).toBeNull();
     expect(document.head.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe("noindex");
   });
 
   it("titles a help article from the bundled article", () => {
     renderAt("/help/kiosk-check-in");
-    expect(document.title).toMatch(/\| Pitch In$/);
-    expect(document.title).not.toBe("Help | Pitch In");
+    expect(document.title).toMatch(/\| fbla 2027$/);
+    expect(document.title).not.toBe("Help | fbla 2027");
   });
 
-  it("canonicalizes /explore to the home page", () => {
+  it("gives the separate Explore page its own canonical URL", () => {
     renderAt("/explore");
-    expect(canonical()).toBe(`${window.location.origin}/`);
+    expect(canonical()).toBe(`${window.location.origin}/explore`);
   });
 });
 

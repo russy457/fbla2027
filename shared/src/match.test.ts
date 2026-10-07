@@ -20,7 +20,7 @@ const availability = (overrides: Partial<Availability> = {}): Availability => ({
   ...overrides
 });
 
-// Saturday, Oct 17, 2026, 9:00 AM in San Antonio.
+// Saturday, Oct 17, 2026, 9:00 AM in the demo time zone.
 const SAT_9AM = fromZonedTime("2026-10-17T09:00:00", "America/Chicago").getTime();
 
 const shift: MatchShift = {

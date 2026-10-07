@@ -27,9 +27,9 @@ vi.mock("@/hooks/useCuration", () => ({
   useOwnedCollections: () => ({ data: state.owned, error: null, isLoading: false })
 }));
 vi.mock("@/hooks/useInbox", () => ({
-  useActiveOpportunities: () => ({ data: [{ id: "opp-1", orgId: "org-1", orgName: "Alamo Pantry", title: "Sort food" }, { id: "opp-2", orgId: "org-2", orgName: "Book Bank", title: "Shelve books" }] })
+  useActiveOpportunities: () => ({ data: [{ id: "opp-1", orgId: "org-1", orgName: "Common Table Pantry", title: "Sort food" }, { id: "opp-2", orgId: "org-2", orgName: "Book Bank", title: "Shelve books" }] })
 }));
-vi.mock("@/lib/data/orgs", () => ({ getOrganizations: async () => [{ id: "org-1", name: "Alamo Pantry", verified: true, archived: false }] }));
+vi.mock("@/lib/data/orgs", () => ({ getOrganizations: async () => [{ id: "org-1", name: "Common Table Pantry", verified: true, archived: false }] }));
 vi.mock("@/lib/data/curatedCollections", () => data);
 vi.mock("@/lib/api", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/api")>()), newRequestNonce: () => "nonce-1" }));
 vi.mock("@/store/authStore", () => ({ useSessionUser: () => ({ uid: "coord-1", isAdmin: false }) }));
@@ -71,8 +71,8 @@ describe("FeaturedCollections", () => {
     wrap(<FeaturedCollections />);
     expect(screen.getByRole("heading", { name: "Collections" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Good first shifts" })).toHaveAttribute("href", "/collections/c1");
-    expect(await screen.findByText(/1 shift and 1 organization · by Alamo Pantry/)).toBeInTheDocument();
-    expect(screen.getByText(/Empty · by the Pitch In team/)).toBeInTheDocument();
+    expect(await screen.findByText(/1 shift and 1 organization · by Common Table Pantry/)).toBeInTheDocument();
+    expect(screen.getByText(/Empty · by the fbla 2027 team/)).toBeInTheDocument();
   });
 });
 

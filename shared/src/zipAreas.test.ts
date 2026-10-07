@@ -1,6 +1,6 @@
 /**
  * zipAreas.test.ts
- * ZIP to coarse area (SPEC 5.9 step 3, SPEC 4.2): bundled San Antonio ZIPs
+ * ZIP to coarse area (SPEC 5.9 step 3, SPEC 4.2): bundled demo ZIPs
  * map to a precision-5 geohash of their centroid; anything else is null.
  */
 import { describe, expect, it } from "vitest";

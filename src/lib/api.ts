@@ -26,6 +26,7 @@ import {
   type UserError
 } from "@fbla/shared";
 import { getFirebase } from "./firebase";
+import { readClientEnv } from "./env";
 
 /** Error type every screen catches. `userError` is ready to render. */
 export class ApiError extends Error {
@@ -54,6 +55,18 @@ export const NETWORK_USER_ERROR: UserError = Object.freeze({
   params: {}
 });
 
+const LOCAL_NETWORK_USER_ERROR: UserError = Object.freeze({
+  ...NETWORK_USER_ERROR,
+  message: "Local action server is offline. Run npm run demo:restart in a terminal.",
+  fix: "Start the full local demo."
+});
+
+const CLOUD_DEMO_NETWORK_USER_ERROR: UserError = Object.freeze({
+  ...NETWORK_USER_ERROR,
+  message: "Local action server is offline. Run npm run demo:cloud in a terminal.",
+  fix: "Start the cloud presentation server."
+});
+
 /**
  * Converts anything thrown during a call into a UserError. Network failures
  * get their own copy; everything else goes through the shared catalog.
@@ -62,6 +75,9 @@ export const toApiUserError = (error: unknown): UserError => {
   if (error instanceof ApiError) return error.userError;
   const hasDetails = isRecord(error) && isRecord(error.details);
   if (!hasDetails && isRecord(error) && typeof error.code === "string" && NETWORK_CODES.has(error.code)) {
+    const env = readClientEnv();
+    if (env.ok && env.env.VITE_USE_EMULATORS) return LOCAL_NETWORK_USER_ERROR;
+    if (env.ok && env.env.VITE_FUNCTIONS_EMULATOR) return CLOUD_DEMO_NETWORK_USER_ERROR;
     return NETWORK_USER_ERROR;
   }
   return toUserError(error);

@@ -35,11 +35,11 @@ export const CookieConsent = (): ReactElement | null => {
 
   return (
     <section aria-labelledby={HEADING_ID} className="border-b border-border bg-surface-sunken">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex min-w-0 items-start gap-3">
           <Cookie aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-fg-muted" />
           <div className="min-w-0">
-            <h2 id={HEADING_ID} className="text-sm font-semibold text-fg">
+            <h2 id={HEADING_ID} className="font-sans text-sm font-semibold text-fg">
               Essential storage only
             </h2>
             <p className="text-sm text-pretty text-fg-muted">

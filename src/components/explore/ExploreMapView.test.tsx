@@ -15,7 +15,7 @@ vi.mock("./OrgMap", () => ({
 }));
 
 const POINTS = [
-  { orgId: "alamo", name: "Alamo Pantry", lat: 29.4, lng: -98.5, shiftCount: 2 },
+  { orgId: "common-table", name: "Common Table Pantry", lat: 29.4, lng: -98.5, shiftCount: 2 },
   { orgId: "river", name: "River Cleanup", lat: 29.5, lng: -98.4, shiftCount: 1 }
 ];
 
@@ -42,7 +42,7 @@ describe("ExploreMapView", () => {
     expect(await screen.findByTestId("org-map")).toHaveTextContent("2 markers");
     expect(screen.getByText(/general area \(about 5 km\)/)).toHaveTextContent("The map starts at your ZIP area.");
     const list = screen.getByRole("list", { name: "Organizations on the map" });
-    expect(within(list).getByRole("link", { name: "Alamo Pantry" })).toHaveAttribute("href", "/organizations/alamo");
+    expect(within(list).getByRole("link", { name: "Common Table Pantry" })).toHaveAttribute("href", "/organizations/common-table");
     expect(within(list).getByText("2 shifts in this list")).toBeInTheDocument();
   });
 

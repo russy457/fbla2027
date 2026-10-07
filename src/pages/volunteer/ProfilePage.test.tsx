@@ -105,7 +105,7 @@ describe("ProfilePage", () => {
 
     fireEvent.change(screen.getByLabelText("ZIP code (optional)"), { target: { value: "10001" } });
     fireEvent.click(screen.getByRole("button", { name: "Save profile" }));
-    expect(await screen.findByText(/outside our San Antonio area list/)).toBeInTheDocument();
+    expect(await screen.findByText(/cannot locate that ZIP yet/)).toBeInTheDocument();
   });
 
   it("checks the phone and ZIP before calling the server", () => {

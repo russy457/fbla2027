@@ -18,7 +18,7 @@ import { useSessionUser, useSession } from "@/store/authStore";
 
 const linkClass = ({ isActive }: { isActive: boolean }): string =>
   cn(
-    "inline-flex min-h-touch items-center gap-2 rounded-md px-2 text-sm font-medium sm:px-3 transition-colors duration-(--duration-fast)",
+    "inline-flex min-h-touch items-center gap-2 rounded-md px-2 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-fast) sm:px-3",
     isActive ? "bg-accent-subtle text-accent" : "text-fg-muted hover:bg-surface-sunken hover:text-fg"
   );
 
@@ -62,21 +62,19 @@ export const AccountControls = (): ReactElement | null => {
       {/* Tier 2 lane C: the bell menu (latest alerts, Mark all read) replaces the Tier 1 badge link. */}
       <BellMenu uid={user.uid} />
       {/* Tier 1 lane A: saved items. */}
-      <NavLink to="/me/saved" className={linkClass}>
+      <NavLink to="/me/saved" className={linkClass} title="Saved shifts and organizations">
         <BookmarkSimple aria-hidden="true" size={18} />
-        <span className="hidden sm:inline">Saved</span>
-        <span className="sr-only sm:hidden">Saved</span>
+        <span className="sr-only 2xl:not-sr-only">Saved</span>
       </NavLink>
       {/* Below md the header is full at 150% text on a phone; the footer carries Profile there (AppLayout). */}
-      <NavLink to="/me/profile" className={(state) => cn(linkClass(state), "hidden md:inline-flex")}>
+      <NavLink to="/me/profile" className={(state) => cn(linkClass(state), "hidden md:inline-flex")} title="Profile and settings">
         <UserCircle aria-hidden="true" size={18} />
-        Profile
+        <span className="sr-only 2xl:not-sr-only">Profile</span>
       </NavLink>
       {firstOrg ? (
-        <NavLink to={`/org/${firstOrg.orgId}/dashboard`} className={linkClass}>
+        <NavLink to={`/org/${firstOrg.orgId}/dashboard`} className={linkClass} title="Coordinator dashboard">
           <Buildings aria-hidden="true" size={18} />
-          <span className="hidden sm:inline">Coordinator</span>
-          <span className="sr-only sm:hidden">Coordinator dashboard</span>
+          <span className="sr-only xl:not-sr-only">Coordinator</span>
         </NavLink>
       ) : null}
       {/* Tier 1 lane B: registration and invite join are reachable before any membership.
@@ -84,21 +82,19 @@ export const AccountControls = (): ReactElement | null => {
       {!firstOrg && memberships.isSuccess ? (
         <NavLink to="/org/register" className={(state) => cn(linkClass(state), "hidden md:inline-flex")}>
           <Buildings aria-hidden="true" size={18} />
-          For organizations
+          <span className="sr-only 2xl:not-sr-only">For organizations</span>
         </NavLink>
       ) : null}
       {/* End Tier 1 lane B */}
       {user.isAdmin ? (
-        <NavLink to="/admin" className={linkClass}>
+        <NavLink to="/admin" className={linkClass} title="Admin">
           <ShieldCheck aria-hidden="true" size={18} />
-          <span className="hidden sm:inline">Admin</span>
-          <span className="sr-only sm:hidden">Admin</span>
+          <span className="sr-only 2xl:not-sr-only">Admin</span>
         </NavLink>
       ) : null}
-      <button type="button" onClick={() => void signOut()} disabled={isSigningOut} className={linkClass({ isActive: false })}>
+      <button type="button" onClick={() => void signOut()} disabled={isSigningOut} title="Sign out" className={linkClass({ isActive: false })}>
         <SignOut aria-hidden="true" size={18} />
-        <span className="hidden sm:inline">{isSigningOut ? "Signing out..." : "Sign out"}</span>
-        <span className="sr-only sm:hidden">Sign out</span>
+        <span className="sr-only xl:not-sr-only">{isSigningOut ? "Signing out..." : "Sign out"}</span>
       </button>
       {signOutError ? (
         <span role="alert" className="text-sm text-status-danger">

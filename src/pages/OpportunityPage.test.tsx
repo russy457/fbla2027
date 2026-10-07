@@ -28,7 +28,7 @@ vi.mock("@/hooks/useOpportunity", () => ({
     data:
       state.description === null
         ? null
-        : { description: state.description, location: { address: { line1: "418 Mission Commons Dr", city: "San Antonio", state: "TX", zip: "78204" }, geo: null } },
+        : { description: state.description, location: { address: { line1: "418 Community Commons Dr", city: "Example City", state: "TX", zip: "78204" }, geo: null } },
     isLoading: false
   })
 }));
@@ -68,11 +68,11 @@ describe("OpportunityPage", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Sort and pack food boxes" })).toBeInTheDocument();
     expect(screen.getByText("Saturday, October 17, 2026")).toBeInTheDocument();
     expect(screen.getByText("9:00 AM to 11:00 AM CDT")).toBeInTheDocument();
-    expect(screen.getByText("418 Mission Commons Dr, San Antonio, TX 78204")).toBeInTheDocument();
+    expect(screen.getByText("418 Community Commons Dr, Example City, TX 78204")).toBeInTheDocument();
     expect(screen.getByText("1 seat left of 3")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign up: Sort and pack food boxes" })).toBeEnabled();
     expect(screen.getByText("Help sort donated groceries and pack family food boxes.")).toBeInTheDocument();
-    expect(screen.getByText("Alamo Community Pantry")).toBeInTheDocument();
+    expect(screen.getByText("Common Table Pantry")).toBeInTheDocument();
     expect(screen.queryByText("Unverified")).not.toBeInTheDocument();
   });
 

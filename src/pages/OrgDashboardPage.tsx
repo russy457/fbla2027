@@ -38,7 +38,7 @@ const DASHBOARD_TICK_MS = 15_000;
 const FeaturedShift = ({ orgId, shift, nowMs, canViewContacts }: { orgId: string; shift: Instance; nowMs: number; canViewContacts: boolean }): ReactElement => {
   const hasStarted = nowMs >= shift.start.toMillis();
   return (
-    <section aria-labelledby="featured-shift-title" className="flex flex-col gap-6 border-l-4 border-accent bg-surface py-5 pr-4 pl-5 shadow-sm">
+    <section aria-labelledby="featured-shift-title" className="feature-panel flex flex-col gap-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-semibold text-accent">{hasStarted ? "Happening now" : "Next shift"}</p>

@@ -48,7 +48,7 @@ const SavedPage = (): ReactElement => {
       {items.length === 0 ? (
         <section className="flex flex-col items-start gap-3">
           <p className="text-fg-muted">Nothing saved yet. Use Save on a shift to keep it here.</p>
-          <Link to="/" className={buttonClassName("primary")}>
+          <Link to="/explore" className={buttonClassName("primary")}>
             Find shifts
           </Link>
         </section>

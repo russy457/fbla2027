@@ -50,15 +50,15 @@ export const KioskScreen = ({ instance, onExit, onSessionExpired }: KioskScreenP
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
-      <header className="flex items-start justify-between gap-4 px-6 pt-6 lg:px-10">
+      <header className="kiosk-screen-header flex items-start justify-between gap-4 px-6 py-8 lg:px-10 lg:py-10">
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-fg-muted">{instance.orgName}</p>
-          <h1 className="text-2xl font-semibold text-fg lg:text-3xl">{instance.title}</h1>
+          <p className="text-sm font-semibold text-inherit">{instance.orgName}</p>
+          <h1 className="text-2xl font-semibold text-inherit lg:text-3xl">{instance.title}</h1>
         </div>
         <button
           type="button"
           onClick={onExit}
-          className="inline-flex min-h-touch items-center rounded-md border border-border px-4 text-sm font-semibold text-fg-muted hover:bg-surface-sunken hover:text-fg"
+          className="inline-flex min-h-touch items-center rounded-full border border-current px-4 text-sm font-semibold text-inherit hover:bg-surface hover:text-fg"
         >
           Exit kiosk
         </button>

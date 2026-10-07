@@ -94,13 +94,13 @@ test("keyboard only: sign in, sign up on Explore, and check in", async ({ browse
   const minor = await openDevice(browser, { width: 1280, height: 900 });
   const page = minor.page;
 
-  await page.goto("/login?next=%2F");
+  await page.goto("/login?next=%2Fexplore");
   await tabTo(page, page.getByLabel("Email"));
   await page.keyboard.type(ACCOUNTS.minor);
   await page.keyboard.press("Tab");
   await page.keyboard.type(DEMO_PASSWORD);
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { level: 1, name: "Explore" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Find a time that fits your life/ })).toBeVisible();
   const signUp = page.getByRole("button", { name: `Sign up: ${SHIFT_TITLE}` });
   await expect(signUp).toBeVisible();
   expect(await seriousAxeViolations(page)).toEqual([]);
@@ -142,8 +142,8 @@ test("volunteer checks in and out, issues a letter, and verify shows Valid", asy
   const checkOut = phone.page.getByRole("button", { name: "Check out", exact: true });
   await expect(checkOut).toBeEnabled({ timeout: 30_000 });
   await checkOut.click();
-  await enterKioskCode(phone.page, kiosk.page, /hours? logged at Alamo Community Pantry/);
-  const arcHeading = phone.page.getByRole("heading", { name: /hours? logged at Alamo Community Pantry/ });
+  await enterKioskCode(phone.page, kiosk.page, /hours? logged at Common Table Pantry/);
+  const arcHeading = phone.page.getByRole("heading", { name: /hours? logged at Common Table Pantry/ });
   await expect(arcHeading).toBeVisible();
   // At least one 15-minute step was credited (SPEC#hours rounding).
   await expect(arcHeading).not.toHaveText(/^0 hours/);
