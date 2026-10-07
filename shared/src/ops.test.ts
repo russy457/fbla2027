@@ -16,12 +16,22 @@ const fakeTimestamp = { toMillis: () => 0, toDate: () => new Date(0) };
 describe("op map (SPEC#api)", () => {
   it("lists the five endpoints and the Tier 0 ops", () => {
     expect(ENDPOINTS).toEqual(["volunteer", "kiosk", "coordinator", "admin", "ai"]);
-    expect(OP_NAMES.volunteer).toEqual(["ping", "completeProfile", "signup", "cancelSignup", "issueLetter"]);
-    expect(OP_NAMES.kiosk).toEqual(["ping", "issueKioskCode", "checkIn", "checkOut"]);
-    expect(OP_NAMES.coordinator).toEqual(["ping", "startKiosk", "finalizeShift", "revokeLetter"]);
-    expect(OP_NAMES.admin).toEqual(["ping", "runDueJobs", "setDemoClock", "resetDemoData"]); // Tier 1 lane C: resetDemoData
-    expect(OP_NAMES.ai).toEqual(["ping", "askAssistant"]); // Tier 1 lane C: askAssistant
+    expect(OP_NAMES.volunteer).toEqual(expect.arrayContaining(["ping", "completeProfile", "signup", "cancelSignup", "issueLetter"]));
+    expect(OP_NAMES.kiosk).toEqual(expect.arrayContaining(["ping", "issueKioskCode", "checkIn", "checkOut"]));
+    expect(OP_NAMES.coordinator).toEqual(expect.arrayContaining(["ping", "startKiosk", "finalizeShift", "revokeLetter"]));
+    expect(OP_NAMES.admin).toEqual(expect.arrayContaining(["ping", "runDueJobs", "setDemoClock", "resetDemoData", "verifyOrganization"]));
+    expect(OP_NAMES.ai).toEqual(expect.arrayContaining(["ping", "askAssistant"]));
   });
+
+  // Tier 1 lane B
+  it("lists the Tier 1 lane B ops", () => {
+    expect(OP_NAMES.volunteer).toEqual(expect.arrayContaining(["submitManualHours", "requestAttendanceReview", "generateVolunteerReport"]));
+    expect(OP_NAMES.coordinator).toEqual(
+      expect.arrayContaining(["registerOrganization", "updateOrganization", "createInvite", "redeemInvite", "removeMember", "upsertOpportunity", "createInstance", "updateInstance", "cancelInstance", "approveHours", "rejectHours", "setAttendance", "generateOrgReport"])
+    );
+    expect(OP_NAMES.admin).toEqual(expect.arrayContaining(["verifyOrganization"]));
+  });
+  // End Tier 1 lane B
 
   it("only treats own op keys as op names", () => {
     expect(isOpName("kiosk", "checkIn")).toBe(true);

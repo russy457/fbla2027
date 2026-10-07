@@ -11,13 +11,17 @@ import { setDemoClock } from "../ops/setDemoClock";
 // Tier 1 lane C
 import { deploySecrets } from "../lib/secrets";
 import { resetDemoData } from "../ops/resetDemoData";
+// Tier 1 lane B
+import { laneBAdminOps } from "./laneB";
 
 export const adminOps: readonly RegisteredOp[] = [
   pingOp("admin"),
   runDueJobsOp,
   setDemoClock,
   // Tier 1 lane C
-  resetDemoData
+  resetDemoData,
+  // Tier 1 lane B
+  ...laneBAdminOps
 ];
 
 // Tier 1 lane C: resetDemoData reseeds demo accounts with DEMO_ACCOUNT_PASSWORD when deployed in DEMO_MODE.

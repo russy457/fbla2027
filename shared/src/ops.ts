@@ -51,6 +51,45 @@ import {
 // Tier 1 lane C
 import { askAssistantInput, askAssistantOutput } from "./schemas/ops/aiOps";
 import { resetDemoDataInput, resetDemoDataOutput } from "./schemas/ops/demoOps";
+// Tier 1 lane B: organization admin, shifts, hours, and report ops.
+import {
+  createInviteInput,
+  createInviteOutput,
+  redeemInviteInput,
+  redeemInviteOutput,
+  registerOrganizationInput,
+  registerOrganizationOutput,
+  removeMemberInput,
+  removeMemberOutput,
+  updateOrganizationInput,
+  updateOrganizationOutput,
+  verifyOrganizationInput,
+  verifyOrganizationOutput
+} from "./schemas/ops/orgOps";
+import {
+  cancelInstanceInput,
+  cancelInstanceOutput,
+  createInstanceInput,
+  createInstanceOutput,
+  updateInstanceInput,
+  updateInstanceOutput,
+  upsertOpportunityInput,
+  upsertOpportunityOutput
+} from "./schemas/ops/shiftAdminOps";
+import {
+  approveHoursInput,
+  approveHoursOutput,
+  rejectHoursInput,
+  rejectHoursOutput,
+  requestAttendanceReviewInput,
+  requestAttendanceReviewOutput,
+  setAttendanceInput,
+  setAttendanceOutput,
+  submitManualHoursInput,
+  submitManualHoursOutput
+} from "./schemas/ops/hoursOps";
+import { generateOrgReportInput, generateReportOutput, generateVolunteerReportInput } from "./schemas/ops/reportOps";
+// End Tier 1 lane B
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -60,7 +99,12 @@ export const OPS = {
     completeProfile: op(completeProfileInput, completeProfileOutput),
     signup: op(signupInput, signupOutput),
     cancelSignup: op(cancelSignupInput, cancelSignupOutput),
-    issueLetter: op(issueLetterInput, issueLetterOutput)
+    issueLetter: op(issueLetterInput, issueLetterOutput),
+    // Tier 1 lane B
+    submitManualHours: op(submitManualHoursInput, submitManualHoursOutput),
+    requestAttendanceReview: op(requestAttendanceReviewInput, requestAttendanceReviewOutput),
+    generateVolunteerReport: op(generateVolunteerReportInput, generateReportOutput)
+    // End Tier 1 lane B
   },
   kiosk: {
     ping: op(pingInput, pingOutput),
@@ -72,14 +116,32 @@ export const OPS = {
     ping: op(pingInput, pingOutput),
     startKiosk: op(startKioskInput, startKioskOutput),
     finalizeShift: op(finalizeShiftInput, finalizeShiftOutput),
-    revokeLetter: op(revokeLetterInput, revokeLetterOutput)
+    revokeLetter: op(revokeLetterInput, revokeLetterOutput),
+    // Tier 1 lane B
+    registerOrganization: op(registerOrganizationInput, registerOrganizationOutput),
+    updateOrganization: op(updateOrganizationInput, updateOrganizationOutput),
+    createInvite: op(createInviteInput, createInviteOutput),
+    redeemInvite: op(redeemInviteInput, redeemInviteOutput),
+    removeMember: op(removeMemberInput, removeMemberOutput),
+    upsertOpportunity: op(upsertOpportunityInput, upsertOpportunityOutput),
+    createInstance: op(createInstanceInput, createInstanceOutput),
+    updateInstance: op(updateInstanceInput, updateInstanceOutput),
+    cancelInstance: op(cancelInstanceInput, cancelInstanceOutput),
+    approveHours: op(approveHoursInput, approveHoursOutput),
+    rejectHours: op(rejectHoursInput, rejectHoursOutput),
+    setAttendance: op(setAttendanceInput, setAttendanceOutput),
+    generateOrgReport: op(generateOrgReportInput, generateReportOutput)
+    // End Tier 1 lane B
   },
   admin: {
     ping: op(pingInput, pingOutput),
     runDueJobs: op(runDueJobsInput, runDueJobsOutput),
     setDemoClock: op(setDemoClockInput, setDemoClockOutput),
     // Tier 1 lane C
-    resetDemoData: op(resetDemoDataInput, resetDemoDataOutput)
+    resetDemoData: op(resetDemoDataInput, resetDemoDataOutput),
+    // Tier 1 lane B
+    verifyOrganization: op(verifyOrganizationInput, verifyOrganizationOutput)
+    // End Tier 1 lane B
   },
   ai: {
     ping: op(pingInput, pingOutput),

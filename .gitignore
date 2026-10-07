@@ -37,3 +37,5 @@ Thumbs.db
 
 # Agent worktrees (local only)
 .claude/worktrees/
+# Private emulator temp dir (avoids Storage emulator clashes)
+.tmp-emu/

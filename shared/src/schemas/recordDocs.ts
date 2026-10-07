@@ -37,6 +37,9 @@ export const hoursLogDocSchema = z.object({
   reviewedBy: z.string().nullable(),
   reviewedAt: timestampSchema.nullable(),
   rejectReason: z.string().nullable(),
+  // Tier 1 lane B: volunteer display name on manual and coordinator logs, so the
+  // Needs attention queue and org reports can name a volunteer with no signup.
+  displayName: z.string().nullable().optional(),
   ...auditFields
 });
 export type HoursLogDoc = z.infer<typeof hoursLogDocSchema>;

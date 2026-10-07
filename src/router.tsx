@@ -32,6 +32,17 @@ const NotFoundPage = lazyWithReload(() => import("./pages/NotFoundPage"));
 const PrivacyPage = lazyWithReload(() => import("./pages/legal/PrivacyPage"));
 const TermsPage = lazyWithReload(() => import("./pages/legal/TermsPage"));
 const AccessibilityPage = lazyWithReload(() => import("./pages/legal/AccessibilityPage"));
+// Tier 1 lane B
+const OrgRegisterPage = lazyWithReload(() => import("./pages/org/OrgRegisterPage"));
+const OrgShiftsPage = lazyWithReload(() => import("./pages/org/OrgShiftsPage"));
+const OrgShiftNewPage = lazyWithReload(() => import("./pages/org/OrgShiftNewPage"));
+const OrgShiftDetailPage = lazyWithReload(() => import("./pages/org/OrgShiftDetailPage"));
+const OrgReportsPage = lazyWithReload(() => import("./pages/org/OrgReportsPage"));
+const OrgSettingsPage = lazyWithReload(() => import("./pages/org/OrgSettingsPage"));
+const JoinPage = lazyWithReload(() => import("./pages/volunteer/JoinPage"));
+const ManualHoursPage = lazyWithReload(() => import("./pages/volunteer/ManualHoursPage"));
+const HoursReportPage = lazyWithReload(() => import("./pages/volunteer/HoursReportPage"));
+// End Tier 1 lane B
 
 export const routes: RouteObject[] = [
   {
@@ -53,7 +64,24 @@ export const routes: RouteObject[] = [
           { path: "me/shifts", element: <MyShiftsPage /> },
           { path: "impact", element: <ImpactPage /> },
           { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "dashboard", element: <OrgDashboardPage /> }] },
-          { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] }
+          { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] },
+          // Tier 1 lane B
+          { path: "org/register", element: <OrgRegisterPage /> },
+          { path: "join", element: <JoinPage /> },
+          { path: "impact/report", element: <HoursReportPage /> },
+          { path: "impact/hours/new", element: <ManualHoursPage /> },
+          {
+            path: "org/:orgId",
+            element: <RequireCoordinator />,
+            children: [
+              { path: "shifts", element: <OrgShiftsPage /> },
+              { path: "shifts/new", element: <OrgShiftNewPage /> },
+              { path: "shifts/:instanceId", element: <OrgShiftDetailPage /> },
+              { path: "reports", element: <OrgReportsPage /> },
+              { path: "settings", element: <OrgSettingsPage /> }
+            ]
+          }
+          // End Tier 1 lane B
         ]
       },
       // Tier 1 lane C

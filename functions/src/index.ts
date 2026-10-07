@@ -16,3 +16,6 @@ export { admin } from "./endpoints/admin";
 export { ai } from "./endpoints/ai";
 export { recomputeVolunteerStats } from "./triggers/recomputeVolunteerStats";
 export { scheduledRunDueJobs as runDueJobs } from "./jobs/runDueJobs";
+// Tier 1 lane B
+export { supersedeLetters } from "./triggers/supersedeLetters";
+// End Tier 1 lane B
