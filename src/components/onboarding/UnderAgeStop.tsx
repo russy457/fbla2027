@@ -2,7 +2,9 @@
  * UnderAgeStop.tsx
  * Shown when the birth date means the person is under 13 (SPEC#minors G18,
  * D10). It stops onboarding with the SPEC's sentence and a kind pointer to a
- * parent or guardian. No account is created; nothing is saved.
+ * parent or guardian. No account is created; nothing is saved. When the
+ * person was already signed in, the account they started has been deleted
+ * by the server (accountDeleted) and the copy says so.
  */
 import { useEffect, useRef, type ReactElement } from "react";
 import { Link } from "react-router-dom";
@@ -11,9 +13,17 @@ import { buttonClassName } from "@/components/ui/buttonStyles";
 
 interface UnderAgeStopProps {
   readonly onChangeDate: () => void;
+  /** The signed-in account was deleted by the server (true), could not be confirmed deleted (false), or never existed (undefined). */
+  readonly accountDeleted?: boolean;
 }
 
-export const UnderAgeStop = ({ onChangeDate }: UnderAgeStopProps): ReactElement => {
+const privacyLine = (accountDeleted: boolean | undefined): string => {
+  if (accountDeleted === true) return "We deleted the account you started and did not save your birth date. You have been signed out.";
+  if (accountDeleted === false) return "You have been signed out. We could not confirm the account was deleted; an admin will remove it.";
+  return "We did not create an account or save your birth date.";
+};
+
+export const UnderAgeStop = ({ onChangeDate, accountDeleted }: UnderAgeStopProps): ReactElement => {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => headingRef.current?.focus(), []);
   return (
@@ -24,8 +34,7 @@ export const UnderAgeStop = ({ onChangeDate }: UnderAgeStopProps): ReactElement 
       </h1>
       <p className="text-lg text-fg">Ask a parent or guardian about volunteering together.</p>
       <p className="text-fg-muted">
-        Many organizations welcome younger helpers when they come with a family member. We did not create an account or save your
-        birth date.
+        Many organizations welcome younger helpers when they come with a family member. {privacyLine(accountDeleted)}
       </p>
       <div className="flex flex-wrap gap-2">
         <Link to="/help/privacy-and-minors" className={buttonClassName("primary")}>

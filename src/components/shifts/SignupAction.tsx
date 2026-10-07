@@ -25,13 +25,15 @@ interface SignupActionProps {
   readonly birthDate: string | null;
   readonly signedIn: boolean;
   readonly nowMs: number;
+  /** Where sign-in returns a signed-out visitor (D5 "opens sign-in, then returns"); Explore by default. */
+  readonly returnPath?: string;
 }
 
 type Pending = "signup" | "cancel" | null;
 
 const toUserError = (error: unknown): UserError | null => (error instanceof ApiError ? error.userError : null);
 
-export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs }: SignupActionProps): ReactElement => {
+export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, returnPath }: SignupActionProps): ReactElement => {
   const navigate = useNavigate();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [pending, setPending] = useState<Pending>(null);
@@ -80,7 +82,7 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs }: S
 
   const onPrimary = (): void => {
     if (state.kind === "signed-out") {
-      navigate(loginPathFor(`/?shift=${encodeURIComponent(instance.id)}`));
+      navigate(loginPathFor(returnPath ?? `/?shift=${encodeURIComponent(instance.id)}`));
       return;
     }
     if (state.kind === "available") void run("signup", () => api.volunteer.signup({ instanceId: instance.id }));

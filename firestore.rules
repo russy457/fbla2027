@@ -67,6 +67,16 @@ service cloud.firestore {
       }
     }
 
+    // Collection-group access for the org switcher (SPEC Q27: collectionGroup
+    // members where uid == me). Only the caller's own membership docs: the
+    // check reads resource.data.uid (not the path id) so a `where uid == me`
+    // query is provably safe and querying another uid is denied. Coordinator
+    // reads of an org's roster still go through the nested rule above.
+    match /{path=**}/members/{memberUid} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
     match /opportunities/{opportunityId} {
       allow read: if true;
       allow write: if false;

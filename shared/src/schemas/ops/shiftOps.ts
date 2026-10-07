@@ -32,7 +32,9 @@ export const checkOutOutput = z.object({
   status: z.literal("completed"),
   minutes: z.number().int(),
   orgName: z.string(),
-  totalApprovedHours: z.number()
+  totalApprovedHours: z.number(),
+  /** True when the log was written pending for coordinator review (a 0-minute check-out); false when approved. */
+  needsReview: z.boolean()
 });
 
 export const startKioskInput = instanceOnlyInput;

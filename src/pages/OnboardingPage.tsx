@@ -1,7 +1,9 @@
 /**
  * OnboardingPage.tsx
  * Route "/onboarding" (SPEC#screen-onboarding D10, SPEC#minors G18). Steps:
- *   1 birth date (always first; under 13 stops here, nothing is created)
+ *   1 birth date (always first; under 13 stops here, nothing is created;
+ *     someone already signed in has their account deleted by the server
+ *     through completeProfile and is signed out, lib/underAgeAccount.ts)
  *   2 create account (only for people who are signed out)
  *   3 name and phone, 4 interests, 5 skills, 6 availability, 7 ZIP
  *     (5 to 7 skippable), 8 human check + volunteer.completeProfile.
@@ -21,6 +23,7 @@ import { AvailabilityStep, InterestsStep, SkillsStep, ZipStep } from "@/componen
 import { UnderAgeStop } from "@/components/onboarding/UnderAgeStop";
 import { usePrivateProfile } from "@/hooks/useVolunteerData";
 import { EMPTY_DRAFT, type OnboardingDraft } from "@/lib/onboardingDraft";
+import { deleteUnderAgeAccount } from "@/lib/underAgeAccount";
 import { safeNextPath } from "@/lib/safeRedirect";
 import { isUnderMinimumAge } from "@/lib/validation/formSchemas";
 import { useSession } from "@/store/authStore";
@@ -40,6 +43,8 @@ const OnboardingPage = (): ReactElement => {
   const [draft, setDraft] = useState<OnboardingDraft>(EMPTY_DRAFT);
   const [stepIndex, setStepIndex] = useState(0);
   const [isUnderAge, setIsUnderAge] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [accountDeleted, setAccountDeleted] = useState<boolean | undefined>(undefined);
   // Decided once, as soon as the session is known, so creating the account mid-flow does not renumber the steps.
   const [needsAccount, setNeedsAccount] = useState<boolean | null>(null);
   if (needsAccount === null && session.status !== "loading") setNeedsAccount(session.status !== "user");
@@ -55,7 +60,23 @@ const OnboardingPage = (): ReactElement => {
     setStepIndex((index) => Math.min(steps.length - 1, index + 1));
   };
 
-  if (isUnderAge) return <UnderAgeStop onChangeDate={() => setIsUnderAge(false)} />;
+  if (isDeletingAccount) return <LoadingState label="One moment" lines={1} />;
+  if (isUnderAge) return <UnderAgeStop accountDeleted={accountDeleted} onChangeDate={() => setIsUnderAge(false)} />;
+
+  // G18: a signed-in person under 13 must not keep an account. The server deletes it; then this device is signed out.
+  const stopUnderAge = async (birthDate: string): Promise<void> => {
+    if (uid === null) {
+      setIsUnderAge(true);
+      return;
+    }
+    setIsDeletingAccount(true);
+    setAccountDeleted(await deleteUnderAgeAccount(birthDate));
+    // Signed out now: a corrected date starts over with account creation.
+    setNeedsAccount(true);
+    setStepIndex(0);
+    setIsDeletingAccount(false);
+    setIsUnderAge(true);
+  };
 
   switch (step) {
     case "birth":
@@ -66,7 +87,7 @@ const OnboardingPage = (): ReactElement => {
           defaultValue={draft.birthDate}
           onNext={(birthDate) => {
             // The 13+ gate runs before any account exists (G18); the server repeats it.
-            if (isUnderMinimumAge(birthDate, clock.now())) setIsUnderAge(true);
+            if (isUnderMinimumAge(birthDate, clock.now())) void stopUnderAge(birthDate);
             else advance({ birthDate });
           }}
         />

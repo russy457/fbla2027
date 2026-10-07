@@ -3,7 +3,9 @@
  * kiosk.checkOut (SPEC#fn-checkout, SPEC 5.4). Moves a checked-in signup to
  * completed and writes hoursLogs/{signupId} with source "kiosk" and status
  * "approved": a typed kiosk code is the verification, so kiosk hours need no
- * coordinator review. The log id equals the signup id, which makes a retried
+ * coordinator review. The exception is a check-out that credits 0 minutes:
+ * that log is pending with needsReview (shifts/hoursRecords.ts) and the
+ * result says so, so the phone can say a coordinator will review it. The log id equals the signup id, which makes a retried
  * check-out land on the same log (one HoursLog per signup, never two).
  *
  * Check order differs slightly from SPEC 5.4's general list on purpose: the
@@ -64,7 +66,7 @@ export const checkOut = defineCallable({
 
       // Idempotent retry: already completed returns the existing log.
       if (signup?.status === "completed" && existingLog !== null) {
-        return { minutes: existingLog.minutes, orgName: instance.orgName };
+        return { minutes: existingLog.minutes, orgName: instance.orgName, needsReview: existingLog.needsReview };
       }
       if (signup === null || signup.status !== "checked-in" || signup.checkInAt === null) throw new AppError("NOT_CHECKED_IN");
 
@@ -91,15 +93,17 @@ export const checkOut = defineCallable({
         history: withHistory(signup.history, "checked-in", "completed", caller.uid, "checkOut", nowMs),
         updatedAt: ts(nowMs)
       });
-      tx.set(logRef, newShiftHoursLog({ signupId, signup, instance, minutes, source: "kiosk", nowMs }));
-      return { minutes, orgName: instance.orgName };
+      const log = newShiftHoursLog({ signupId, signup, instance, minutes, source: "kiosk", nowMs });
+      tx.set(logRef, log);
+      return { minutes, orgName: instance.orgName, needsReview: log.needsReview };
     });
 
     return {
       status: "completed" as const,
       minutes: result.minutes,
       orgName: result.orgName,
-      totalApprovedHours: await approvedHoursFor(db, caller.uid)
+      totalApprovedHours: await approvedHoursFor(db, caller.uid),
+      needsReview: result.needsReview
     };
   }
 });

@@ -152,7 +152,7 @@ describe("kiosk.checkOut", () => {
     testClock.set(END - 8 * MINUTE);
     const code = await currentCode();
     const result = await call("kiosk", "checkOut", { instanceId: "inst1", code }, user("vol1"));
-    expect(result).toEqual({ status: "completed", minutes: 225, orgName: "Alamo Community Pantry", totalApprovedHours: 3.75 });
+    expect(result).toEqual({ status: "completed", minutes: 225, orgName: "Alamo Community Pantry", totalApprovedHours: 3.75, needsReview: false });
 
     // Retry with the same request (for example after a dropped response): same result, still one log.
     testClock.advance(2 * MINUTE);
@@ -161,6 +161,19 @@ describe("kiosk.checkOut", () => {
     expect(logs.size).toBe(1);
     expect(logs.docs[0]?.id).toBe("inst1_vol1");
     expect(logs.docs[0]?.data() as HoursLogDoc).toMatchObject({ source: "kiosk", status: "approved", needsReview: false, minutes: 225 });
+  });
+
+  it("a check-out that credits 0 minutes writes a pending needsReview log, never an approved one", async () => {
+    // SPEC#hours table row: in 8:31, out 8:50 (both before the 9:00 start) credits 0.
+    await checkInAt(START - 29 * MINUTE);
+    testClock.set(START - 10 * MINUTE);
+    const code = await currentCode();
+    const result = await call("kiosk", "checkOut", { instanceId: "inst1", code }, user("vol1"));
+    expect(result).toEqual({ status: "completed", minutes: 0, orgName: "Alamo Community Pantry", totalApprovedHours: 0, needsReview: true });
+    const log = (await db.collection(COLLECTIONS.hoursLogs).doc("inst1_vol1").get()).data() as HoursLogDoc;
+    expect(log).toMatchObject({ source: "kiosk", status: "pending", needsReview: true, minutes: 0 });
+    // The idempotent retry reports the same review state.
+    await expect(call("kiosk", "checkOut", { instanceId: "inst1", code }, user("vol1"))).resolves.toMatchObject({ minutes: 0, needsReview: true });
   });
 
   it("refuses check-out without check-in, after the grace window, and with a wrong code", async () => {

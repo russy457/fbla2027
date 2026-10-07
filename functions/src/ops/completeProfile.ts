@@ -3,10 +3,15 @@
  * volunteer.completeProfile (SPEC#fn-completeprofile, SPEC 5.9, G11, G13, G18).
  * The one op exempt from the profile gate, because it is what completes the
  * profile. Steps:
- *   1. Turnstile (skipped on the emulator),
- *   2. age from birthDate on today's Chicago date; under 13 deletes the Auth
+ *   1. age from birthDate on today's Chicago date; under 13 deletes the Auth
  *      user and every doc under the uid, then fails with AGE_UNDER_13 (no PII
  *      is logged),
+ *   2. Turnstile (skipped on the emulator).
+ * Steps 1 and 2 are swapped from SPEC 5.9 on purpose: an already signed-in
+ * person who enters an under-13 birth date in onboarding is stopped before
+ * any Turnstile widget is shown, and their account must still be deleted
+ * (G18). Deleting your own account needs no bot check, and the age check
+ * reads nothing but the input, so running it first gives nothing away.
  *   3. validated profile fields (zod, in the shared op schema),
  *   4. writes users/{uid}/private/profile and the public users/{uid}
  *      projection (displayName = first name + last initial).
@@ -61,13 +66,13 @@ export const completeProfile = defineCallable({
       return { displayName: displayNameFor(existing.firstName, existing.lastName), isMinor: existing.isMinor };
     }
 
-    const verifiedByTurnstile = await verifyTurnstile(db, deps.env, deps.log, input.turnstileToken, nowMs);
-
     const age = ageOn(input.birthDate, clock.now(), DEFAULT_TIME_ZONE);
     if (age < MIN_ACCOUNT_AGE) {
       await deleteAccountData(deps, caller.uid);
       throw new AppError("AGE_UNDER_13");
     }
+
+    const verifiedByTurnstile = await verifyTurnstile(db, deps.env, deps.log, input.turnstileToken, nowMs);
 
     const isMinor = age < ADULT_AGE;
     const displayName = displayNameFor(input.firstName, input.lastName);

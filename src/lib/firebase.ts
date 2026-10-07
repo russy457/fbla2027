@@ -12,9 +12,9 @@
  * - Emulator ports and the dev reachability probe live in emulatorProbe.ts,
  *   which does not import the SDK, so the app shell stays small.
  */
-import { initializeApp, type FirebaseApp } from "firebase/app";
+import { deleteApp, initializeApp, type FirebaseApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
-import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
+import { connectAuthEmulator, getAuth, inMemoryPersistence, initializeAuth, signOut, type Auth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore, type Firestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions, type Functions } from "firebase/functions";
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from "firebase/storage";
@@ -78,4 +78,42 @@ let services: FirebaseServices | null = null;
 export const getFirebase = (): FirebaseServices => {
   services ??= createServices(parseClientEnv(import.meta.env));
   return services;
+};
+
+export interface IsolatedServices {
+  readonly auth: Auth;
+  readonly db: Firestore;
+  /** Signs out and deletes the throwaway app. */
+  readonly dispose: () => Promise<void>;
+}
+
+let isolatedCount = 0;
+
+/**
+ * A short-lived second Firebase app with in-memory Auth, for checking a
+ * person's credentials without touching this device's current session (the
+ * kiosk exit check, G15). Same config, App Check, and emulator wiring as the
+ * main app; nothing it signs in is persisted.
+ */
+export const createIsolatedServices = (): IsolatedServices => {
+  const main = getFirebase();
+  const env = parseClientEnv(import.meta.env);
+  isolatedCount += 1;
+  const app = initializeApp(main.app.options, `isolated-${isolatedCount}`);
+  startAppCheck(app, env);
+  const auth = initializeAuth(app, { persistence: inMemoryPersistence });
+  const db = getFirestore(app);
+  if (main.usingEmulators) {
+    const host = getEmulatorHost();
+    connectAuthEmulator(auth, `http://${host}:${EMULATOR_PORTS.auth}`, { disableWarnings: true });
+    connectFirestoreEmulator(db, host, EMULATOR_PORTS.firestore);
+  }
+  return Object.freeze({
+    auth,
+    db,
+    dispose: async () => {
+      await signOut(auth).catch(() => undefined);
+      await deleteApp(app);
+    }
+  });
 };

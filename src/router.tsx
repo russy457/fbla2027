@@ -21,6 +21,7 @@ const MyShiftsPage = lazyWithReload(() => import("./pages/MyShiftsPage"));
 const ImpactPage = lazyWithReload(() => import("./pages/ImpactPage"));
 const HelpPage = lazyWithReload(() => import("./pages/HelpPage"));
 const VerifyPage = lazyWithReload(() => import("./pages/VerifyPage"));
+const OpportunityPage = lazyWithReload(() => import("./pages/OpportunityPage"));
 const LoginPage = lazyWithReload(() => import("./pages/LoginPage"));
 const OnboardingPage = lazyWithReload(() => import("./pages/OnboardingPage"));
 const OrgDashboardPage = lazyWithReload(() => import("./pages/OrgDashboardPage"));
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <ExplorePage /> },
       { path: "explore", element: <ExplorePage /> },
+      { path: "opportunity/:instanceId", element: <OpportunityPage /> },
       { path: "help", element: <HelpPage /> },
       { path: "help/:slug", element: <HelpPage /> },
       { path: "verify", element: <VerifyPage /> },

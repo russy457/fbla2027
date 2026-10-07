@@ -2,39 +2,29 @@
  * requestClock.ts
  * Builds the clock one invocation uses (SPEC#clock, G6). In demo mode the
  * offset from demoClock/global is added so "Advance clock 15 min" moves every
- * window check, kiosk code, and stored timestamp together. The offset is
- * cached for 5 seconds per Firestore instance to avoid a read on every call.
- * Outside demo mode the document is never read, so a stray doc in a real
- * project cannot shift time.
+ * window check, kiosk code, and stored timestamp together.
+ *
+ * The offset is read fresh on every request while the demo clock is allowed.
+ * An earlier per-instance cache let two Functions instances disagree for a few
+ * seconds after setDemoClock (one at +15 min, another at +30), which credited
+ * the wrong minutes at check-out. One small read per call is cheap next to
+ * that. Outside demo mode the document is never read and the offset is always
+ * 0, so a stray doc in a real project cannot shift time.
  */
-import type { Firestore } from "firebase-admin/firestore";
+import type { DocumentSnapshot } from "firebase-admin/firestore";
 import { PATHS, createClock, type Clock } from "@fbla/shared";
 import type { ServerDeps } from "./deps";
 
-const CACHE_MS = 5_000;
-
-interface CachedOffset {
-  readonly offsetMs: number;
-  readonly fetchedAtMs: number;
-}
-
-const offsetCache = new WeakMap<Firestore, CachedOffset>();
-
-/** Drops the cached offset (setDemoClock calls this so its own next call sees the change). */
-export const forgetDemoOffset = (db: Firestore): void => {
-  offsetCache.delete(db);
+/** Parses the stored offset; anything missing or malformed means no offset. */
+export const offsetFromSnapshot = (snapshot: DocumentSnapshot): number => {
+  const raw: unknown = snapshot.get("offsetMs");
+  return typeof raw === "number" && Number.isFinite(raw) ? Math.trunc(raw) : 0;
 };
 
+/** The authoritative demo offset for this request (always 0 when the demo clock is not allowed). */
 export const readDemoOffsetMs = async (deps: ServerDeps): Promise<number> => {
   if (!deps.env.demoClockAllowed) return 0;
-  const realNow = deps.nowMs();
-  const cached = offsetCache.get(deps.db);
-  if (cached && realNow - cached.fetchedAtMs < CACHE_MS) return cached.offsetMs;
-  const snapshot = await deps.db.doc(PATHS.demoClock()).get();
-  const raw: unknown = snapshot.get("offsetMs");
-  const offsetMs = typeof raw === "number" && Number.isFinite(raw) ? Math.trunc(raw) : 0;
-  offsetCache.set(deps.db, { offsetMs, fetchedAtMs: realNow });
-  return offsetMs;
+  return offsetFromSnapshot(await deps.db.doc(PATHS.demoClock()).get());
 };
 
 /** The clock for one request, job run, or trigger execution. */

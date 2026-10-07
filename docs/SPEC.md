@@ -609,7 +609,7 @@ Errors list op-specific codes; every op can also return `AUTH_REQUIRED`, `PROFIL
 
 | Endpoint.op | Auth resolver | Input | Output | Idempotency | Transitions | Errors | Audit | Tier |
 |---|---|---|---|---|---|---|---|---|
-| <a id="fn-completeprofile"></a>volunteer.completeProfile | signedIn (gate exempt) | firstName, lastName (1-40), birthDate, interests?, skills?, availability?, phone?, zip?, turnstileToken | displayName, isMinor | Already complete: returns current values; a different birthDate is refused | none | AGE_UNDER_13, TURNSTILE_FAILED, BIRTHDATE_LOCKED | profileCompletedAt, turnstileVerifiedAt | 1 |
+| <a id="fn-completeprofile"></a>volunteer.completeProfile | signedIn (gate exempt) | firstName, lastName (1-40), birthDate, interests?, skills?, availability?, phone?, zip?, turnstileToken | displayName, isMinor | Already complete: returns current values; a different birthDate is refused | none | AGE_UNDER_13 (checked first), TURNSTILE_FAILED, BIRTHDATE_LOCKED | profileCompletedAt, turnstileVerifiedAt | 1 |
 | volunteer.updateProfile | signedIn | firstName?, lastName?, interests?, skills?, availability?, phone?, zip?, avatarPath? | displayName | Set semantics | none | none extra | updatedAt | 1 |
 | <a id="fn-signup"></a>volunteer.signup | signedIn; loads instance | instanceId | signupId, status, waitlistPosition?, waitlistSize? | Doc id `{instanceId}_{uid}`; an active signup is returned unchanged | (none) to confirmed; (none) to waitlisted | SHIFT_FULL, WAITLIST_CLOSED, SHIFT_STARTED, SHIFT_CANCELLED, AGE_BELOW_MIN, MINOR_UNVERIFIED_ORG, SIGNUP_CANCELLED_BEFORE | history | 0 (waitlist, walk-up: 1) |
 | volunteer.signupSeries | signedIn; loads series | seriesId | results [{instanceId, date, outcome: confirmed, waitlisted, skipped, reason?}], coversThrough | Per-instance signup idempotency | as signup, per date | as signup, per date (reported, not thrown) | history | 2 |
@@ -740,8 +740,8 @@ updateOrganization (owner only):
 
 ### 5.9 completeProfile and Turnstile (G13)
 
-1. If `TURNSTILE_ENABLED`, POST the token to Cloudflare siteverify with `TURNSTILE_SECRET`, then in a transaction create `turnstileTokens/{sha256(token)}` with a 10-minute expiry; an existing record means replay. Missing, invalid, or replayed: `TURNSTILE_FAILED`. When disabled (emulator), Functions log one warning line at startup.
-2. Age from birthDate at `clock.now()`. Under 13: delete the Auth user and any docs and files under the uid, then `AGE_UNDER_13`.
+1. Age from birthDate at `clock.now()`. Under 13: delete the Auth user and any docs and files under the uid, then `AGE_UNDER_13`. Age runs before Turnstile so a signed-in under-13 user is always deleted, even though the stop screen shows no Turnstile widget.
+2. If `TURNSTILE_ENABLED`, POST the token to Cloudflare siteverify with `TURNSTILE_SECRET`, then in a transaction create `turnstileTokens/{sha256(token)}` with a 10-minute expiry; an existing record means replay. Missing, invalid, or replayed: `TURNSTILE_FAILED`. When disabled (emulator), Functions log one warning line at startup.
 3. Validate profile fields: interests from CauseArea, skills <= 20 items of <= 40 chars, availability flags, phone E.164, zip 5 digits mapped to a geohash-5 centroid from the bundled San Antonio ZIP table (or null).
 4. Write the private profile (`profileComplete true`) and `users/{uid}` (displayName = first name + last initial).
 
@@ -854,6 +854,7 @@ minutes    = max(0, floor(rawMinutes / 15 + 0.5) * 15)        // nearest 15, tie
 - finalizeShift auto-completion uses `checkOutAt = scheduledEnd`; mid-shift cancel uses `checkOutAt = cancel time`.
 - Verified letters never credit time outside the scheduled window. Coordinators adjust with setAttendance.
 - `totalApprovedHours = round2(sum(approved minutes) / 60)`.
+- A kiosk check-out that credits 0 minutes is never auto-approved: the log is written `pending` with `needsReview: true` and 0 minutes, checkOut returns `needsReview: true`, and the volunteer sees "0 hours counted, your coordinator will review".
 
 Table test (shift 9:00-13:00 local unless noted):
 
@@ -907,7 +908,7 @@ Display (D12): neutral text "Attended 8 of 10 recent shifts" (`attended` of `att
 <a id="clock"></a>
 ### 7.4 Single clock (G6) and demo clock (X12)
 
-- `shared/clock.ts` exports `createClock({offsetSource})` with `now(): Date`. Functions create one clock per invocation; the offset is read from `demoClock/global` (cached 5 s).
+- `shared/clock.ts` exports `createClock({offsetSource})` with `now(): Date`. Functions create one clock per invocation; the offset is read from `demoClock/global` on every request when `DEMO_MODE` is on (no cache, so all instances agree right after `setDemoClock`); with `DEMO_MODE` off the offset is 0 and nothing is read.
 - The offset is honored only when `DEMO_MODE == true` and (`projectId` starts with `demo-` or `ALLOW_DEMO_CLOCK == true`). The competition project sets both flags; any other project ignores the doc.
 - Every window check, kiosk code, job, age check, and stored timestamp in Functions uses `clock.now()`. ESLint forbids `FieldValue.serverTimestamp` and bare `Date.now()` / `new Date()` in `functions/src` outside `clock.ts`.
 - The client reads `demoClock/global` when `VITE_DEMO_MODE` is true and applies the same offset to countdowns and "opens at" text.

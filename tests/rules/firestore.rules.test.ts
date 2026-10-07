@@ -9,7 +9,7 @@
 import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, type Firestore } from "firebase/firestore";
+import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, type Firestore } from "firebase/firestore";
 
 const PROJECT_ID = "demo-fbla2027";
 const HOUR_MS = 3_600_000;
@@ -92,6 +92,24 @@ describe("organizations/{id}/members", () => {
     await assertFails(getDoc(doc(as("vol1"), "organizations/orgA/members/coordA")));
     await assertFails(getDoc(doc(kiosk("inst1"), "organizations/orgA/members/coordA")));
     await assertFails(setDoc(doc(as("vol1"), "organizations/orgA/members/vol1"), { role: "owner", canViewContacts: true }));
+  });
+});
+
+describe("collection group members (org switcher, SPEC Q27)", () => {
+  const membersOf = (db: Firestore, uid: string) =>
+    getDocs(query(collectionGroup(db, "members"), where("uid", "==", uid)));
+
+  it("a signed-in user can query their own memberships across orgs", async () => {
+    await assertSucceeds(membersOf(as("coordA"), "coordA"));
+    await assertSucceeds(membersOf(as("vol1"), "vol1"));
+  });
+
+  it("querying another user's memberships, unfiltered, anonymously, or as a kiosk is denied", async () => {
+    await assertFails(membersOf(as("coordA"), "coordB"));
+    await assertFails(membersOf(as("coordA"), "minorCoord"));
+    await assertFails(getDocs(collectionGroup(as("coordA"), "members")));
+    await assertFails(membersOf(anon(), "coordA"));
+    await assertFails(membersOf(kiosk("inst1"), `kiosk_inst1_abcd1234`));
   });
 });
 

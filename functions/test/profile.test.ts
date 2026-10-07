@@ -45,6 +45,17 @@ describe("volunteer.completeProfile", () => {
     expect(JSON.stringify(logLines)).not.toMatch(/2014-01-01|kid@example/);
   });
 
+  it("under 13 is deleted even with Turnstile on and no token (signed-in onboarding stop)", async () => {
+    await auth.createUser({ uid: "kid2", email: "kid2@example.test" });
+    await db.doc(PATHS.privateProfile("kid2")).set({ textSize: 125 });
+    const turnstileOn = makeDeps({ FUNCTIONS_EMULATOR: "false", GCLOUD_PROJECT: PROJECT_ID, TURNSTILE_ENABLED: "true", TURNSTILE_SECRET: "test-secret" });
+    // What the onboarding stop sends: the birth date plus placeholder names, no Turnstile token.
+    const stopInput = { firstName: "Pending", lastName: "Pending", birthDate: "2015-06-01" };
+    await expectCode(call("volunteer", "completeProfile", stopInput, user("kid2"), turnstileOn), "AGE_UNDER_13");
+    await expect(auth.getUser("kid2")).rejects.toMatchObject({ code: "auth/user-not-found" });
+    expect((await db.doc(PATHS.privateProfile("kid2")).get()).exists).toBe(false);
+  });
+
   it("validates fields at the boundary", async () => {
     await expectCode(call("volunteer", "completeProfile", { ...profileInput, birthDate: "2007-02-30" }, user("x")), "INVALID_INPUT");
     await expectCode(call("volunteer", "completeProfile", { ...profileInput, phone: "555-1234" }, user("x")), "INVALID_INPUT");
@@ -87,6 +98,23 @@ describe("admin.setDemoClock", () => {
     expect(ping.time).toBe(new Date(BASE_MS + 15 * 60_000).toISOString());
     await call("admin", "setDemoClock", { offsetMs: 0 }, adminUser());
     expect((await call<{ time: string }>("ai", "ping", {}, user("vol1"))).time).toBe(new Date(BASE_MS).toISOString());
+  });
+
+  it("two sequential setDemoClock calls are both visible to the very next op", async () => {
+    await seedWorld();
+    // Warm any per-instance state with a first read, as a busy instance would have.
+    expect((await call<{ time: string }>("ai", "ping", {}, user("vol1"))).time).toBe(new Date(BASE_MS).toISOString());
+    await call("admin", "setDemoClock", { advanceMinutes: 15 }, adminUser());
+    await call("admin", "setDemoClock", { advanceMinutes: 15 }, adminUser());
+    expect((await call<{ time: string }>("ai", "ping", {}, user("vol1"))).time).toBe(new Date(BASE_MS + 30 * 60_000).toISOString());
+  });
+
+  it("an offset written by another instance is seen at once (no per-instance cache)", async () => {
+    await seedWorld();
+    expect((await call<{ time: string }>("ai", "ping", {}, user("vol1"))).time).toBe(new Date(BASE_MS).toISOString());
+    // Simulates setDemoClock served by a different Functions instance: only the doc changes.
+    await db.doc(PATHS.demoClock()).set({ offsetMs: 45 * 60_000, setBy: "admin1", setAt: tsAt(BASE_MS) });
+    expect((await call<{ time: string }>("ai", "ping", {}, user("vol1"))).time).toBe(new Date(BASE_MS + 45 * 60_000).toISOString());
   });
 
   it("is refused outside demo mode and for non-admins", async () => {

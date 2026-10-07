@@ -5,7 +5,10 @@
  *   start     a coordinator is signed in: "Start kiosk on this device"
  *             (startKiosk, then this device signs out and signs in as kiosk)
  *   expired   "Kiosk session expired, coordinator sign-in" (assertive)
- *   exit      leaving kiosk mode requires a coordinator sign-in
+ *   exit      leaving kiosk mode requires a coordinator sign-in; the person
+ *             is checked as an owner or coordinator of the shift's org
+ *             BEFORE the kiosk session is replaced (lib/kioskExit.ts), so
+ *             anyone else gets an error and the kiosk keeps running
  * The panel is centered and free of app navigation, like the kiosk itself.
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
@@ -16,12 +19,15 @@ import { ErrorNotice } from "@/components/errors/ErrorNotice";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { ApiError, NETWORK_USER_ERROR, api } from "@/lib/api";
 import { AuthFormError, switchToKioskSession } from "@/lib/authClient";
+import { exitKioskWithCredentials } from "@/lib/kioskExit";
 
 export type KioskAccessMode = "sign-in" | "start" | "expired" | "exit";
 
 interface KioskAccessPanelProps {
   readonly mode: KioskAccessMode;
   readonly instanceId: string;
+  /** The shift's organization (from the instance doc); exit requires a coordinator of it. */
+  readonly orgId: string;
   readonly shiftTitle: string | null;
   /** exit: called after the coordinator signs in (kiosk session is replaced). */
   readonly onExited?: () => void;
@@ -62,7 +68,7 @@ const StartButton = ({ instanceId }: { instanceId: string }): ReactElement => {
   );
 };
 
-export const KioskAccessPanel = ({ mode, instanceId, shiftTitle, onExited, onCancelExit }: KioskAccessPanelProps): ReactElement => {
+export const KioskAccessPanel = ({ mode, instanceId, orgId, shiftTitle, onExited, onCancelExit }: KioskAccessPanelProps): ReactElement => {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => headingRef.current?.focus(), [mode]);
   const copy = COPY[mode];
@@ -81,7 +87,11 @@ export const KioskAccessPanel = ({ mode, instanceId, shiftTitle, onExited, onCan
         {mode === "start" ? (
           <StartButton instanceId={instanceId} />
         ) : (
-          <SignInForm submitLabel={mode === "exit" ? "Sign in and exit kiosk" : "Sign in"} onSignedIn={() => onExited?.()} />
+          <SignInForm
+            submitLabel={mode === "exit" ? "Sign in and exit kiosk" : "Sign in"}
+            authenticate={mode === "exit" ? (email, password) => exitKioskWithCredentials(email, password, orgId) : undefined}
+            onSignedIn={() => onExited?.()}
+          />
         )}
         {mode === "exit" && onCancelExit ? (
           <button type="button" onClick={onCancelExit} className={buttonClassName("quiet", "w-fit")}>

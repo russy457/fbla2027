@@ -98,6 +98,7 @@ const KioskPage = (): ReactElement => {
   if (isExiting && session.status === "kiosk") {
     return (
       <KioskAccessPanel
+        orgId={instance.data.orgId}
         mode="exit"
         instanceId={instanceId}
         shiftTitle={shiftTitle}
@@ -113,10 +114,10 @@ const KioskPage = (): ReactElement => {
     return <KioskScreen instance={instance.data} onExit={openExit} onSessionExpired={markExpired} />;
   }
   if (session.status === "kiosk" || switchFailed) {
-    return <KioskAccessPanel mode="expired" instanceId={instanceId} shiftTitle={shiftTitle} />;
+    return <KioskAccessPanel orgId={instance.data.orgId} mode="expired" instanceId={instanceId} shiftTitle={shiftTitle} />;
   }
-  if (session.status === "user") return <KioskAccessPanel mode="start" instanceId={instanceId} shiftTitle={shiftTitle} />;
-  return <KioskAccessPanel mode="sign-in" instanceId={instanceId} shiftTitle={shiftTitle} />;
+  if (session.status === "user") return <KioskAccessPanel orgId={instance.data.orgId} mode="start" instanceId={instanceId} shiftTitle={shiftTitle} />;
+  return <KioskAccessPanel orgId={instance.data.orgId} mode="sign-in" instanceId={instanceId} shiftTitle={shiftTitle} />;
 };
 
 export default KioskPage;

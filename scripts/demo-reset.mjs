@@ -9,6 +9,8 @@
  *   2. runs scripts/seed-demo.mjs again (extra args such as
  *      --shift-starts-in=10m are passed through).
  * Storage files (letter PDFs) are left in place; new letters get new paths.
+ * The child gets FUNCTIONS_DISCOVERY_TIMEOUT=60 like npm run demo, so any
+ * emulator process it starts uses the same discovery timeout on every OS.
  *
  * Usage: npm run demo:reset [-- --shift-starts-in=10m]
  */
@@ -20,6 +22,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PROJECT_ID = "demo-fbla2027";
 const FIRESTORE_HOST = process.env.FIRESTORE_EMULATOR_HOST || "127.0.0.1:8080";
 const AUTH_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST || "127.0.0.1:9099";
+const FUNCTIONS_DISCOVERY_TIMEOUT_SEC = "60";
 
 const clear = async (label, url) => {
   try {
@@ -40,6 +43,12 @@ const passThrough = process.argv.slice(2).filter((arg) => /^--shift-starts-in(=\
 const seed = spawnSync(process.execPath, [join(ROOT, "scripts", "seed-demo.mjs"), ...passThrough], {
   cwd: ROOT,
   stdio: "inherit",
-  env: { ...process.env, FIRESTORE_EMULATOR_HOST: FIRESTORE_HOST, FIREBASE_AUTH_EMULATOR_HOST: AUTH_HOST, GCLOUD_PROJECT: PROJECT_ID }
+  env: {
+    ...process.env,
+    FIRESTORE_EMULATOR_HOST: FIRESTORE_HOST,
+    FIREBASE_AUTH_EMULATOR_HOST: AUTH_HOST,
+    GCLOUD_PROJECT: PROJECT_ID,
+    FUNCTIONS_DISCOVERY_TIMEOUT: FUNCTIONS_DISCOVERY_TIMEOUT_SEC
+  }
 });
 process.exit(seed.status ?? 1);

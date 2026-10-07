@@ -3,6 +3,9 @@
  * Builds the hours log for a shift signup (SPEC#dm-hourslogs). Kiosk
  * check-outs are approved immediately; finalize auto-completions (no
  * check-out) are pending with needsReview so a coordinator confirms them.
+ * A kiosk check-out that rounds to 0 minutes (SPEC#hours, e.g. in and out
+ * before the shift started) is never an approved log: SPEC is silent on this
+ * case, so it is kept pending with needsReview for the coordinator to settle.
  */
 import type { HoursLogDoc, InstanceDoc, SignupDoc } from "@fbla/shared";
 import { ts } from "../lib/firestore";
@@ -17,7 +20,7 @@ export interface ShiftHoursParams {
 }
 
 export const newShiftHoursLog = (params: ShiftHoursParams): HoursLogDoc => {
-  const verifiedAtKiosk = params.source === "kiosk";
+  const autoApproved = params.source === "kiosk" && params.minutes > 0;
   return {
     uid: params.signup.uid,
     orgId: params.instance.orgId,
@@ -27,8 +30,8 @@ export const newShiftHoursLog = (params: ShiftHoursParams): HoursLogDoc => {
     // Logs are dated by the shift start so letter ranges and reports group by shift day.
     date: params.instance.start,
     minutes: params.minutes,
-    status: verifiedAtKiosk ? "approved" : "pending",
-    needsReview: !verifiedAtKiosk,
+    status: autoApproved ? "approved" : "pending",
+    needsReview: !autoApproved,
     description: null,
     reviewedBy: null,
     reviewedAt: null,

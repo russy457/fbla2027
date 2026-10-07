@@ -3,7 +3,9 @@
  * Email and password sign-in, validated with zod before any network call.
  * Used by the Login page and by the kiosk (coordinator sign-in to start or
  * exit kiosk mode). The parent decides what happens after success through
- * onSignedIn. Errors from Firebase Auth arrive as plain sentences
+ * onSignedIn; `authenticate` replaces the plain sign-in when a caller must
+ * check something first (the kiosk exit verifies coordinator membership before
+ * replacing the kiosk session). Errors from Firebase Auth arrive as plain sentences
  * (authClient.ts) and are announced with role="alert".
  */
 import { useState, type ReactElement } from "react";
@@ -20,9 +22,11 @@ interface SignInFormProps {
   readonly submitLabel?: string;
   /** Prefills the email, for example the coordinator who started the kiosk. */
   readonly defaultEmail?: string;
+  /** Signs in (or refuses with an AuthFormError); defaults to a plain email sign-in on this device. */
+  readonly authenticate?: (email: string, password: string) => Promise<void>;
 }
 
-export const SignInForm = ({ onSignedIn, submitLabel = "Sign in", defaultEmail = "" }: SignInFormProps): ReactElement => {
+export const SignInForm = ({ onSignedIn, submitLabel = "Sign in", defaultEmail = "", authenticate = signInWithEmail }: SignInFormProps): ReactElement => {
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
@@ -33,7 +37,7 @@ export const SignInForm = ({ onSignedIn, submitLabel = "Sign in", defaultEmail =
   const submit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      await signInWithEmail(values.email, values.password);
+      await authenticate(values.email, values.password);
       await onSignedIn();
     } catch (error) {
       setFormError(error instanceof AuthFormError ? error.message : "We couldn't sign you in. Try again.");

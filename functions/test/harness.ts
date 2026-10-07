@@ -16,7 +16,6 @@ import type { Endpoint } from "@fbla/shared";
 import { createEndpointHandler, type CallableRequestLike, type RegisteredOp } from "../src/lib/defineCallable";
 import type { LogFields, Logger, ServerDeps } from "../src/lib/deps";
 import { readFunctionsEnv } from "../src/lib/env";
-import { forgetDemoOffset } from "../src/lib/requestClock";
 import { adminOps } from "../src/endpoints/admin";
 import { aiOps } from "../src/endpoints/ai";
 import { coordinatorOps } from "../src/endpoints/coordinator";
@@ -133,7 +132,6 @@ export const resetEmulators = async (): Promise<void> => {
     fetch(`http://${authHost}/emulator/v1/projects/${PROJECT_ID}/accounts`, { method: "DELETE" })
   ]);
   responses.forEach((response) => expect(response.ok).toBe(true));
-  forgetDemoOffset(db);
   testClock.set(BASE_MS);
   logLines.length = 0;
 };
