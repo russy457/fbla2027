@@ -7,8 +7,8 @@
  * can highlight each one for the coordinator to check. Nothing is submitted
  * from here: the coordinator reviews and presses the form's own buttons.
  *
- * Warnings become plain hints. A weekly recurrence is noted but not acted
- * on (recurring series are Tier 2), so the form still creates one shift.
+ * Warnings become plain hints. A weekly recurrence sets `repeatsWeekly`, and
+ * the new-shift page then opens the Tier 2 repeat form instead of one shift.
  */
 import { MAX_CAPACITY, type CauseArea, type PlannerDraft, type PlannerWarning } from "@fbla/shared";
 
@@ -25,6 +25,8 @@ export interface PlannerPrefill {
   readonly capacity?: number;
   readonly filled: ReadonlySet<PrefillField>;
   readonly hints: readonly string[];
+  // Tier 2 lane A: "every Saturday" in the sentence; the page preselects "Repeats".
+  readonly repeatsWeekly?: true;
 }
 
 const WARNING_HINTS: Readonly<Record<PlannerWarning, string>> = {
@@ -38,7 +40,7 @@ const WARNING_HINTS: Readonly<Record<PlannerWarning, string>> = {
   "reference-date-invalid": "We couldn't work out today's date, so relative days like Saturday were skipped."
 };
 
-const WEEKLY_HINT = "Repeating every week is not available yet. This creates one shift; copy it for later dates.";
+const WEEKLY_HINT = "This repeats every week, so the schedule below is set to Repeats. Check the days, then save.";
 
 /** "HH:mm" plus minutes, wrapping past midnight. */
 const addMinutes = (hhmm: string, minutes: number): string => {
@@ -60,7 +62,8 @@ export const prefillFromDraft = (draft: PlannerDraft): PlannerPrefill => {
   };
   const entries = Object.entries(values).filter(([, value]) => value !== null) as Array<[PrefillField, string | number]>;
   const hints = [...draft.warnings.map((warning) => WARNING_HINTS[warning]), ...(draft.recurrence === "weekly" ? [WEEKLY_HINT] : [])];
-  return { ...(Object.fromEntries(entries) as Omit<PlannerPrefill, "filled" | "hints">), filled: new Set(entries.map(([field]) => field)), hints };
+  const repeats = draft.recurrence === "weekly" ? { repeatsWeekly: true as const } : {};
+  return { ...(Object.fromEntries(entries) as Omit<PlannerPrefill, "filled" | "hints">), filled: new Set(entries.map(([field]) => field)), hints, ...repeats };
 };
 
 /** Field labels for the "We filled in ..." summary, in form order. */

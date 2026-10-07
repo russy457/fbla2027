@@ -97,6 +97,17 @@ import { markNotificationsReadInput, markNotificationsReadOutput } from "./schem
 import { updateProfileInput, updateProfileOutput } from "./schemas/ops/profileOps";
 // Tier 1 review fixes
 import { getOrgReportUrlInput, getPdfUrlInput, pdfUrlOutput } from "./schemas/ops/pdfOps";
+// Tier 2 lane A: recurring series, whole-series signup, volunteer ranking and invites.
+import {
+  extendSeriesInput,
+  extendSeriesOutput,
+  seriesSignupInput,
+  seriesSignupOutput,
+  upsertSeriesInput,
+  upsertSeriesOutput
+} from "./schemas/ops/seriesOps";
+import { inviteVolunteersInput, inviteVolunteersOutput, rankVolunteersInput, rankVolunteersOutput } from "./schemas/ops/rankOps";
+// End Tier 2 lane A
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -118,7 +129,11 @@ export const OPS = {
     // Tier 1 integration
     updateProfile: op(updateProfileInput, updateProfileOutput),
     // Tier 1 review fixes
-    getPdfUrl: op(getPdfUrlInput, pdfUrlOutput)
+    getPdfUrl: op(getPdfUrlInput, pdfUrlOutput),
+    // Tier 2 lane A
+    signupSeries: op(seriesSignupInput, seriesSignupOutput),
+    extendSeriesSignup: op(seriesSignupInput, seriesSignupOutput)
+    // End Tier 2 lane A
   },
   kiosk: {
     ping: op(pingInput, pingOutput),
@@ -147,7 +162,13 @@ export const OPS = {
     generateOrgReport: op(generateOrgReportInput, generateReportOutput),
     // End Tier 1 lane B
     // Tier 1 review fixes
-    getOrgReportUrl: op(getOrgReportUrlInput, pdfUrlOutput)
+    getOrgReportUrl: op(getOrgReportUrlInput, pdfUrlOutput),
+    // Tier 2 lane A
+    upsertSeries: op(upsertSeriesInput, upsertSeriesOutput),
+    extendSeries: op(extendSeriesInput, extendSeriesOutput),
+    rankVolunteers: op(rankVolunteersInput, rankVolunteersOutput),
+    inviteVolunteers: op(inviteVolunteersInput, inviteVolunteersOutput)
+    // End Tier 2 lane A
   },
   admin: {
     ping: op(pingInput, pingOutput),

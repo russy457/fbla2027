@@ -231,5 +231,24 @@ service cloud.firestore {
       allow update: if false;
     }
     // End Tier 1 lane A
+
+    // Tier 2 lane A
+    // Recurring series (SPEC 3.7, 4.3): public read so the opportunity page can
+    // describe the rule; only Functions write (upsertSeries, extendSeries).
+    match /series/{seriesId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // How far a volunteer's whole-series signup reaches (coversThrough): the
+    // volunteer reads their own; only Functions write (signupSeries). The id is
+    // {seriesId}_{uid}, so the page can listen before the record exists.
+    match /seriesSignups/{recordId} {
+      allow read: if signedIn() && (resource == null
+        ? recordId.matches('.+_' + request.auth.uid)
+        : resource.data.uid == request.auth.uid);
+      allow write: if false;
+    }
+    // End Tier 2 lane A
   }
 }

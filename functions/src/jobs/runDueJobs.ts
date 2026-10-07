@@ -8,6 +8,8 @@
  *   3. runs the waitlist cutoff and then finalizeShift when each is due,
  *   3b. finishes due contactRefreshJobs (T4 contact hiding after an org's
  *      verified flag changed; orgs/contactRefreshJob.ts), oldest first,
+ *   3c. (Tier 2) extends recurring series whose nextExtendAt has come
+ *      (series/extendDueSeries.ts, 50 per run),
  *   4. writes jobRuns/{runId} with counts, per-instance errors, and `more`
  *      when the page was full, then releases the lease.
  * Overlapping runs cannot double-process: the lease serializes them, and the
@@ -34,6 +36,9 @@ import { requestClock } from "../lib/requestClock";
 import { runContactRefreshJobs } from "../orgs/contactRefreshJob";
 import { runCutoff } from "../shifts/cutoff";
 import { SYSTEM_ACTOR, finalizeInstance } from "../shifts/finalize";
+// Tier 2 lane A: step 5, extend recurring series whose nextExtendAt has come.
+import { SERIES_PAGE_SIZE, extendDueSeries } from "../series/extendDueSeries";
+// End Tier 2 lane A
 
 export type JobTrigger = JobRunDoc["trigger"];
 
@@ -135,18 +140,21 @@ export const runDueJobs = async (deps: ServerDeps, clock: Clock, trigger: JobTri
       }
     }
     const contactRefresh = await runContactRefreshJobs(deps, clock.nowMs(), pageSize);
-    const errors = [...results.filter((result): result is { id: string; code: string } => "code" in result), ...contactRefresh.errors];
+    // Tier 2 lane A
+    const seriesWork = await extendDueSeries(deps, clock.nowMs());
+    // End Tier 2 lane A
+    const errors = [...results.filter((result): result is { id: string; code: string } => "code" in result), ...contactRefresh.errors, ...seriesWork.errors];
     const work = results.filter((result): result is InstanceWork => "finalized" in result);
 
     const processed: JobProcessed = {
       cutoffs: work.reduce((sum, item) => sum + item.cutoffs, 0),
       finalized: work.reduce((sum, item) => sum + item.finalized, 0),
-      seriesExtended: 0,
+      seriesExtended: seriesWork.extended,
       contactRefreshes: contactRefresh.refreshed
     };
-    const attempted = due.size + contactRefresh.due;
+    const attempted = due.size + contactRefresh.due + seriesWork.due;
     const outcome: JobOutcome = errors.length === 0 ? "ok" : errors.length < attempted ? "partial" : "error";
-    const more = due.size === pageSize || contactRefresh.due === pageSize;
+    const more = due.size === pageSize || contactRefresh.due === pageSize || seriesWork.due === SERIES_PAGE_SIZE;
     await writeRun(deps, runId, { trigger, startedAt, finishedAt: ts(clock.nowMs()), processed, more, errors, outcome });
     deps.log.info("runDueJobs finished", { runId, trigger, outcome, ...processed, more, errorCount: errors.length });
     return { runId, outcome, processed, more };

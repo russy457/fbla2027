@@ -57,3 +57,10 @@ export * from "./zipAreas";
 export * from "./schemas/ops/profileOps";
 // Tier 1 review fixes: short-lived PDF links
 export * from "./schemas/ops/pdfOps";
+// Tier 2 lane A: recurring series, whole-series signup, ranking and invites
+export * from "./recurrence";
+export * from "./ranking";
+export * from "./schemas/seriesDocs";
+export * from "./schemas/ops/seriesOps";
+export * from "./schemas/ops/rankOps";
+// End Tier 2 lane A

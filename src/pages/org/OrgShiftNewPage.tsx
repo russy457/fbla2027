@@ -13,6 +13,10 @@
  * recognized, highlighted for review (SPEC#screen-planner 9.14). If the
  * parsed title matches an active opportunity that one is picked; otherwise
  * the New opportunity form opens pre-filled. It never submits anything.
+ *
+ * Tier 2: step 2 offers "Just once" or "Repeats". Repeats opens the series
+ * form (NewSeriesSection, coordinator.upsertSeries); a planner sentence such
+ * as "every Saturday" preselects it.
  */
 import { useId, useState, type ReactElement } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -35,6 +39,10 @@ import type { Opportunity } from "@/lib/data/orgAdmin";
 import { getOrganization } from "@/lib/data/orgs";
 import type { PlannerPrefill } from "@/lib/plannerPrefill";
 import { fromShiftInstants } from "@/lib/shiftForm";
+// Tier 2 lane A
+import { NewSeriesSection } from "@/components/org/NewSeriesSection";
+import { RepeatChoice } from "@/components/org/RepeatChoice";
+// End Tier 2 lane A
 
 const NEW_OPPORTUNITY = "__new__";
 const DAY_MS = 86_400_000;
@@ -79,6 +87,8 @@ const OrgShiftNewPage = (): ReactElement => {
   const [prefillVersion, setPrefillVersion] = useState(0);
   const runner = useOpRunner();
   const selectId = useId();
+  // Tier 2 lane A: one dated shift, or a recurring series.
+  const [repeats, setRepeats] = useState(false);
 
   if (org.isError || opportunities.isError) return <ErrorState title="We couldn't load this organization" description="Check your connection, then reload." />;
   if (org.isPending || opportunities.isPending) return <LoadingState label="Loading" />;
@@ -96,6 +106,7 @@ const OrgShiftNewPage = (): ReactElement => {
   const applyPrefill = (next: PlannerPrefill): void => {
     setPrefill(next);
     setPrefillVersion((version) => version + 1);
+    if (next.repeatsWeekly) setRepeats(true);
     if (choice !== "") return;
     const match = matchingOpportunity(active, next.title);
     if (match !== null) setChoice(match);
@@ -136,16 +147,21 @@ const OrgShiftNewPage = (): ReactElement => {
       {selected !== "" && selected !== NEW_OPPORTUNITY ? (
         <section aria-labelledby="step-when" className="flex flex-col gap-4">
           <h2 id="step-when" className="text-lg font-semibold text-fg">2. When</h2>
-          <InstanceForm
-            key={prefillVersion}
-            timeZone={timeZone}
-            nowMs={nowMs}
-            initial={initialTimes(nowMs, timeZone, prefill)}
-            highlighted={prefill?.filled}
-            submitLabel="Create shift"
-            isPending={runner.pending === "instance"}
-            onSubmit={(values) => void createShift(values)}
-          />
+          <RepeatChoice repeats={repeats} onChange={setRepeats} />
+          {repeats ? (
+            <NewSeriesSection key={prefillVersion} orgId={orgId} opportunityId={selected} timeZone={timeZone} nowMs={nowMs} start={initialTimes(nowMs, timeZone, prefill)} />
+          ) : (
+            <InstanceForm
+              key={prefillVersion}
+              timeZone={timeZone}
+              nowMs={nowMs}
+              initial={initialTimes(nowMs, timeZone, prefill)}
+              highlighted={prefill?.filled}
+              submitLabel="Create shift"
+              isPending={runner.pending === "instance"}
+              onSubmit={(values) => void createShift(values)}
+            />
+          )}
         </section>
       ) : null}
       <OpFeedback message={runner.message} error={runner.error} />

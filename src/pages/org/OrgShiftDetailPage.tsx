@@ -7,7 +7,7 @@
  * The instance is live, so a cancel or finalize shows immediately.
  */
 import type { ReactElement } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { formatShiftTime } from "@fbla/shared";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
@@ -22,6 +22,9 @@ import { useNow } from "@/hooks/useNow";
 import { useOpportunity } from "@/hooks/useOpportunity";
 import { useInstance } from "@/hooks/useShiftData";
 import { useSessionUser } from "@/store/authStore";
+// Tier 2 lane A
+import { RankedVolunteersPanel } from "@/components/org/RankedVolunteersPanel";
+// End Tier 2 lane A
 
 const OrgShiftDetailPage = (): ReactElement => {
   const { orgId = "", instanceId = "" } = useParams();
@@ -53,7 +56,17 @@ const OrgShiftDetailPage = (): ReactElement => {
           </div>
         ) : null}
       </section>
+      {/* Tier 2 lane A: series link and the ranked volunteers panel (SPEC 8.4, 9.14). */}
+      {shift.seriesId ? (
+        <p className="text-sm text-fg-muted">
+          Part of a recurring series.{" "}
+          <Link to={`/org/${orgId}/series/${shift.seriesId}`} className="font-semibold text-accent underline underline-offset-2">
+            View series
+          </Link>
+        </p>
+      ) : null}
       <ShiftAttendanceRoster orgId={orgId} instance={shift} canViewContacts={membership.data?.canViewContacts === true} />
+      {isOpen && nowMs < shift.start.toMillis() ? <RankedVolunteersPanel instanceId={shift.id} /> : null}
       {isOpen && !hasEnded ? <EditShiftPanel instance={shift} nowMs={nowMs} /> : null}
       {opportunity.data ? <EditOpportunityPanel opportunity={opportunity.data} /> : null}
       {!hasEnded ? <CancelShiftControl instanceId={shift.id} isCancelled={shift.status === "cancelled"} /> : null}

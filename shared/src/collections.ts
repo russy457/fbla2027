@@ -37,8 +37,12 @@ export const COLLECTIONS = Object.freeze({
   // Tier 1 lane A: in-app notifications (notifications/{uid}/items) and saved items (users/{uid}/saved).
   notifications: "notifications",
   notificationItems: "items",
-  saved: "saved"
+  saved: "saved",
   // End Tier 1 lane A
+  // Tier 2 lane A: recurring series and each volunteer's whole-series signup record.
+  series: "series",
+  seriesSignups: "seriesSignups"
+  // End Tier 2 lane A
 });
 
 export const PATHS = Object.freeze({

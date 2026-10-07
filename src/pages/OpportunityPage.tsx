@@ -27,6 +27,9 @@ import type { Instance } from "@/lib/data/instances";
 import type { Opportunity } from "@/lib/data/opportunities";
 import { seatsLeft } from "@/lib/signupButtonState";
 import { useSessionUser } from "@/store/authStore";
+// Tier 2 lane A
+import { SeriesSignupPanel } from "@/components/shifts/SeriesSignupPanel";
+// End Tier 2 lane A
 
 /** Seats and "Shift started" re-check on the same 15-second tick as Explore. */
 const OPPORTUNITY_TICK_MS = 15_000;
@@ -91,6 +94,8 @@ const OpportunityPage = (): ReactElement => {
           returnPath={opportunityPathFor(shift.id)}
         />
       </div>
+      {/* Tier 2 lane A: whole-series signup for a recurring shift (SPEC 9.4). */}
+      {shift.seriesId && shift.status === "scheduled" ? <SeriesSignupPanel seriesId={shift.seriesId} uid={uid} returnPath={opportunityPathFor(shift.id)} /> : null}
       <section aria-labelledby="about-shift" className="flex flex-col gap-2">
         <h2 id="about-shift" className="text-xl font-semibold text-fg">
           About this shift

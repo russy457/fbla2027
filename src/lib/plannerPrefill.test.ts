@@ -26,7 +26,8 @@ describe("prefillFromDraft", () => {
   it("derives the end from a duration and notes weekly repeats", () => {
     const prefill = prefillFromDraft({ ...EMPTY, startTime: "22:30", durationMinutes: 120, recurrence: "weekly" });
     expect(prefill.endTime).toBe("00:30");
-    expect(prefill.hints[0]).toMatch(/Repeating every week is not available yet/);
+    expect(prefill.hints[0]).toMatch(/This repeats every week/);
+    expect(prefill.repeatsWeekly).toBe(true);
     expect(prefillSummary(prefill)).toBe("We filled in start time and end time. Check each highlighted field, then save.");
   });
 

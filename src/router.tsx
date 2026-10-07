@@ -51,6 +51,9 @@ const CheckinPage = lazyWithReload(() => import("./pages/CheckinPage"));
 // Tier 1 integration
 const ProfilePage = lazyWithReload(() => import("./pages/volunteer/ProfilePage"));
 const OrganizationPage = lazyWithReload(() => import("./pages/OrganizationPage"));
+// Tier 2 lane A
+const OrgSeriesPage = lazyWithReload(() => import("./pages/org/OrgSeriesPage"));
+// End Tier 2 lane A
 
 export const routes: RouteObject[] = [
   {
@@ -97,8 +100,11 @@ export const routes: RouteObject[] = [
               { path: "reports", element: <OrgReportsPage /> },
               { path: "settings", element: <OrgSettingsPage /> }
             ]
-          }
+          },
           // End Tier 1 lane B
+          // Tier 2 lane A: recurring series page for coordinators
+          { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "series/:seriesId", element: <OrgSeriesPage /> }] }
+          // End Tier 2 lane A
         ]
       },
       // Tier 1 lane C

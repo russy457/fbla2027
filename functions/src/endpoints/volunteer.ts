@@ -20,6 +20,9 @@ import { signup } from "../ops/signup";
 import { updateProfile } from "../ops/updateProfile";
 // Tier 1 lane B
 import { laneBVolunteerOps } from "./laneB";
+// Tier 2 lane A
+import { tier2LaneAVolunteerOps } from "./tier2LaneA";
+// End Tier 2 lane A
 
 export const volunteerOps: readonly RegisteredOp[] = [
   pingOp("volunteer"),
@@ -34,7 +37,10 @@ export const volunteerOps: readonly RegisteredOp[] = [
   // Tier 1 integration
   updateProfile,
   // Tier 1 review fixes
-  getPdfUrl
+  getPdfUrl,
+  // Tier 2 lane A
+  ...tier2LaneAVolunteerOps
+  // End Tier 2 lane A
 ];
 
 export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: deploySecrets("TURNSTILE_SECRET") });

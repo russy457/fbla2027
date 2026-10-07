@@ -70,7 +70,8 @@ export const makeDeps = (extraEnv: Record<string, string> = {}): ServerDeps => (
   db,
   auth,
   storage,
-  env: readFunctionsEnv({ FUNCTIONS_EMULATOR: "true", GCLOUD_PROJECT: PROJECT_ID, ...extraEnv }),
+  // Tier 2 lane A: pass the Storage emulator address through, so signed-link tests work on non-default ports.
+  env: readFunctionsEnv({ FUNCTIONS_EMULATOR: "true", GCLOUD_PROJECT: PROJECT_ID, FIREBASE_STORAGE_EMULATOR_HOST: process.env.FIREBASE_STORAGE_EMULATOR_HOST, ...extraEnv }),
   nowMs: () => testClock.nowMs,
   log: captureLogger
 });

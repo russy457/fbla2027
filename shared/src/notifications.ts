@@ -130,3 +130,17 @@ export const disputeOpenedNotification = (volunteerName: string, shift: ShiftRef
   link: `/org/${encodeURIComponent(orgId)}/dashboard`,
   data: shiftData(shift)
 });
+
+// Tier 2 lane A
+/** shift-invite: a coordinator picked this volunteer from the ranked list (SPEC 8.3, 8.4). */
+export const shiftInviteNotification = (shift: ShiftRef): NotificationContent => ({
+  type: "shift-invite",
+  title: `${shift.orgName} invited you to ${shift.title}`,
+  body: `${formatInTimeZone(new Date(shift.startMs), shift.timeZone, "EEE, MMM d, h:mm a zzz")}. Open the shift to sign up if it works for you.`,
+  link: shiftLink(shift.instanceId),
+  data: shiftData(shift)
+});
+
+/** One invite per volunteer per shift: a second invite rewrites the same item (SPEC 5.2). */
+export const shiftInviteKey = (instanceId: string, uid: string): string => `${instanceId}_${uid}`;
+// End Tier 2 lane A
