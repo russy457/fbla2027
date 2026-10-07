@@ -16,6 +16,8 @@ export const SmoothScroll = (): null => {
       } else if (!scroller) {
         scroller = new Lenis({
           autoRaf: true,
+          // Lazy route content grows the body after the scroller mounts.
+          content: document.body,
           anchors: true,
           allowNestedScroll: true,
           lerp: 0.18,
