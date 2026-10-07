@@ -19,6 +19,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:rules": "firebase emulators:exec --project demo-fbla2027 --only firestore,storage \"vitest run --config vitest.rules.config.ts\"",
+    "test:functions": "firebase emulators:exec --project demo-fbla2027 --only auth,firestore,storage \"vitest run --config vitest.functions.config.ts\"",
     "test:e2e": "playwright test",
     "build:functions": "node scripts/build-functions.mjs",
     "emulators": "npm run build:functions && firebase emulators:start --project demo-fbla2027 --only auth,firestore,functions,storage",
@@ -52,6 +54,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.2",

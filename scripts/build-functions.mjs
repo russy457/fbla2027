@@ -6,7 +6,7 @@
  *   functions/src (TypeScript) + shared/src  --esbuild-->  functions-dist/lib/index.js
  *
  * Then writes functions-dist/package.json listing ONLY the runtime packages
- * (firebase-functions, firebase-admin) with the versions from
+ * (firebase-functions, firebase-admin, pdfkit, qrcode) with the versions from
  * functions/package.json, and creates its own package-lock.json. The result
  * never imports ../shared or any workspace path, so Cloud Build can install
  * and run it on its own. firebase.json points functions.source here.
@@ -21,7 +21,9 @@ import { build } from "esbuild";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = join(ROOT, "functions-dist");
-const RUNTIME_DEPENDENCIES = ["firebase-functions", "firebase-admin"];
+// pdfkit loads its font metric (.afm) files from its own folder at runtime, so it (and qrcode,
+// which letters use beside it) is installed in the deploy dir instead of bundled.
+const RUNTIME_DEPENDENCIES = ["firebase-functions", "firebase-admin", "pdfkit", "qrcode"];
 const skipLock = process.argv.includes("--skip-lock");
 
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));

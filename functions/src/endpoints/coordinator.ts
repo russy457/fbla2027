@@ -1,14 +1,15 @@
 /**
  * coordinator.ts
- * The "coordinator" callable endpoint (plan G4). Coordinator operations (shifts, roster, attendance, hours approval) for one organization.
- * Register each new operation in the ops map below, one handler file per
- * operation under functions/src/ops/.
+ * The "coordinator" callable endpoint (SPEC 2.3, G4): kiosk start, finalize,
+ * and letter revocation. Every op derives the org from the target resource
+ * (lib/auth.ts), never from client input. 512 MB for Tier 1 org reports.
  */
-import { defineCallable } from "../lib/defineCallable";
+import { defineEndpoint, type RegisteredOp } from "../lib/defineCallable";
+import { finalizeShift } from "../ops/finalizeShift";
 import { pingOp } from "../ops/ping";
+import { revokeLetter } from "../ops/revokeLetter";
+import { startKiosk } from "../ops/startKiosk";
 
-export const coordinatorOps = {
-  ping: pingOp
-};
+export const coordinatorOps: readonly RegisteredOp[] = [pingOp("coordinator"), startKiosk, finalizeShift, revokeLetter];
 
-export const coordinator = defineCallable({ name: "coordinator", ops: coordinatorOps });
+export const coordinator = defineEndpoint("coordinator", coordinatorOps, { memory: "512MiB" });

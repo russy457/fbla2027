@@ -1,25 +1,50 @@
 /**
  * health.ts
- * Plain HTTP health check (kept from the old app, used by the DEMO.md
- * pre-flight check). Reports the project id and the current time from the
- * shared clock, so a demo clock offset is visible here too.
+ * Plain HTTP health check (SPEC 2.3; used by the DEMO.md pre-flight check).
+ * Returns {ok, version, demoMode, lastJobRunAt} plus the project and the
+ * request clock's time, so a demo clock offset and a stalled scheduler are
+ * both visible from one URL.
  */
 import { onRequest } from "firebase-functions/v2/https";
-import { clock } from "@fbla/shared";
+import { COLLECTIONS, type JobRunDoc } from "@fbla/shared";
+import { defaultDeps, type ServerDeps } from "./lib/deps";
+import { isoOf } from "./lib/firestore";
+import { requestClock } from "./lib/requestClock";
 
 export interface HealthPayload {
   readonly ok: true;
+  readonly version: string;
+  readonly demoMode: boolean;
   readonly project: string;
   readonly time: string;
+  readonly lastJobRunAt: string | null;
 }
 
-export const healthPayload = (env: Readonly<Record<string, string | undefined>>): HealthPayload => ({
-  ok: true,
-  project: env.GCLOUD_PROJECT ?? env.GCP_PROJECT ?? "unknown",
-  time: clock.now().toISOString()
-});
+/** Start time of the newest jobRuns doc, or null when none exists or the read fails. */
+const lastJobRunAt = async (deps: ServerDeps): Promise<string | null> => {
+  try {
+    const latest = await deps.db.collection(COLLECTIONS.jobRuns).orderBy("startedAt", "desc").limit(1).get();
+    const run = latest.docs[0]?.data() as JobRunDoc | undefined;
+    return run ? isoOf(run.startedAt) : null;
+  } catch (error) {
+    deps.log.warn("health could not read jobRuns", { error: error instanceof Error ? error.message : String(error) });
+    return null;
+  }
+};
 
-export const health = onRequest((_request, response) => {
+export const healthPayload = async (deps: ServerDeps): Promise<HealthPayload> => {
+  const clock = await requestClock(deps);
+  return {
+    ok: true,
+    version: deps.env.version,
+    demoMode: deps.env.demoMode,
+    project: deps.env.projectId,
+    time: clock.now().toISOString(),
+    lastJobRunAt: await lastJobRunAt(deps)
+  };
+};
+
+export const health = onRequest(async (_request, response) => {
   response.set("Cache-Control", "no-store");
-  response.json(healthPayload(process.env));
+  response.json(await healthPayload(defaultDeps()));
 });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { clock, getOffsetMs, setOffsetMs, withFixedNow } from "./clock";
+import { clock, createClock, getOffsetMs, setOffsetMs, withFixedNow } from "./clock";
 
 const FIXED = Date.UTC(2026, 9, 6, 15, 0, 0); // 2026-10-06T15:00:00Z
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -59,6 +59,25 @@ describe("clock", () => {
     });
     expect(result).toBe(FIXED);
     expect(Math.abs(clock.nowMs() - Date.now())).toBeLessThan(1000);
+  });
+
+  it("createClock uses the injected base time and offset", () => {
+    let base = FIXED;
+    const testClock = createClock({ baseNowMs: () => base, offsetMs: FIFTEEN_MINUTES + 0.7 });
+    expect(testClock.nowMs()).toBe(FIXED + FIFTEEN_MINUTES);
+    base += 1000;
+    expect(testClock.now().getTime()).toBe(FIXED + FIFTEEN_MINUTES + 1000);
+  });
+
+  it("createClock defaults to wall time (or withFixedNow) and ignores the global offset", () => {
+    expect(withFixedNow(FIXED, () => createClock().nowMs())).toBe(FIXED);
+    expect(Math.abs(createClock().nowMs() - Date.now())).toBeLessThan(1000);
+    setOffsetMs(FIFTEEN_MINUTES);
+    expect(createClock({ baseNowMs: () => FIXED }).nowMs()).toBe(FIXED);
+  });
+
+  it("createClock rejects a non-finite offset", () => {
+    expect(() => createClock({ offsetMs: Number.NaN })).toThrow(RangeError);
   });
 
   it("supports nesting by restoring the outer fixed time", () => {

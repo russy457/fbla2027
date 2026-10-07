@@ -1,35 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LIMITS, LIMIT_ENV_VARS, resolveLimits } from "./config";
+import { CONFIG_ENV_VARS, DEFAULT_CONFIG, DEFAULT_TIME_ZONE, MILESTONES, resolveConfig } from "./config";
 
-describe("resolveLimits", () => {
-  it("returns the plan's defaults when no overrides are set", () => {
-    expect(resolveLimits()).toEqual({
-      aiCallsPerHour: 20,
-      aiCallsPerDay: 100,
-      aiInputMaxChars: 2000,
-      aiOutputMaxTokens: 1024,
-      checkInAttemptsPerWindow: 10,
-      checkInWindowMinutes: 10,
-      kioskCodeRotationSeconds: 30,
-      seriesWindowWeeks: 8
-    });
+describe("resolveConfig (SPEC#config)", () => {
+  it("returns the SPEC defaults when no overrides are set", () => {
+    const config = resolveConfig();
+    expect(config).toEqual(DEFAULT_CONFIG);
+    expect(config.checkinRateMax).toBe(10);
+    expect(config.checkinRateWindowSec).toBe(600);
+    expect(config.waitlistCutoffMin).toBe(120);
+    expect(config.jobLeaseSec).toBe(240);
+  });
+
+  it("names each override after its key in UPPER_SNAKE_CASE", () => {
+    expect(CONFIG_ENV_VARS.aiPerHour).toBe("AI_PER_HOUR");
+    expect(CONFIG_ENV_VARS.checkinRateWindowSec).toBe("CHECKIN_RATE_WINDOW_SEC");
+    expect(CONFIG_ENV_VARS.jobPageSize).toBe("JOB_PAGE_SIZE");
+    expect(Object.keys(CONFIG_ENV_VARS).sort()).toEqual(Object.keys(DEFAULT_CONFIG).sort());
   });
 
   it("applies an environment override", () => {
-    const limits = resolveLimits({ LIMIT_AI_CALLS_PER_HOUR: " 5 " });
-    expect(limits.aiCallsPerHour).toBe(5);
-    expect(limits.aiCallsPerDay).toBe(DEFAULT_LIMITS.aiCallsPerDay);
-  });
-
-  it("has an env var for every limit", () => {
-    expect(Object.keys(LIMIT_ENV_VARS).sort()).toEqual(Object.keys(DEFAULT_LIMITS).sort());
+    const config = resolveConfig({ CHECKIN_RATE_MAX: " 5 " });
+    expect(config.checkinRateMax).toBe(5);
+    expect(config.aiPerDay).toBe(DEFAULT_CONFIG.aiPerDay);
   });
 
   it.each(["", "0", "-3", "2.5", "ten"])("rejects the malformed override %j", (raw) => {
-    expect(() => resolveLimits({ LIMIT_SERIES_WINDOW_WEEKS: raw })).toThrow(/LIMIT_SERIES_WINDOW_WEEKS/);
+    expect(() => resolveConfig({ SERIES_WINDOW_WEEKS: raw })).toThrow(/SERIES_WINDOW_WEEKS/);
   });
 
-  it("returns a frozen object", () => {
-    expect(Object.isFrozen(resolveLimits())).toBe(true);
+  it("returns a frozen object and exposes milestones and the default zone", () => {
+    expect(Object.isFrozen(resolveConfig())).toBe(true);
+    expect([...MILESTONES]).toEqual([25, 50, 100]);
+    expect(DEFAULT_TIME_ZONE).toBe("America/Chicago");
   });
 });

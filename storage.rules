@@ -1,12 +1,51 @@
 rules_version = '2';
 
 // storage.rules
-// Deny-all placeholder. Tier 0 adds owner-only letter/report paths, image/*
-// and application/pdf content-type checks, and the 5 MB size limit (plan G17).
+// Client access rules for Cloud Storage (docs/SPEC.md 3.22, G17).
+//   orgs/{orgId}/photos/*   public read; org coordinators upload images < 5 MB
+//   avatars/{uid}/*         signed-in read; the owner uploads images < 5 MB
+//   letters/{uid}/*.pdf     owner read only; written by Functions (Admin SDK)
+//   reports/{uid}/*.pdf     owner read only; written by Functions (Admin SDK)
+// Everything else is denied. Tests: tests/rules/storage.rules.test.ts.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if false;
+
+    function signedIn() {
+      return request.auth != null && !('kioskInstanceId' in request.auth.token);
+    }
+
+    function isImageUnder5MB() {
+      return request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Cross-service lookup: the members doc decides who coordinates an org.
+    function isOrgCoordinator(orgId) {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data.role in ['owner', 'coordinator'];
+    }
+
+    match /orgs/{orgId}/photos/{file} {
+      allow read: if true;
+      allow create, update: if isOrgCoordinator(orgId) && isImageUnder5MB();
+      allow delete: if isOrgCoordinator(orgId);
+    }
+
+    match /avatars/{uid}/{file} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid && isImageUnder5MB();
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /letters/{uid}/{file} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /reports/{uid}/{file} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
     }
   }
 }

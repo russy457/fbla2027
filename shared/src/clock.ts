@@ -29,6 +29,32 @@ export const clock: Clock = {
   nowMs: currentMs
 };
 
+export interface ClockOptions {
+  /**
+   * Where "real" time comes from, in epoch ms. Defaults to wall time (or the
+   * withFixedNow value). Function tests inject a controllable source here.
+   */
+  readonly baseNowMs?: () => number;
+  /** Demo clock offset for this clock only (SPEC#clock). Defaults to 0. */
+  readonly offsetMs?: number;
+}
+
+/**
+ * Creates an independent clock (SPEC#clock). Cloud Functions build one per
+ * invocation with the demo offset they read from demoClock/global, so two
+ * concurrent requests never share mutable time state. The module-level
+ * `clock` above stays the client's single clock.
+ */
+export const createClock = (options: ClockOptions = {}): Clock => {
+  const offset = options.offsetMs ?? 0;
+  if (!Number.isFinite(offset)) {
+    throw new RangeError(`Clock offset must be a finite number of milliseconds, got ${String(offset)}`);
+  }
+  const base = options.baseNowMs ?? (() => fixedNowMs ?? Date.now());
+  const nowMs = (): number => base() + Math.trunc(offset);
+  return { now: () => new Date(nowMs()), nowMs };
+};
+
 /** Sets the demo clock offset. Throws on non-finite input so a bad env value cannot corrupt time. */
 export const setOffsetMs = (ms: number): void => {
   if (!Number.isFinite(ms)) {

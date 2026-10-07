@@ -1,93 +1,16 @@
 /**
  * errors.ts
- * The error catalog (plan X9). Cloud Functions throw errors by catalog code;
- * the client maps the same code back to friendly copy, a fix, and a help
- * article. Keeping both sides on one list means a message is written once and
- * every error a user can see has a next step.
+ * Turns error codes from the catalog (errorCatalog.ts, SPEC#errors) into
+ * thrown errors on the server and friendly copy on the client.
  *
- * Each entry has:
- *   code       stable identifier sent to the client in HttpsError details
- *   httpsCode  the Firebase callable error code used on the wire
- *   message    user-facing sentence, built from optional params
- *   fix        what the user (or developer) should do next
- *   helpSlug   Help Center article slug, or null when no article applies
+ *   Server: `throw new AppError("SHIFT_FULL")`. defineCallable converts it to
+ *           an HttpsError whose details are {code, params, requestId, ...}.
+ *   Client: `toUserError(err)` (SPEC#screen-errors) reads those details back
+ *           and returns {title, message, fix, helpSlug, requestId} for the UI.
  */
+import { ERROR_CATALOG, type ErrorCode, type ErrorParams, type HelpSlug, type HttpsErrorCode } from "./errorCatalog";
 
-/** Firebase callable error codes (the subset of FunctionsErrorCode we use). */
-export type HttpsErrorCode =
-  | "invalid-argument"
-  | "unauthenticated"
-  | "permission-denied"
-  | "not-found"
-  | "failed-precondition"
-  | "resource-exhausted"
-  | "internal";
-
-export type ErrorParams = Readonly<Record<string, string | number>>;
-
-export interface ErrorCatalogEntry {
-  readonly code: string;
-  readonly httpsCode: HttpsErrorCode;
-  readonly message: (params: ErrorParams) => string;
-  readonly fix: string;
-  readonly helpSlug: string | null;
-}
-
-const entry = (value: ErrorCatalogEntry): ErrorCatalogEntry => Object.freeze(value);
-
-export const ERROR_CATALOG = Object.freeze({
-  UNAUTHENTICATED: entry({
-    code: "UNAUTHENTICATED",
-    httpsCode: "unauthenticated",
-    message: () => "Please sign in to continue.",
-    fix: "Sign in, then try again.",
-    helpSlug: "signing-in"
-  }),
-  PERMISSION_DENIED: entry({
-    code: "PERMISSION_DENIED",
-    httpsCode: "permission-denied",
-    message: () => "You do not have permission to do that.",
-    fix: "Ask an organization owner to add you as a coordinator, or switch accounts.",
-    helpSlug: "roles-and-permissions"
-  }),
-  PROFILE_INCOMPLETE: entry({
-    code: "PROFILE_INCOMPLETE",
-    httpsCode: "failed-precondition",
-    message: () => "Finish setting up your profile first.",
-    fix: "Complete onboarding (birth date and interests), then try again.",
-    helpSlug: "finishing-your-profile"
-  }),
-  NOT_FOUND: entry({
-    code: "NOT_FOUND",
-    httpsCode: "not-found",
-    message: (params) => (params.resource ? `We could not find that ${params.resource}.` : "We could not find that."),
-    fix: "Check the link, or go back and pick it again from the list.",
-    helpSlug: null
-  }),
-  INVALID_INPUT: entry({
-    code: "INVALID_INPUT",
-    httpsCode: "invalid-argument",
-    message: (params) => (params.field ? `Please check the ${params.field} field.` : "Some of the information sent was not valid."),
-    fix: "Correct the highlighted fields and submit again.",
-    helpSlug: null
-  }),
-  UNKNOWN_OPERATION: entry({
-    code: "UNKNOWN_OPERATION",
-    httpsCode: "invalid-argument",
-    message: (params) => `This app version asked for an action the server does not know (${params.op ?? "none"}).`,
-    fix: "Reload the page to get the latest version of the app.",
-    helpSlug: null
-  }),
-  INTERNAL: entry({
-    code: "INTERNAL",
-    httpsCode: "internal",
-    message: () => "Something went wrong on our side.",
-    fix: "Try again in a minute. If it keeps happening, share the request ID with your coordinator.",
-    helpSlug: null
-  })
-});
-
-export type ErrorCode = keyof typeof ERROR_CATALOG;
+export { ERROR_CATALOG, HELP_SLUGS, type ErrorCatalogEntry, type ErrorCode, type ErrorParams, type HelpSlug, type HttpsErrorCode } from "./errorCatalog";
 
 /** Plain, serializable description of an error, safe to send to the client. */
 export interface DescribedError {
@@ -95,7 +18,7 @@ export interface DescribedError {
   readonly httpsCode: HttpsErrorCode;
   readonly message: string;
   readonly fix: string;
-  readonly helpSlug: string | null;
+  readonly helpSlug: HelpSlug | null;
 }
 
 export const isErrorCode = (value: unknown): value is ErrorCode =>
@@ -133,3 +56,63 @@ export class AppError extends Error {
 }
 
 export const isAppError = (value: unknown): value is AppError => value instanceof AppError;
+
+/** What the UI shows for any failure (SPEC#screen-errors, D22). */
+export interface UserError {
+  readonly code: ErrorCode | null;
+  readonly title: string;
+  readonly message: string;
+  readonly fix: string;
+  readonly helpSlug: HelpSlug | null;
+  readonly requestId: string | null;
+  readonly params: ErrorParams;
+}
+
+/** Short heading per wire code; the catalog message carries the detail. */
+const TITLES: Readonly<Record<HttpsErrorCode, string>> = {
+  "invalid-argument": "Check your entry",
+  unauthenticated: "Sign in needed",
+  "permission-denied": "No access",
+  "not-found": "Not found",
+  "already-exists": "Already done",
+  "failed-precondition": "Not available right now",
+  "resource-exhausted": "Please wait",
+  aborted: "Busy right now",
+  internal: "Something went wrong"
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
+
+/** Keeps only string and number params, so untrusted details cannot inject objects into copy. */
+const readParams = (value: unknown): ErrorParams =>
+  isRecord(value)
+    ? Object.fromEntries(
+        Object.entries(value).filter((pair): pair is [string, string | number] => ["string", "number"].includes(typeof pair[1]))
+      )
+    : {};
+
+const fromCode = (code: ErrorCode, params: ErrorParams, requestId: string | null): UserError => {
+  const described = describeError(code, requestId === null ? params : { requestId, ...params });
+  return {
+    code,
+    title: TITLES[described.httpsCode],
+    message: described.message,
+    fix: described.fix,
+    helpSlug: described.helpSlug,
+    requestId,
+    params
+  };
+};
+
+/**
+ * Maps anything thrown by a callable (FirebaseError with details, AppError,
+ * network failure, plain Error) to UI copy. Unknown errors become
+ * "Something went wrong (ref: ID)" so nothing is silently dropped.
+ */
+export const toUserError = (error: unknown): UserError => {
+  if (isAppError(error)) return fromCode(error.code, error.params, null);
+  const details = isRecord(error) && isRecord(error.details) ? error.details : null;
+  const requestId = details && typeof details.requestId === "string" ? details.requestId : null;
+  if (details && isErrorCode(details.code)) return fromCode(details.code, readParams(details.params), requestId);
+  return fromCode("INTERNAL", {}, requestId);
+};

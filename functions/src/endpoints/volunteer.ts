@@ -1,14 +1,18 @@
 /**
  * volunteer.ts
- * The "volunteer" callable endpoint (plan G4). Volunteer operations (signup, cancel, hours, letters) arrive in Tier 0 and Tier 1.
- * Register each new operation in the ops map below, one handler file per
- * operation under functions/src/ops/.
+ * The "volunteer" callable endpoint (SPEC 2.3, G4): profile, signup, cancel,
+ * and letters. 512 MB because issueLetter renders a PDF.
+ * Add an op: schema in shared/src/schemas/ops, entry in shared/src/ops.ts,
+ * handler in functions/src/ops/<op>.ts, then list it here.
  */
-import { defineCallable } from "../lib/defineCallable";
+import { defineEndpoint, type RegisteredOp } from "../lib/defineCallable";
+import { deploySecrets } from "../lib/secrets";
+import { cancelSignup } from "../ops/cancelSignup";
+import { completeProfile } from "../ops/completeProfile";
+import { issueLetter } from "../ops/issueLetter";
 import { pingOp } from "../ops/ping";
+import { signup } from "../ops/signup";
 
-export const volunteerOps = {
-  ping: pingOp
-};
+export const volunteerOps: readonly RegisteredOp[] = [pingOp("volunteer"), completeProfile, signup, cancelSignup, issueLetter];
 
-export const volunteer = defineCallable({ name: "volunteer", ops: volunteerOps });
+export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: deploySecrets("TURNSTILE_SECRET") });

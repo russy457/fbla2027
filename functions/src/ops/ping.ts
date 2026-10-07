@@ -1,36 +1,26 @@
 /**
  * ping.ts
- * The only operation registered in the Tier 0 skeleton. Every endpoint exposes
- * it so the client, the emulator smoke test, and DEMO.md pre-flight checks can
- * prove the callable path works end to end (auth, validation, logging).
+ * Every endpoint exposes ping so the client, the emulator smoke test, and the
+ * DEMO.md pre-flight check can prove the callable path works end to end
+ * (auth, validation, logging, the request clock).
  */
-import { z } from "zod";
-import { clock } from "@fbla/shared";
-import { defineOp } from "../lib/defineCallable";
+import type { Endpoint } from "@fbla/shared";
+import { signedIn } from "../lib/auth";
+import { defineCallable, type RegisteredOp } from "../lib/defineCallable";
 
-const MAX_ECHO_LENGTH = 100;
-
-export const pingInputSchema = z
-  .object({ echo: z.string().max(MAX_ECHO_LENGTH).optional() })
-  .strict()
-  .default({});
-
-export interface PingResult {
-  readonly pong: true;
-  readonly fn: string;
-  readonly uid: string;
-  readonly time: string;
-  readonly echo: string | null;
-}
-
-export const pingOp = defineOp({
-  input: pingInputSchema,
-  auth: "signedIn",
-  handler: (input, context): PingResult => ({
-    pong: true,
-    fn: context.fn,
-    uid: context.uid,
-    time: clock.now().toISOString(),
-    echo: input.echo ?? null
-  })
+/** Builds the ping op for one endpoint. All five share the same schemas in the op map. */
+export const pingOp = (endpoint: Endpoint): RegisteredOp => ({
+  ...defineCallable({
+    endpoint: "volunteer",
+    op: "ping",
+    auth: signedIn(),
+    handler: async ({ input, caller, clock }) => ({
+      pong: true as const,
+      fn: endpoint,
+      uid: caller.uid,
+      time: clock.now().toISOString(),
+      echo: input.echo ?? null
+    })
+  }),
+  endpoint
 });

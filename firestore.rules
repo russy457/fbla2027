@@ -1,14 +1,171 @@
 rules_version = '2';
 
 // firestore.rules
-// Deny-all placeholder. The full rules matrix (public/private user split,
-// signups, hours, letters, organizations, and every denied case) arrives in
-// Tier 0 together with its emulator rules tests. Cloud Functions use the Admin
-// SDK and are not bound by these rules, so they enforce their own checks.
+// Client access rules for the Tier 0 collections (docs/SPEC.md#rules-matrix).
+// Cloud Functions use the Admin SDK and are NOT bound by these rules; every op
+// authorizes itself (functions/src/lib/auth.ts). Clients therefore only READ,
+// except the allowlisted display preferences on their own private profile.
+// Anything not matched below is denied (default deny).
+// Tests: tests/rules/firestore.rules.test.ts (npm run test:rules).
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+
+    // ---------- helpers ----------
+
+    // A real user session. Kiosk custom tokens carry kioskInstanceId and are
+    // treated as a separate, much narrower role.
+    function signedIn() {
+      return request.auth != null && !('kioskInstanceId' in request.auth.token);
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function memberPath(orgId) {
+      return /databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid);
+    }
+
+    // Owner or coordinator of the org (members doc exists with one of those roles).
+    function isMember(orgId) {
+      return signedIn()
+        && exists(memberPath(orgId))
+        && get(memberPath(orgId)).data.role in ['owner', 'coordinator'];
+    }
+
+    // Minor coordinators never see contact snapshots (G14).
+    function canViewContacts(orgId) {
+      return isMember(orgId) && get(memberPath(orgId)).data.canViewContacts == true;
+    }
+
+    // A kiosk token scoped to this instance and not yet expired (kioskExp is epoch ms).
+    function isKioskFor(instanceId) {
+      return request.auth != null
+        && request.auth.token.kioskInstanceId == instanceId
+        && request.auth.token.kioskExp is number
+        && request.auth.token.kioskExp > request.time.toMillis();
+    }
+
+    // ---------- public catalog ----------
+
+    match /organizations/{orgId} {
+      allow read: if true;
+      allow write: if false;
+
+      match /members/{uid} {
+        allow read: if isMember(orgId) || isSelf(uid);
+        allow write: if false;
+      }
+
+      match /letterRefs/{letterId} {
+        allow read: if isMember(orgId);
+        allow write: if false;
+      }
+    }
+
+    match /opportunities/{opportunityId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /instances/{instanceId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Kiosk key material: never readable by any client.
+    match /instanceSecrets/{instanceId} {
       allow read, write: if false;
     }
+
+    // ---------- shifts ----------
+
+    // The kiosk can read its own instance's roster (display names and status only).
+    match /signups/{signupId} {
+      allow read: if isSelf(resource.data.uid)
+        || isMember(resource.data.orgId)
+        || isKioskFor(resource.data.instanceId);
+      allow write: if false;
+    }
+
+    // Contact data lives apart from signups so the kiosk never sees it.
+    match /signupContacts/{signupId} {
+      allow read: if canViewContacts(resource.data.orgId);
+      allow write: if false;
+    }
+
+    // ---------- hours and letters ----------
+
+    match /hoursLogs/{logId} {
+      allow read: if isSelf(resource.data.uid) || isMember(resource.data.orgId);
+      allow write: if false;
+    }
+
+    match /letters/{letterId} {
+      allow read: if isSelf(resource.data.uid) || isAdmin();
+      allow write: if false;
+    }
+
+    // Public by exact code only; listing would let anyone enumerate letters.
+    match /letterVerifications/{verifyCode} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // ---------- people ----------
+
+    match /users/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow write: if false;
+
+      match /private/profile {
+        allow read: if isSelf(uid);
+        allow create, delete: if false;
+        // Only display preferences, each type-checked. birthDate, isMinor,
+        // reliability, names, and every server field stay Function-only.
+        allow update: if isSelf(uid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['textSize', 'contrast', 'reducedMotion', 'notificationPrefs', 'milestonesSeen'])
+          && validPreferences(request.resource.data);
+      }
+    }
+
+    function validPreferences(data) {
+      return (!('textSize' in data) || data.textSize in [100, 125, 150])
+        && (!('contrast' in data) || data.contrast in ['normal', 'high'])
+        && (!('reducedMotion' in data) || data.reducedMotion is bool)
+        && (!('notificationPrefs' in data)
+              || (data.notificationPrefs is map
+                  && data.notificationPrefs.keys().hasOnly(['discoverable'])
+                  && data.notificationPrefs.discoverable is bool))
+        && (!('milestonesSeen' in data)
+              || (data.milestonesSeen is list
+                  && data.milestonesSeen.size() <= 3
+                  && data.milestonesSeen.toSet().hasOnly([25, 50, 100])));
+    }
+
+    // ---------- system ----------
+
+    match /jobRuns/{runId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Every signed-in client, including kiosks, applies the demo offset to countdowns.
+    match /demoClock/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // rateLimits, jobLeases, turnstileTokens, aiUsage, meta: no client access
+    // (covered by default deny; listed here so the matrix is explicit).
+    match /rateLimits/{id} { allow read, write: if false; }
+    match /jobLeases/{id} { allow read, write: if false; }
+    match /turnstileTokens/{id} { allow read, write: if false; }
   }
 }
