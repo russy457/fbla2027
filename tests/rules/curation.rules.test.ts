@@ -1,10 +1,10 @@
 /**
  * curation.rules.test.ts
- * Rules for the Tier 2 lane B client-written collections (SPEC#rules-matrix):
+ * Rules for the Tier 2 lane B curation collections (SPEC#rules-matrix):
  *   collections/{id}  published = public read; drafts for the org's
- *                     coordinators and admins; org collections written by the
- *                     org's coordinators, admin collections (orgId null) by
- *                     admins; author and org fixed; schema and server time.
+ *                     coordinators and admins; every client write denied
+ *                     (Functions-only: coordinator/admin collection ops,
+ *                     covered by functions/test/collections.test.ts).
  *   reviews/{signupId} public read; created only by the author of a completed
  *                     signup at that org (so a second review for one signup
  *                     fails); public name or "A volunteer"; authors edit the
@@ -86,30 +86,18 @@ const fields = (orgId: string | null, authorUid: string, extra: Record<string, u
 const seedCollection = (id: string, orgId: string | null, published: boolean) =>
   seed(`collections/${id}`, { ...fields(orgId, orgId === null ? "admin1" : "coordA"), published, updatedAt: OLD });
 
-describe("collections create", () => {
-  it("org coordinators create for their org; admins create admin collections", async () => {
-    await assertSucceeds(setDoc(doc(as("coordA"), "collections/c1"), fields("orgA", "coordA")));
-    await assertSucceeds(setDoc(doc(admin(), "collections/c2"), fields(null, "admin1")));
-  });
-
-  it("denies other orgs, volunteers, coordinators writing admin collections, kiosks, visitors", async () => {
+describe("collections client writes", () => {
+  it("denies every client create, even a well-formed one from the org's coordinator or an admin", async () => {
+    await assertFails(setDoc(doc(as("coordA"), "collections/c1"), fields("orgA", "coordA")));
+    await assertFails(setDoc(doc(admin(), "collections/c2"), fields(null, "admin1")));
     await assertFails(setDoc(doc(as("coordB"), "collections/c1"), fields("orgA", "coordB")));
-    await assertFails(setDoc(doc(as("vol1"), "collections/c1"), fields("orgA", "vol1")));
     await assertFails(setDoc(doc(as("vol1"), "collections/c1"), fields(null, "vol1")));
-    await assertFails(setDoc(doc(as("coordA"), "collections/c1"), fields(null, "coordA")));
     await assertFails(setDoc(doc(kiosk(), "collections/c1"), fields("orgA", "kiosk_inst1_x")));
     await assertFails(setDoc(doc(anon(), "collections/c1"), fields("orgA", "nobody")));
   });
 
-  it("checks the author, shape, lengths, and server time", async () => {
-    const db = as("coordA");
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "ownerA")));
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "coordA", { title: "abc" })));
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "coordA", { description: "x".repeat(501) })));
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "coordA", { items: Array.from({ length: 31 }, (_, i) => ({ kind: "org", refId: `o${i}` })) })));
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "coordA", { featured: true })));
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "coordA", { published: "yes" })));
-    await assertFails(setDoc(doc(db, "collections/c1"), fields("orgA", "coordA", { updatedAt: OLD })));
+  it("denies a malformed item list the rules could never have checked item by item", async () => {
+    await assertFails(setDoc(doc(as("coordA"), "collections/c1"), fields("orgA", "coordA", { items: [{ kind: "script", refId: "x".repeat(5000), extra: true }] })));
   });
 });
 
@@ -144,21 +132,13 @@ describe("collections update and delete", () => {
     await seedCollection("adminC", null, true);
   });
 
-  it("any coordinator of the org edits; the author and org never change", async () => {
-    await assertSucceeds(updateDoc(doc(as("ownerA"), "collections/pubA"), { published: false, updatedAt: serverTimestamp() }));
-    await assertFails(updateDoc(doc(as("ownerA"), "collections/pubA"), { authorUid: "ownerA", updatedAt: serverTimestamp() }));
-    await assertFails(updateDoc(doc(as("coordA"), "collections/pubA"), { orgId: "orgB", updatedAt: serverTimestamp() }));
-    await assertFails(updateDoc(doc(as("coordB"), "collections/pubA"), { title: "Taken over", updatedAt: serverTimestamp() }));
-    await assertFails(updateDoc(doc(as("coordA"), "collections/adminC"), { title: "Not mine", updatedAt: serverTimestamp() }));
-    await assertSucceeds(updateDoc(doc(admin(), "collections/adminC"), { title: "Admin picks", updatedAt: serverTimestamp() }));
-  });
-
-  it("coordinators of the org and admins delete; others cannot", async () => {
-    await assertFails(deleteDoc(doc(as("coordB"), "collections/pubA")));
+  it("denies client updates and deletes, including the org's coordinators and admins", async () => {
+    await assertFails(updateDoc(doc(as("ownerA"), "collections/pubA"), { published: false, updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(doc(as("coordA"), "collections/pubA"), { title: "Weekend picks", updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(doc(admin(), "collections/adminC"), { title: "Admin picks", updatedAt: serverTimestamp() }));
+    await assertFails(deleteDoc(doc(as("coordA"), "collections/pubA")));
+    await assertFails(deleteDoc(doc(admin(), "collections/adminC")));
     await assertFails(deleteDoc(doc(as("vol1"), "collections/pubA")));
-    await assertFails(deleteDoc(doc(as("coordA"), "collections/adminC")));
-    await assertSucceeds(deleteDoc(doc(as("coordA"), "collections/pubA")));
-    await assertSucceeds(deleteDoc(doc(admin(), "collections/adminC")));
   });
 });
 

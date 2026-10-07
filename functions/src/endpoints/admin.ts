@@ -1,8 +1,8 @@
 /**
  * admin.ts
  * The "admin" callable endpoint (SPEC 2.3, G4): run due jobs, the demo
- * clock, and (Tier 1) reset demo data. Every op requires the admin custom
- * claim. 512 MB and 120 s because resetDemoData reseeds and renders a PDF.
+ * clock, (Tier 1) reset demo data, and (Tier 2) app-wide curated
+ * collections. Every op requires the admin custom claim. 512 MB and 120 s because resetDemoData reseeds and renders a PDF.
  */
 import { defineEndpoint, type RegisteredOp } from "../lib/defineCallable";
 import { pingOp } from "../ops/ping";
@@ -13,6 +13,8 @@ import { deploySecrets } from "../lib/secrets";
 import { resetDemoData } from "../ops/resetDemoData";
 // Tier 1 lane B
 import { laneBAdminOps } from "./laneB";
+// Tier 2 lane B: app-wide curated collections
+import { curationAdminOps } from "./curation";
 
 export const adminOps: readonly RegisteredOp[] = [
   pingOp("admin"),
@@ -21,7 +23,9 @@ export const adminOps: readonly RegisteredOp[] = [
   // Tier 1 lane C
   resetDemoData,
   // Tier 1 lane B
-  ...laneBAdminOps
+  ...laneBAdminOps,
+  // Tier 2 lane B
+  ...curationAdminOps
 ];
 
 // Tier 1 lane C: resetDemoData reseeds demo accounts with DEMO_ACCOUNT_PASSWORD when deployed in DEMO_MODE.

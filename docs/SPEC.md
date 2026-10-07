@@ -117,7 +117,7 @@ Nothing outside Tier 0 starts until the Tier 0 Playwright e2e passes in CI. No f
                                 | Admin SDK (rules do not apply; each op authorizes itself)
                                 v
         Firestore (rules: clients read; client writes only for allowlisted prefs,
-                   saved items, collections, reviews)          Storage (rules)
+                   saved items, reviews)                       Storage (rules)
                                 |
         Secrets: ANTHROPIC_API_KEY, TURNSTILE_SECRET, KIOSK_MASTER_SECRET, DEMO_ACCOUNT_PASSWORD
         External: Anthropic API, Cloudflare Turnstile siteverify, Mapbox (client, optional)
@@ -153,7 +153,7 @@ Nothing outside Tier 0 starts until the Tier 0 Playwright e2e passes in CI. No f
 
 ### 2.4 Trust rules
 
-- Every mutation of shared or server-owned state is a callable op. Rules let clients write only: allowlisted preference keys in `users/{uid}/private/profile`, `users/{uid}/saved/*`, `collections/*` (coordinators/admins), and `reviews/*` (Tier 2).
+- Every mutation of shared or server-owned state is a callable op. Rules let clients write only: allowlisted preference keys in `users/{uid}/private/profile`, `users/{uid}/saved/*`, and `reviews/*` (Tier 2). Curated `collections/*` are Functions-written (coordinator/admin collection ops, Appendix B 50).
 - Functions use the Admin SDK, so **Firestore rules do not bind them.** Each op enforces its own authorization (resource-derived, [G2](#auth-resolvers)), input schema, allowed state transitions, idempotency, and audit fields, as listed in [#api](#api).
 - Functions write timestamps from `clock.now()` only, never `FieldValue.serverTimestamp()` (ESLint `no-restricted-properties` in `functions/src`).
 - Firestore stores instants as `Timestamp` (UTC). Each organization has an IANA `timeZone`; all display, thresholds that depend on calendar days, and `.ics` output use it through date-fns-tz.
@@ -456,13 +456,15 @@ Allowlisted projection, written only by Functions through a strict zod schema.
 
 | Field | Type | Writer |
 |---|---|---|
-| title | string 4-80 | C |
-| description | string <= 500 | C |
-| items | [{kind: `org` or `opportunity`, refId}] <= 30 | C |
-| orgId | string or null (null = admin-authored) | C |
-| authorUid | uid | C |
-| published | bool | C |
-| updatedAt | request.time | C |
+| title | string 4-80 | F |
+| description | string <= 500 | F |
+| items | [{kind: `org` or `opportunity`, refId (doc id <= 200)}] <= 30, unique, no other keys | F |
+| orgId | string or null (null = admin-authored); never changes | F |
+| authorUid | uid of the creator; never changes | F |
+| published | bool | F |
+| updatedAt | request clock (`clock.now()`) | F |
+
+Written only by `coordinator.upsertCollection` / `publishCollection` / `deleteCollection` (org collections) and the `admin.*` ops of the same names (orgId null), validated with `collectionFieldsSchema` (Appendix B 50). Create ids are hash(uid, requestNonce).
 
 ### 3.20 reviews/{signupId} (Tier 2)
 
@@ -515,7 +517,7 @@ Clients never call `getDownloadURL` on letter or report PDFs (its token never ex
 | volunteer | any signed-in user with a completed profile | Sign up, check in/out, view own hours, issue letters, AI Q&A, saved items, reviews (Tier 2) |
 | coordinator | `organizations/{orgId}/members/{uid}` role `coordinator`, via invite | Manage that org's opportunities, instances, roster, kiosk, hours approval, attendance, reports |
 | owner | members doc role `owner`, created by registerOrganization | Coordinator powers + org edits, invites, member removal, letter revocation for letters counting the org |
-| admin | custom claim `admin: true`, set by `scripts/set-admin-claim.mjs` (service account); client forces an ID token refresh after the script runs | Verify orgs, run due jobs, demo controls, revoke any letter, birth-date correction, admin-authored collections |
+| admin | custom claim `admin: true`, set by `scripts/set-admin.mjs` (Application Default Credentials, explicit `--project`, `--yes` to apply); client forces an ID token refresh after the script runs | Verify orgs, run due jobs, demo controls, revoke any letter, birth-date correction, admin-authored collections |
 | kiosk | custom token from startKiosk with claims `kioskInstanceId`, `kioskOrgId`, `kioskExp` (12 h) | Call `kiosk.issueKioskCode` for its instance; read that instance and its signups. Nothing else. |
 
 A user can be a volunteer and a member of several orgs. The org switcher shows only orgs where the user has a members doc.
@@ -559,7 +561,7 @@ Helpers: `signedIn()` (has auth and no kiosk claim), `isAdmin()` (`token.admin =
 | users/{uid} | uid == auth.uid; isAdmin() | none | none | none |
 | <a id="rules-private"></a>users/{uid}/private/profile | uid == auth.uid | none | self, only if `diff().affectedKeys().hasOnly([textSize, contrast, reducedMotion, notificationPrefs, milestonesSeen])` and each passes its type check | none |
 | users/{uid}/saved/{id} | self | self; id == `{kind}_{refId}`; schema check | none | self |
-| collections | `published == true`; or isMember(orgId); or isAdmin() | signedIn author; orgId != null requires isMember(orgId); orgId == null requires isAdmin(); schema check | same as create, authorUid unchanged | isMember(orgId) or isAdmin() |
+| collections | `published == true`; or isMember(orgId); or isAdmin() | false (Functions only: collection ops) | false | false |
 | reviews/{signupId} | public | author: `get(signups/{signupId})` has uid == auth.uid, status == completed, orgId == request.orgId; doc id is the signupId so one review per signup | author: only rating, tags, text, updatedAt; or isMember(orgId): only response | author; isAdmin() |
 | aiUsage, rateLimits, turnstileTokens, jobLeases, contactRefreshJobs | none | none | none | none |
 | jobRuns | isAdmin() | none | none | none |
@@ -656,8 +658,14 @@ Errors list op-specific codes; every op can also return `AUTH_REQUIRED`, `PROFIL
 | admin.correctBirthDate | admin | uid, birthDate, note | isMinor | Set semantics | none | AGE_UNDER_13 | birthDateCorrectedBy, birthDateCorrectedAt | 1 |
 | <a id="fn-askassistant"></a>ai.askAssistant | signedIn | question (<= 2,000 chars), route? | answer, source (`ai` or `help`), limited, articles [{slug, title}] | none | none | INPUT_TOO_LONG | aiUsage | 1 |
 | ai.shiftPlannerParse | coordinatorOfOrg(orgId) | orgId, text (<= 2,000 chars) | draft, source (`ai` or `parser`) | none | none | INPUT_TOO_LONG | aiUsage | 2 |
+| coordinator.upsertCollection | create: coordinatorOfOrg(orgId); update: coordinatorOfCollection (org from the stored doc; orgId null refused) | create: orgId, requestNonce, fields; update: collectionId, fields. fields = {title, description, items [{kind, refId}] <= 30, published} (strict) | collectionId, created | Create id hash(uid, requestNonce); a retry rewrites the same doc | none | none extra | authorUid (create), updatedAt | 2 |
+| coordinator.publishCollection | coordinatorOfCollection | collectionId, published | collectionId, published | Set semantics | none | none extra | updatedAt | 2 |
+| coordinator.deleteCollection | coordinatorOfCollection | collectionId | collectionId, deleted | Missing: NOT_FOUND | none | none extra | log | 2 |
+| admin.upsertCollection | admin; existing target must have orgId null | create: requestNonce, fields; update: collectionId, fields | collectionId, created | as coordinator.upsertCollection | none | none extra | authorUid (create), updatedAt | 2 |
+| admin.publishCollection | admin; orgId null only | collectionId, published | collectionId, published | Set semantics | none | none extra | updatedAt | 2 |
+| admin.deleteCollection | admin; orgId null only | collectionId | collectionId, deleted | Missing: NOT_FOUND | none | none extra | log | 2 |
 
-Outside the callables: `scripts/set-admin-claim.mjs` (admin claim) and the client writes allowed by [#rules-matrix](#rules-matrix).
+Outside the callables: `scripts/set-admin.mjs` (admin claim; requires `--project` and `--yes`, see docs/DEMO.md 1.4) and the client writes allowed by [#rules-matrix](#rules-matrix).
 
 ### 5.3 Signup and cancel
 
@@ -1926,3 +1934,4 @@ Each item names the competing wording and the final behavior. Later obligations 
 47. **Invite rate limits.** SPEC 5.2 gives createInvite and redeemInvite no limit, which lets a signed-in user guess 50-bit codes at speed and an owner mint codes in bulk. Final: rate limits through defineCallable like check-in: `redeemInvite` 10 attempts per user per 10 minutes (bucket `redeemInvite`, wrong codes included), `createInvite` 20 per user per hour (bucket `createInvite`); excess gives `RATE_LIMITED` with `retryAfterSec`.
 48. **PDF download links.** SPEC 3.22 lets the owner read letter and report PDFs through Storage rules, and the client used `getDownloadURL`, whose token is a permanent bearer link. Final: `volunteer.getPdfUrl` (path `letters/{uid}/{letterId}.pdf` or `reports/{uid}/{reportId}.pdf` only, uid == caller, document ready; org reports refused) and `coordinator.getOrgReportUrl` (coordinatorOfOrg plus report owner == caller) return a V4 signed URL valid 5 minutes, measured on the real clock. On the emulator, which cannot sign or verify signed URLs, the same checks run and the link is the Storage emulator download path. The Functions service account needs Service Account Token Creator on itself to sign. Storage rules stay owner-read.
 49. **Durable contact hiding.** SPEC 5.8 refreshes T4 contact hiding after a verified change, but in several non-atomic batches; a failure partway left minors' contacts visible at an unverified org. Final: the verified change and `contactRefreshJobs/{orgId}` {token, nextActionAt} are one batch; the op still runs the pass immediately, runDueJobs finishes any job left behind, each pass reads the org's current flag and skips snapshots that already match, each chunk commits only while the org still has that flag, and the job is deleted only after a complete pass with an unchanged token.
+50. **Curated collection writes.** SPEC 2.4 and 4.3 let coordinators and admins write `collections/*` directly, but rules cannot loop over `items`, so a client could store arbitrary item shapes (only `items is list && size() <= 30` was checked). Final: rules deny every client write (`allow write: if false`; reads unchanged). Writes go through `coordinator.upsertCollection`, `publishCollection`, and `deleteCollection` (org from input only on create, otherwise from the stored collection; coordinatorOf) and the `admin.*` ops of the same names for app-wide collections (orgId null; the admin endpoint never edits org collections). Input is the strict `collectionFieldsSchema` (items exactly {kind `org` or `opportunity`, refId <= 200}); create ids are hash(uid, requestNonce); updatedAt is the request clock.

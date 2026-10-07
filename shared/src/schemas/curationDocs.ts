@@ -1,18 +1,23 @@
 /**
  * curationDocs.ts
- * Tier 2 lane B client-written documents (SPEC 2.4: the rules let clients
- * write these two collections directly; firestore.rules repeats every check):
+ * Tier 2 lane B documents:
  *
  *   collections/{collectionId}  curated collections (SPEC 3.19). Authored only
  *                               by org coordinators (orgId set) or admins
  *                               (orgId null), never by volunteers (gate UC1).
- *   reviews/{signupId}          org experience reviews (SPEC 3.20). The doc id
- *                               is the completed signup, so one review per
- *                               signup and only from someone who attended.
+ *                               Functions-written only (coordinator/admin
+ *                               upsertCollection, publishCollection,
+ *                               deleteCollection); the rules deny client
+ *                               writes because they cannot check each item.
+ *   reviews/{signupId}          org experience reviews (SPEC 3.20). Client-
+ *                               written (SPEC 2.4; firestore.rules repeats
+ *                               every check). The doc id is the completed
+ *                               signup, so one review per signup and only
+ *                               from someone who attended.
  *
- * `*FieldsSchema` is what a form edits; the full `*DocSchema` adds the fields
- * the client stamps (author, server time) and is used to parse reads, so a
- * malformed document never reaches a screen.
+ * `*FieldsSchema` is what a form edits (and what the collection ops accept);
+ * the full `*DocSchema` adds the stamped fields (author, time) and is used
+ * to parse reads, so a malformed document never reaches a screen.
  */
 import { z } from "zod";
 import { docIdSchema, timestampSchema } from "./common";
@@ -46,7 +51,7 @@ export const collectionFieldsSchema = z
   .strict();
 export type CollectionFields = z.infer<typeof collectionFieldsSchema>;
 
-/** collections/{collectionId} as stored. updatedAt is request.time (rules). */
+/** collections/{collectionId} as stored. updatedAt is the op's request clock. */
 export const curatedCollectionDocSchema = z.object({
   title: z.string().min(COLLECTION_TITLE_MIN).max(COLLECTION_TITLE_MAX),
   description: z.string().max(COLLECTION_DESCRIPTION_MAX),

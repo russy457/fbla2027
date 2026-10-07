@@ -253,40 +253,15 @@ service cloud.firestore {
     // Tier 2 lane B
     // Curated collections (SPEC 3.19, 4.3; gate UC1: coordinator/admin-authored
     // only). Anyone reads a published collection; the org's coordinators and
-    // admins also read drafts. Writes: org collections by the org's
-    // coordinators, admin collections (orgId null) by admins. The author is
-    // stamped on create and never changes; the org never changes either.
-    // Rules cannot loop over a list, so each item's shape is checked by the
-    // client schema on write and again when the app parses reads.
-    function canCurate(orgId) {
-      return orgId == null ? isAdmin() : (orgId is string && isMember(orgId));
-    }
-
-    function validCollection(data) {
-      return data.keys().hasOnly(['title', 'description', 'items', 'orgId', 'authorUid', 'published', 'updatedAt'])
-        && data.keys().hasAll(['title', 'description', 'items', 'orgId', 'authorUid', 'published', 'updatedAt'])
-        && data.title is string && data.title.size() >= 4 && data.title.size() <= 80
-        && data.description is string && data.description.size() <= 500
-        && data.items is list && data.items.size() <= 30
-        && data.published is bool
-        && data.authorUid is string
-        && data.updatedAt == request.time;
-    }
-
+    // admins also read drafts. Writes are Functions-only (coordinator and
+    // admin upsertCollection / publishCollection / deleteCollection): rules
+    // cannot loop over a list to check each item's shape, so the ops validate
+    // the whole document with the shared zod schema instead.
     match /collections/{collectionId} {
       allow read: if resource.data.published == true
         || isAdmin()
         || (resource.data.orgId != null && isMember(resource.data.orgId));
-      allow create: if signedIn()
-        && validCollection(request.resource.data)
-        && request.resource.data.authorUid == request.auth.uid
-        && canCurate(request.resource.data.orgId);
-      allow update: if signedIn()
-        && validCollection(request.resource.data)
-        && request.resource.data.authorUid == resource.data.authorUid
-        && request.resource.data.orgId == resource.data.orgId
-        && canCurate(resource.data.orgId);
-      allow delete: if signedIn() && canCurate(resource.data.orgId);
+      allow write: if false;
     }
 
     // Org experience reviews (SPEC 3.20, 4.3). Public read. The id is the

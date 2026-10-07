@@ -3,12 +3,15 @@
  * The list-and-edit surface for curated collections (SPEC 3.19, Tier 2),
  * used by coordinators on /org/:orgId/collections (orgId = their org) and by
  * admins on /admin (orgId null, app-wide picks). Lists the owner's
- * collections with Published or Draft, then View, Edit, and Delete; "New
- * collection" opens the editor with a fresh id kept for retries.
+ * collections with Published or Draft, then View, Edit, Publish or
+ * Unpublish, and Delete; "New collection" opens the editor with a fresh
+ * requestNonce kept for retries. Every write is a callable op (coordinator
+ * endpoint for org collections, admin endpoint for app-wide ones); the list
+ * is a live listener, so it shows the server's write without a refetch.
  *
  * Picks come from the public catalog: active opportunities (the org's own
- * first) and organizations. Volunteers never reach this (route guards and
- * rules: collections are coordinator/admin-authored only, gate UC1).
+ * first) and organizations. Volunteers never reach this (route guards, and
+ * the ops authorize coordinators/admins only, gate UC1).
  */
 import { useMemo, useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
@@ -16,18 +19,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "@phosphor-icons/react";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useClientWrite } from "@/hooks/useClientWrite";
+import { OpFeedback } from "@/components/org/OpFeedback";
 import { useOwnedCollections } from "@/hooks/useCuration";
 import { useActiveOpportunities } from "@/hooks/useInbox";
+import { useOpRunner } from "@/hooks/useOpRunner";
+import { newRequestNonce } from "@/lib/api";
 import { collectionCountText } from "@/lib/collectionItems";
-import { deleteCollection, newCollectionId, type CuratedCollection } from "@/lib/data/curatedCollections";
+import { deleteCollection, setCollectionPublished, type CuratedCollection } from "@/lib/data/curatedCollections";
 import { getOrganizations } from "@/lib/data/orgs";
 import { useSessionUser } from "@/store/authStore";
 import { CollectionEditor, EMPTY_COLLECTION, type CollectionChoice } from "./CollectionEditor";
 import { collectionPathFor } from "./FeaturedCollections";
-import { WriteFeedback } from "./WriteFeedback";
 
-type Editing = { readonly id: string; readonly existing: CuratedCollection | null } | null;
+type Editing = { readonly requestNonce: string; readonly existing: CuratedCollection | null } | null;
 
 interface CollectionManagerProps {
   /** The org whose collections these are, or null for admin collections. */
@@ -58,13 +62,21 @@ export const CollectionManager = ({ orgId, headingId }: CollectionManagerProps):
   const choices = useChoices(orgId);
   const [editing, setEditing] = useState<Editing>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const removal = useClientWrite();
+  const runner = useOpRunner();
   const list = collections.data ?? [];
 
   const remove = async (item: CuratedCollection): Promise<void> => {
     if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
     setNotice(null);
-    await removal.run(() => deleteCollection(item.id), `Deleted "${item.title}".`, "We couldn't delete this collection. Try again.");
+    await runner.run(`delete-${item.id}`, () => deleteCollection(item), () => `Deleted "${item.title}".`);
+  };
+
+  const togglePublished = async (item: CuratedCollection): Promise<void> => {
+    setNotice(null);
+    const published = !item.published;
+    await runner.run(`publish-${item.id}`, () => setCollectionPublished(item, published), () =>
+      published ? `Published "${item.title}" to Explore.` : `"${item.title}" is a draft again.`
+    );
   };
 
   if (editing !== null && user !== null) {
@@ -77,9 +89,9 @@ export const CollectionManager = ({ orgId, headingId }: CollectionManagerProps):
           {editing.existing ? `Edit "${editing.existing.title}"` : "New collection"}
         </h2>
         <CollectionEditor
-          collectionId={editing.id}
+          collectionId={editing.existing?.id ?? null}
+          requestNonce={editing.requestNonce}
           orgId={orgId}
-          authorUid={editing.existing?.authorUid ?? user.uid}
           initial={initial}
           choices={choices}
           onSaved={(message) => {
@@ -98,7 +110,7 @@ export const CollectionManager = ({ orgId, headingId }: CollectionManagerProps):
         <h2 id={headingId} className="text-xl font-semibold text-fg">
           {orgId === null ? "App-wide collections" : "Your collections"}
         </h2>
-        <button type="button" onClick={() => setEditing({ id: newCollectionId(), existing: null })} className={buttonClassName("primary")}>
+        <button type="button" onClick={() => setEditing({ requestNonce: newRequestNonce(), existing: null })} className={buttonClassName("primary")}>
           <Plus aria-hidden="true" size={18} />
           New collection
         </button>
@@ -106,7 +118,7 @@ export const CollectionManager = ({ orgId, headingId }: CollectionManagerProps):
       <p role="status" className="text-sm font-medium text-fg empty:hidden">
         {notice ?? ""}
       </p>
-      <WriteFeedback message={removal.message} error={removal.error} />
+      <OpFeedback message={runner.message} error={runner.error} />
       {collections.error ? <p className="text-fg-muted">We couldn't load collections. Reload to try again.</p> : null}
       {!collections.error && !collections.isLoading && list.length === 0 ? (
         <p className="max-w-[60ch] text-fg-muted">No collections yet. Group a few shifts or partner organizations, for example "Good first shifts", and publish it to Explore.</p>
@@ -126,10 +138,13 @@ export const CollectionManager = ({ orgId, headingId }: CollectionManagerProps):
                 <Link to={collectionPathFor(item.id)} className={buttonClassName("quiet")} aria-label={`View ${item.title}`}>
                   View
                 </Link>
-                <button type="button" onClick={() => setEditing({ id: item.id, existing: item })} className={buttonClassName("secondary")} aria-label={`Edit ${item.title}`}>
+                <button type="button" onClick={() => setEditing({ requestNonce: newRequestNonce(), existing: item })} className={buttonClassName("secondary")} aria-label={`Edit ${item.title}`}>
                   Edit
                 </button>
-                <button type="button" disabled={removal.pending} onClick={() => void remove(item)} className={buttonClassName("quiet")} aria-label={`Delete ${item.title}`}>
+                <button type="button" disabled={runner.pending !== null} onClick={() => void togglePublished(item)} className={buttonClassName("quiet")} aria-label={`${item.published ? "Unpublish" : "Publish"} ${item.title}`}>
+                  {item.published ? "Unpublish" : "Publish"}
+                </button>
+                <button type="button" disabled={runner.pending !== null} onClick={() => void remove(item)} className={buttonClassName("quiet")} aria-label={`Delete ${item.title}`}>
                   Delete
                 </button>
               </div>

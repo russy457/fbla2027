@@ -68,5 +68,6 @@ export * from "./schemas/ops/rankOps";
 export * from "./schemas/ops/plannerOps";
 export * from "./reliabilityReport";
 export * from "./schemas/curationDocs";
+export * from "./schemas/ops/curationOps";
 export * from "./reviews";
 // End Tier 2 lane B

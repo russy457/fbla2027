@@ -2,8 +2,9 @@
  * collections.test.tsx
  * Curated collections UI (SPEC 3.19, Tier 2): the Explore section lists
  * published collections with counts and the curator (and hides when there
- * are none); the manager creates a collection with a fixed id, validates the
- * title, keeps picks in order, and deletes after confirming.
+ * are none); the manager creates a collection with one requestNonce (via the
+ * callable-backed data layer), validates the title, keeps picks in order,
+ * publishes or unpublishes from the list, and deletes after confirming.
  */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -16,9 +17,9 @@ import { FeaturedCollections } from "./FeaturedCollections";
 
 const state = vi.hoisted(() => ({ published: [] as CuratedCollection[], owned: [] as CuratedCollection[] }));
 const data = vi.hoisted(() => ({
-  saveCollection: vi.fn(async () => undefined),
+  saveCollection: vi.fn(async () => "new-id"),
   deleteCollection: vi.fn(async () => undefined),
-  newCollectionId: vi.fn(() => "new-id")
+  setCollectionPublished: vi.fn(async () => undefined)
 }));
 
 vi.mock("@/hooks/useCuration", () => ({
@@ -30,6 +31,7 @@ vi.mock("@/hooks/useInbox", () => ({
 }));
 vi.mock("@/lib/data/orgs", () => ({ getOrganizations: async () => [{ id: "org-1", name: "Alamo Pantry", verified: true, archived: false }] }));
 vi.mock("@/lib/data/curatedCollections", () => data);
+vi.mock("@/lib/api", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/api")>()), newRequestNonce: () => "nonce-1" }));
 vi.mock("@/store/authStore", () => ({ useSessionUser: () => ({ uid: "coord-1", isAdmin: false }) }));
 
 const collection = (id: string, extra: Partial<CuratedCollection> = {}): CuratedCollection => ({
@@ -75,7 +77,7 @@ describe("FeaturedCollections", () => {
 });
 
 describe("CollectionManager", () => {
-  it("creates a collection with picks in order under a fixed id", async () => {
+  it("creates a collection with picks in order under one request nonce", async () => {
     wrap(<CollectionManager orgId="org-1" headingId="h" />);
     expect(screen.getByText(/No collections yet/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "New collection" }));
@@ -92,9 +94,9 @@ describe("CollectionManager", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save collection" }));
     await waitFor(() =>
       expect(data.saveCollection).toHaveBeenCalledWith({
-        collectionId: "new-id",
+        collectionId: null,
+        requestNonce: "nonce-1",
         orgId: "org-1",
-        authorUid: "coord-1",
         fields: {
           title: "Weekend food drives",
           description: "",
@@ -106,15 +108,31 @@ describe("CollectionManager", () => {
     expect(await screen.findByText('Saved and published "Weekend food drives".')).toBeInTheDocument();
   });
 
-  it("edits keep the original author, and delete asks first", async () => {
-    state.owned = [collection("c1", { authorUid: "someone-else", published: false })];
+  it("edits update the existing collection, publish toggles, and delete asks first", async () => {
+    const item = collection("c1", { authorUid: "someone-else", published: false });
+    state.owned = [item];
     wrap(<CollectionManager orgId="org-1" headingId="h" />);
     expect(screen.getByText("Draft")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Publish Good first shifts" }));
+    await waitFor(() => expect(data.setCollectionPublished).toHaveBeenCalledWith(item, true));
+    expect(await screen.findByText('Published "Good first shifts" to Explore.')).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Delete Good first shifts" }));
-    await waitFor(() => expect(data.deleteCollection).toHaveBeenCalledWith("c1"));
+    await waitFor(() => expect(data.deleteCollection).toHaveBeenCalledWith(item));
 
     fireEvent.click(screen.getByRole("button", { name: "Edit Good first shifts" }));
     fireEvent.click(screen.getByRole("button", { name: "Save collection" }));
-    await waitFor(() => expect(data.saveCollection).toHaveBeenCalledWith(expect.objectContaining({ collectionId: "c1", authorUid: "someone-else" })));
+    await waitFor(() => expect(data.saveCollection).toHaveBeenCalledWith(expect.objectContaining({ collectionId: "c1", orgId: "org-1" })));
+  });
+
+  it("shows the catalog error when a write is refused", async () => {
+    const { ApiError } = await import("@/lib/api");
+    data.deleteCollection.mockRejectedValueOnce(
+      new ApiError({ code: "PERMISSION_DENIED", title: "Not allowed", message: "You can't do that here.", fix: "Ask an owner.", helpSlug: null, requestId: "req-1", params: {} })
+    );
+    state.owned = [collection("c1")];
+    wrap(<CollectionManager orgId="org-1" headingId="h" />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete Good first shifts" }));
+    expect(await screen.findByText("You can't do that here.")).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 /**
  * useClientWrite.ts
  * Pending, success, and error state for the few direct Firestore writes the
- * rules allow (Tier 2 lane B: collections and reviews; SPEC 2.4). Callable
+ * rules allow (Tier 2 lane B: reviews; SPEC 2.4). Callable
  * ops use useOpRunner with the error catalog; a rules denial has no catalog
  * code, so each caller supplies its own plain-language failure sentence.
  * The raw Firestore error is never shown.

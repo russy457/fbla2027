@@ -110,6 +110,15 @@ import { inviteVolunteersInput, inviteVolunteersOutput, rankVolunteersInput, ran
 // End Tier 2 lane A
 // Tier 2 lane B
 import { shiftPlannerParseInput, shiftPlannerParseOutput } from "./schemas/ops/plannerOps";
+import {
+  deleteCollectionInput,
+  deleteCollectionOutput,
+  publishCollectionInput,
+  publishCollectionOutput,
+  upsertAdminCollectionInput,
+  upsertCollectionOutput,
+  upsertOrgCollectionInput
+} from "./schemas/ops/curationOps";
 // End Tier 2 lane B
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
@@ -170,8 +179,13 @@ export const OPS = {
     upsertSeries: op(upsertSeriesInput, upsertSeriesOutput),
     extendSeries: op(extendSeriesInput, extendSeriesOutput),
     rankVolunteers: op(rankVolunteersInput, rankVolunteersOutput),
-    inviteVolunteers: op(inviteVolunteersInput, inviteVolunteersOutput)
+    inviteVolunteers: op(inviteVolunteersInput, inviteVolunteersOutput),
     // End Tier 2 lane A
+    // Tier 2 lane B: curated collections are Functions-written (rules deny client writes)
+    upsertCollection: op(upsertOrgCollectionInput, upsertCollectionOutput),
+    publishCollection: op(publishCollectionInput, publishCollectionOutput),
+    deleteCollection: op(deleteCollectionInput, deleteCollectionOutput)
+    // End Tier 2 lane B
   },
   admin: {
     ping: op(pingInput, pingOutput),
@@ -180,8 +194,13 @@ export const OPS = {
     // Tier 1 lane C
     resetDemoData: op(resetDemoDataInput, resetDemoDataOutput),
     // Tier 1 lane B
-    verifyOrganization: op(verifyOrganizationInput, verifyOrganizationOutput)
+    verifyOrganization: op(verifyOrganizationInput, verifyOrganizationOutput),
     // End Tier 1 lane B
+    // Tier 2 lane B: app-wide curated collections (orgId null)
+    upsertCollection: op(upsertAdminCollectionInput, upsertCollectionOutput),
+    publishCollection: op(publishCollectionInput, publishCollectionOutput),
+    deleteCollection: op(deleteCollectionInput, deleteCollectionOutput)
+    // End Tier 2 lane B
   },
   ai: {
     ping: op(pingInput, pingOutput),

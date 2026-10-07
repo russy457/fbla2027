@@ -3,19 +3,21 @@
  * Create or edit a curated collection (SPEC 3.19, Tier 2; coordinators for
  * their org, admins for app-wide collections). Title, description, the
  * shifts and organizations it lists (checkboxes, kept in the order picked,
- * at most 30), and Published. Validated with the shared schema before the
- * write; the rules check it again. The collection id is chosen once by the
- * caller, so a retried Save rewrites the same document.
+ * at most 30), and Published. Validated with the shared schema here and
+ * again by the callable op (coordinator.upsertCollection, or admin.* for
+ * app-wide ones); clients never write collections directly. A new
+ * collection carries a requestNonce chosen once by the caller, so a retried
+ * Save lands on the same document. Errors are the catalog's (OpFeedback).
  */
 import { useId, useState, type FormEvent, type ReactElement } from "react";
 import { COLLECTION_DESCRIPTION_MAX, COLLECTION_ITEMS_MAX, COLLECTION_TITLE_MAX, collectionFieldsSchema, type CollectionFields, type CollectionItem } from "@fbla/shared";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { TextField } from "@/components/ui/TextField";
-import { useClientWrite } from "@/hooks/useClientWrite";
+import { OpFeedback } from "@/components/org/OpFeedback";
+import { useOpRunner } from "@/hooks/useOpRunner";
 import { saveCollection } from "@/lib/data/curatedCollections";
 import { fieldErrorsOf, type FieldErrors } from "@/lib/validation/fieldErrors";
-import { WriteFeedback } from "./WriteFeedback";
 
 export interface CollectionChoice {
   readonly kind: CollectionItem["kind"];
@@ -25,9 +27,11 @@ export interface CollectionChoice {
 }
 
 interface CollectionEditorProps {
-  readonly collectionId: string;
+  /** null creates a new collection. */
+  readonly collectionId: string | null;
+  /** Idempotency key for a create, kept across retries. */
+  readonly requestNonce: string;
   readonly orgId: string | null;
-  readonly authorUid: string;
   readonly initial: CollectionFields;
   readonly choices: readonly CollectionChoice[];
   /** Called after a successful save with the sentence to announce. */
@@ -63,10 +67,10 @@ const ChoiceGroup = ({ legend, choices, items, onToggle }: { legend: string; cho
     </fieldset>
   );
 
-export const CollectionEditor = ({ collectionId, orgId, authorUid, initial, choices, onSaved, onCancel }: CollectionEditorProps): ReactElement => {
+export const CollectionEditor = ({ collectionId, requestNonce, orgId, initial, choices, onSaved, onCancel }: CollectionEditorProps): ReactElement => {
   const [fields, setFields] = useState<CollectionFields>(initial);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const write = useClientWrite();
+  const write = useOpRunner();
   const publishedId = useId();
   const full = fields.items.length >= COLLECTION_ITEMS_MAX;
 
@@ -83,12 +87,8 @@ export const CollectionEditor = ({ collectionId, orgId, authorUid, initial, choi
     if (!parsed.success) return setErrors(fieldErrorsOf(parsed.error));
     setErrors({});
     const success = parsed.data.published ? `Saved and published "${parsed.data.title}".` : `Saved "${parsed.data.title}" as a draft.`;
-    const saved = await write.run(
-      () => saveCollection({ collectionId, orgId, authorUid, fields: parsed.data }),
-      success,
-      "We couldn't save this collection. Check your connection and that you still manage this organization, then try again."
-    );
-    if (saved) onSaved(success);
+    const saved = await write.run("save", () => saveCollection({ collectionId, requestNonce, orgId, fields: parsed.data }), () => success);
+    if (saved !== null) onSaved(success);
   };
 
   return (
@@ -108,14 +108,14 @@ export const CollectionEditor = ({ collectionId, orgId, authorUid, initial, choi
         </label>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button type="submit" disabled={write.pending} className={buttonClassName("primary")}>
-          {write.pending ? "Saving..." : "Save collection"}
+        <button type="submit" disabled={write.pending !== null} className={buttonClassName("primary")}>
+          {write.pending !== null ? "Saving..." : "Save collection"}
         </button>
         <button type="button" onClick={onCancel} className={buttonClassName("quiet")}>
           Cancel
         </button>
       </div>
-      <WriteFeedback message={write.message} error={write.error} />
+      <OpFeedback message={write.message} error={write.error} />
     </form>
   );
 };

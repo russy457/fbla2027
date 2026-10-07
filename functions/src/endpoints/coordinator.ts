@@ -1,8 +1,9 @@
 /**
  * coordinator.ts
  * The "coordinator" callable endpoint (SPEC 2.3, G4): kiosk start, finalize,
- * letter revocation, and org report links. Every op derives the org from the target resource
- * (lib/auth.ts), never from client input. 512 MB for Tier 1 org reports.
+ * letter revocation, org report links, and curated collections. Every op
+ * derives the org from the target resource (lib/auth.ts), never from client
+ * input. 512 MB for Tier 1 org reports.
  */
 import { defineEndpoint, type RegisteredOp } from "../lib/defineCallable";
 import { finalizeShift } from "../ops/finalizeShift";
@@ -16,6 +17,8 @@ import { laneBCoordinatorOps } from "./laneB";
 import { deploySecrets } from "../lib/secrets";
 import { tier2LaneACoordinatorOps } from "./tier2LaneA";
 // End Tier 2 lane A
+// Tier 2 lane B: curated collections (Functions-written only)
+import { curationCoordinatorOps } from "./curation";
 
 export const coordinatorOps: readonly RegisteredOp[] = [
   pingOp("coordinator"),
@@ -25,8 +28,10 @@ export const coordinatorOps: readonly RegisteredOp[] = [
   ...laneBCoordinatorOps,
   getOrgReportUrl,
   // Tier 2 lane A
-  ...tier2LaneACoordinatorOps
+  ...tier2LaneACoordinatorOps,
   // End Tier 2 lane A
+  // Tier 2 lane B
+  ...curationCoordinatorOps
 ];
 
 export const coordinator = defineEndpoint("coordinator", coordinatorOps, { memory: "512MiB", secrets: deploySecrets("KIOSK_MASTER_SECRET") });

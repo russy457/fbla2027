@@ -85,7 +85,14 @@ Rules and indexes go first so the new Functions never meet an old rule set. Inde
 The seed creates the four demo accounts (SPEC 10.7) and sets the admin claim, but on a fresh project nobody is admin yet, so the very first seed needs a one-time bootstrap:
 
 1. In Authentication, add `admin@demo.fbla2027.test` with the `DEMO_ACCOUNT_PASSWORD` value.
-2. Give that account the `admin: true` custom claim with the Admin SDK from a team laptop signed in with `gcloud auth application-default login` (the repo has no script for this yet; see Open items).
+2. Give that account the `admin: true` custom claim from a team laptop signed in with `gcloud auth application-default login`:
+
+   ```
+   node scripts/set-admin.mjs --project <projectId> --email admin@demo.fbla2027.test          # prints the plan, changes nothing
+   node scripts/set-admin.mjs --project <projectId> --email admin@demo.fbla2027.test --yes    # sets { admin: true }, keeps other claims
+   ```
+
+   The script has no default project, prints what it will do, and changes nothing without `--yes`. It refuses `demo-` project ids unless `FIREBASE_AUTH_EMULATOR_HOST` points it at the Auth emulator (that is how `functions/test/setAdmin.test.ts` exercises it). The admin signs out and back in so the new claim is on their ID token.
 3. Sign in on the deployed site as the admin, open `/admin`, and press **Reset demo data**. It clears the project's data and runs the same seed as `npm run seed:demo`, with the demo shift starting in 10 minutes.
 
 ### 1.5 Post-deploy smoke test
@@ -170,7 +177,7 @@ The demo clock is a server-side offset (`demoClock/global`, `shared/src/clock.ts
 | Every call fails with an App Check error | Device has no valid App Check token | Browser console | Reload; confirm the site key and that `APPCHECK_ENFORCE` matches |
 | "Missing or insufficient permissions" | Rules not deployed or index building | Firestore console | Deploy rules and indexes; wait for indexes |
 | Help assistant shows only article links | AI off, over limit, or key missing (this is the designed fallback) | `ai` endpoint logs | Set `AI_ENABLED=true` and the key, or present the fallback |
-| Admin page says the account is not an admin | Claim not on the ID token yet | Sign out and in again | Re-run the claim bootstrap (1.4) |
+| Admin page says the account is not an admin | Claim not on the ID token yet | Sign out and in again | Re-run the claim bootstrap (1.4, `scripts/set-admin.mjs`) |
 
 Fallback answers if something breaks mid-demo: say what would happen, show the relevant e2e test (`e2e/tier0.spec.ts` runs the exact same loop on three browser contexts), and continue from the next step. Never switch to a local or LAN copy.
 
@@ -222,5 +229,5 @@ Each row is assigned to a team member who can explain the code in two minutes.
 
 ## Open items
 
-- No script sets the first admin claim on a deployed project (1.4 step 2). Write and test one (Admin SDK, refuses `demo-` projects) before the first deploy rehearsal.
+- Resolved: `scripts/set-admin.mjs` sets the first admin claim (1.4 step 2). It is tested against the Auth emulator only; run it against the real project for the first time at the first deploy rehearsal.
 - `.env.example` says Functions settings go in `functions/.env`; with `functions-dist` as the source directory the deployed values belong in `functions-dist/.env.<projectId>`. Confirm during the first deploy.

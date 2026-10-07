@@ -56,7 +56,7 @@ The rule that shapes everything: **clients read, the server writes.** The browse
 | `tests/rules/` | Security rules tests against the emulator |
 | `functions/test/` | Op, job, and trigger tests against the emulators |
 | `e2e/` | Playwright specs (three-device Tier 0 loop, lane specs, smoke + axe) |
-| `scripts/` | `demo.mjs`, `doctor.mjs`, `seed-demo.mjs`, `demo-reset.mjs`, `build-functions.mjs`, `check-tokens.mjs` |
+| `scripts/` | `demo.mjs`, `doctor.mjs`, `seed-demo.mjs`, `demo-reset.mjs`, `build-functions.mjs`, `check-tokens.mjs`, `set-admin.mjs` (first-admin claim, docs/DEMO.md 1.4) |
 
 ## 3. Data model summary
 
@@ -138,6 +138,18 @@ All visual values live in `src/styles/tokens.css` as CSS custom properties and r
 | Component | React Testing Library in jsdom: keyboard paths, focus, aria (for example `src/components/palette/CommandPalette.test.tsx`, `src/components/notifications/BellMenu.test.tsx`) | `npm test` |
 | Rules | Every rules row against the Firestore and Storage emulators | `npm run test:rules` |
 | Functions | Each op, job, and trigger against the emulators with an injected clock (races, idempotency, cross-org and kiosk denial) | `npm run test:functions` |
-| End to end | Playwright on the seeded emulators: the three-device Tier 0 loop, lane specs, axe scans with zero serious or critical violations | `npm run test:e2e:tier0`, `npm run test:e2e:tier1a`, `npm run test:e2e:tier1b` |
+| End to end | Playwright on the seeded emulators: the three-device Tier 0 loop, lane specs, axe scans with zero serious or critical violations | see the e2e table below |
+
+End-to-end scripts. Each one builds Functions, starts the emulators from `firebase.e2e.json` (ports 19099/18080/15001/19199, never 5173), seeds the demo, runs Playwright, and shuts the emulators down:
+
+| Script | Seed | Specs |
+|---|---|---|
+| `npm run test:e2e` | none (no emulators) | every spec; emulator-backed specs skip themselves, `e2e/smoke.spec.ts` runs |
+| `npm run test:e2e:tier0` | `--shift-starts-in=10m` | `e2e/tier0.spec.ts` |
+| `npm run test:e2e:tier1a` | `--shift-starts-in=10m` | `e2e/tier0.spec.ts`, `e2e/tier1-laneA.spec.ts` (`--workers=1`) |
+| `npm run test:e2e:tier1b` | default (10 minutes) | `e2e/tier1LaneB.spec.ts` |
+| `npm run test:e2e:tier2a` | `--shift-starts-in=10m` | `e2e/tier0.spec.ts`, `e2e/tier2-laneA.spec.ts` (`--workers=1`) |
+| `npm run test:e2e:tier2b` | `--shift-starts-in=10m` | `e2e/tier0.spec.ts`, `e2e/tier2LaneB.spec.ts` (`--workers=1`) |
+| `npm run test:e2e:all` | `--shift-starts-in=10m` | every spec in `e2e/` in one emulators:exec, `--workers=1` (one seed shared by all suites) |
 
 `npm run verify` (typecheck, unit and component tests, web build, Functions build, token check) runs before every push and in CI (`.github/workflows/ci.yml`).

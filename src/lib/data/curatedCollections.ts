@@ -1,23 +1,26 @@
 /**
  * curatedCollections.ts
  * Client reads and writes for curated collections (SPEC 3.19, Tier 2 lane B).
- * Collections are one of the few client-written collections (SPEC 2.4); the
- * rules (firestore.rules "Curated collections") repeat every check made here.
+ * Reads are live Firestore listeners; writes go through callable ops
+ * (coordinator.* for org collections, admin.* for app-wide ones, orgId
+ * null), because rules cannot validate each list item. The rules deny every
+ * client write; the listeners pick up the server's write.
  *
  *   listenToPublishedCollections   Explore: published, newest first (Q34)
  *   listenToOwnedCollections       an org's collections, or the admin ones
  *                                  (orgId null), drafts included (Q35)
  *   listenToCollection             one collection page
- *   saveCollection                 create or replace with a caller-made id,
- *                                  so a retried save never makes a duplicate
+ *   saveCollection                 create (requestNonce, so a retried save
+ *                                  never makes a duplicate) or update
+ *   setCollectionPublished         publish or unpublish
  *   deleteCollection
  *
  * Public lists skip any document that fails the schema instead of failing
- * the whole list: rules cannot check each item of a list, so one malformed
- * write must not break Explore for everyone.
+ * the whole list, so one malformed legacy document never breaks Explore.
  */
-import { collection, deleteDoc, doc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where, type Query } from "firebase/firestore";
+import { collection, doc, limit, onSnapshot, orderBy, query, where, type Query } from "firebase/firestore";
 import { COLLECTIONS, collectionFieldsSchema, curatedCollectionDocSchema, type CollectionFields, type CuratedCollectionDoc } from "@fbla/shared";
+import { callOp } from "../api";
 import { getFirebase } from "../firebase";
 import type { WithId } from "./parse";
 
@@ -65,29 +68,34 @@ export const listenToCollection = (collectionId: string, onData: (item: CuratedC
     (error) => onError(asError(error))
   );
 
-/** A fresh document id for a new collection (kept by the editor across retries). */
-export const newCollectionId = (): string => doc(collectionsRef()).id;
-
 export interface SaveCollectionRequest {
-  readonly collectionId: string;
-  /** null for an admin-authored collection. */
+  /** null creates a new collection; otherwise the collection to update. */
+  readonly collectionId: string | null;
+  /** Kept by the editor across retries, so a retried create lands on the same id. */
+  readonly requestNonce: string;
+  /** The org that owns it, or null for an app-wide (admin) collection. */
   readonly orgId: string | null;
-  /** The original author when editing, the caller when creating (rules keep it fixed). */
-  readonly authorUid: string;
   readonly fields: CollectionFields;
 }
 
-/** Validates the fields, then writes the whole document with the server time. */
-export const saveCollection = async (request: SaveCollectionRequest): Promise<void> => {
+/** Validates the fields, then creates or updates through the coordinator or admin endpoint. */
+export const saveCollection = async (request: SaveCollectionRequest): Promise<string> => {
   const fields = collectionFieldsSchema.parse(request.fields);
-  await setDoc(doc(collectionsRef(), request.collectionId), {
-    ...fields,
-    orgId: request.orgId,
-    authorUid: request.authorUid,
-    updatedAt: serverTimestamp()
-  });
+  if (request.orgId === null) {
+    const input = request.collectionId === null ? { requestNonce: request.requestNonce, fields } : { collectionId: request.collectionId, fields };
+    return (await callOp("admin", "upsertCollection", input)).collectionId;
+  }
+  const input = request.collectionId === null ? { orgId: request.orgId, requestNonce: request.requestNonce, fields } : { collectionId: request.collectionId, fields };
+  return (await callOp("coordinator", "upsertCollection", input)).collectionId;
 };
 
-export const deleteCollection = async (collectionId: string): Promise<void> => {
-  await deleteDoc(doc(collectionsRef(), collectionId));
+/** Publishes or unpublishes without resending the fields. */
+export const setCollectionPublished = async (collection: Pick<CuratedCollection, "id" | "orgId">, published: boolean): Promise<void> => {
+  const endpoint = collection.orgId === null ? "admin" : "coordinator";
+  await callOp(endpoint, "publishCollection", { collectionId: collection.id, published });
+};
+
+export const deleteCollection = async (collection: Pick<CuratedCollection, "id" | "orgId">): Promise<void> => {
+  const endpoint = collection.orgId === null ? "admin" : "coordinator";
+  await callOp(endpoint, "deleteCollection", { collectionId: collection.id });
 };
