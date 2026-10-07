@@ -9,7 +9,9 @@ import { finalizeShift } from "../ops/finalizeShift";
 import { pingOp } from "../ops/ping";
 import { revokeLetter } from "../ops/revokeLetter";
 import { startKiosk } from "../ops/startKiosk";
+// Tier 1 lane B
+import { laneBCoordinatorOps } from "./laneB";
 
-export const coordinatorOps: readonly RegisteredOp[] = [pingOp("coordinator"), startKiosk, finalizeShift, revokeLetter];
+export const coordinatorOps: readonly RegisteredOp[] = [pingOp("coordinator"), startKiosk, finalizeShift, revokeLetter, ...laneBCoordinatorOps];
 
 export const coordinator = defineEndpoint("coordinator", coordinatorOps, { memory: "512MiB" });

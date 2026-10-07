@@ -12,7 +12,9 @@ import { completeProfile } from "../ops/completeProfile";
 import { issueLetter } from "../ops/issueLetter";
 import { pingOp } from "../ops/ping";
 import { signup } from "../ops/signup";
+// Tier 1 lane B
+import { laneBVolunteerOps } from "./laneB";
 
-export const volunteerOps: readonly RegisteredOp[] = [pingOp("volunteer"), completeProfile, signup, cancelSignup, issueLetter];
+export const volunteerOps: readonly RegisteredOp[] = [pingOp("volunteer"), completeProfile, signup, cancelSignup, issueLetter, ...laneBVolunteerOps];
 
 export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: deploySecrets("TURNSTILE_SECRET") });

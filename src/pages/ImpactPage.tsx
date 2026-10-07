@@ -72,6 +72,17 @@ const ImpactPage = (): ReactElement => {
       )}
 
       <LetterList letters={letters.data ?? []} />
+
+      {/* Tier 1 lane B: manual hours entry and the hours report. */}
+      <nav aria-label="More for your hours" className="flex flex-wrap gap-3">
+        <Link to="/impact/hours/new" className={buttonClassName("secondary")}>
+          Log outside hours
+        </Link>
+        <Link to="/impact/report" className={buttonClassName("secondary")}>
+          Hours report
+        </Link>
+      </nav>
+      {/* End Tier 1 lane B */}
     </div>
   );
 };

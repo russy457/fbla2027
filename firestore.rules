@@ -177,5 +177,29 @@ service cloud.firestore {
     match /rateLimits/{id} { allow read, write: if false; }
     match /jobLeases/{id} { allow read, write: if false; }
     match /turnstileTokens/{id} { allow read, write: if false; }
+
+    // Tier 1 lane B
+    // Owner of the org (SPEC 4.3 isOwner).
+    function isOrgOwner(orgId) {
+      return signedIn()
+        && exists(memberPath(orgId))
+        && get(memberPath(orgId)).data.role == 'owner';
+    }
+
+    // Invite ids are code hashes; only the org owner may list them (SPEC 3.5).
+    match /invites/{inviteId} {
+      allow read: if isOrgOwner(resource.data.orgId);
+      allow write: if false;
+    }
+
+    // Report metadata: the owner reads and deletes; Functions write (SPEC 3.21).
+    match /reports/{reportId} {
+      allow read, delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      allow create, update: if false;
+    }
+
+    // Admin verification notes stay private (server-only).
+    match /orgVerificationLog/{id} { allow read, write: if false; }
+    // End Tier 1 lane B
   }
 }

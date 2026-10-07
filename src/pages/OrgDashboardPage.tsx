@@ -5,9 +5,12 @@
  * counts, Start kiosk, Finalize shift, and the live roster; upcoming shifts
  * follow; the labeled Demo controls box comes last, only in demo mode (D11, X12).
  * Guarded by RequireCoordinator, so the viewer is an owner or coordinator.
+ * Tier 1 lane B: the org nav (OrgPageShell), an analytics strip, the Needs
+ * attention queue (D9), a Create shift link, and the "Your organization is
+ * ready." empty state for an org with no shifts at all (D6).
  */
 import type { ReactElement } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { formatShiftTime } from "@fbla/shared";
 import { ErrorState } from "@/components/ErrorState";
@@ -16,7 +19,12 @@ import { DemoControls } from "@/components/org/DemoControls";
 import { FinalizeShiftButton } from "@/components/org/FinalizeShiftButton";
 import { RosterTable } from "@/components/org/RosterTable";
 import { StartKioskControl } from "@/components/org/StartKioskControl";
-import { PageHeader } from "@/components/ui/PageHeader";
+// Tier 1 lane B
+import { NeedsAttention } from "@/components/org/NeedsAttention";
+import { OrgAnalytics } from "@/components/org/OrgAnalytics";
+import { OrgPageShell } from "@/components/org/OrgPageShell";
+import { buttonClassName } from "@/components/ui/buttonStyles";
+// End Tier 1 lane B
 import { useMembership } from "@/hooks/useMemberships";
 import { useNow } from "@/hooks/useNow";
 import { useOrgInstances } from "@/hooks/useShiftData";
@@ -68,14 +76,27 @@ const OrgDashboardPage = (): ReactElement => {
 
   const { featured, upcoming } = pickFeaturedShift(shifts.data ?? [], nowMs);
 
+  const allShifts = shifts.data ?? [];
+  const timeZone = org.data?.timeZone ?? featured?.timeZone ?? "America/Chicago";
+
   return (
-    <div className="flex flex-col gap-10">
-      <PageHeader title={org.data?.name ?? "Organization"}>Run today's shift: start the kiosk, watch arrivals, and finalize when it ends.</PageHeader>
-      {featured ? (
+    <OrgPageShell title={org.data?.name ?? "Organization"} intro="Run today's shift: start the kiosk, watch arrivals, and finalize when it ends.">
+      <Link to={`/org/${orgId}/shifts/new`} className={buttonClassName("secondary", "w-fit")}>
+        Create shift
+      </Link>
+      {allShifts.length === 0 ? (
+        <section className="flex flex-col items-start gap-3">
+          <p className="text-lg font-semibold text-fg">Your organization is ready.</p>
+          <Link to={`/org/${orgId}/shifts/new`} className={buttonClassName("primary")}>
+            Create your first shift
+          </Link>
+        </section>
+      ) : featured ? (
         <FeaturedShift orgId={orgId} shift={featured} nowMs={nowMs} canViewContacts={membership.data?.canViewContacts === true} />
       ) : (
         <p className="text-fg-muted">No upcoming shifts right now.</p>
       )}
+      <NeedsAttention orgId={orgId} />
       {upcoming.length > 0 ? (
         <section aria-labelledby="upcoming-shifts-title">
           <h2 id="upcoming-shifts-title" className="border-b border-border-strong pb-2 text-sm font-semibold text-fg-muted">
@@ -84,7 +105,9 @@ const OrgDashboardPage = (): ReactElement => {
           <ul className="divide-y divide-border">
             {upcoming.map((shift) => (
               <li key={shift.id} className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <span className="font-semibold text-fg">{shift.title}</span>
+                <Link to={`/org/${orgId}/shifts/${shift.id}`} className="font-semibold text-fg underline-offset-2 hover:underline">
+                  {shift.title}
+                </Link>
                 <span className="text-sm text-fg-muted">
                   {formatShiftTime(shift.start.toDate(), shift.timeZone)}, {shift.signupCount} of {shift.capacity} signed up
                 </span>
@@ -93,9 +116,10 @@ const OrgDashboardPage = (): ReactElement => {
           </ul>
         </section>
       ) : null}
+      <OrgAnalytics orgId={orgId} timeZone={timeZone} nowMs={nowMs} />
       {/* Demo-only tools sit last so the real work (today's shift) stays on top. */}
       <DemoControls />
-    </div>
+    </OrgPageShell>
   );
 };
 

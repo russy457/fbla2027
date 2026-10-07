@@ -24,7 +24,12 @@ export const COLLECTIONS = Object.freeze({
   jobLeases: "jobLeases",
   jobRuns: "jobRuns",
   demoClock: "demoClock",
-  meta: "meta"
+  meta: "meta",
+  // Tier 1 lane B
+  invites: "invites",
+  reports: "reports",
+  orgVerificationLog: "orgVerificationLog"
+  // End Tier 1 lane B
 });
 
 export const PATHS = Object.freeze({
@@ -36,5 +41,9 @@ export const PATHS = Object.freeze({
   runDueJobsLease: () => `${COLLECTIONS.jobLeases}/runDueJobs`,
   demoClock: () => `${COLLECTIONS.demoClock}/global`,
   /** Storage path of a letter PDF (SPEC 3.22). */
-  letterPdf: (uid: string, letterId: string) => `letters/${uid}/${letterId}.pdf`
+  letterPdf: (uid: string, letterId: string) => `letters/${uid}/${letterId}.pdf`,
+  // Tier 1 lane B
+  /** Storage path of a report PDF (SPEC 3.22). */
+  reportPdf: (uid: string, reportId: string) => `reports/${uid}/${reportId}.pdf`
+  // End Tier 1 lane B
 });

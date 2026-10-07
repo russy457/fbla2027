@@ -64,6 +64,15 @@ export const AccountControls = (): ReactElement | null => {
           <span className="sr-only sm:hidden">Coordinator dashboard</span>
         </NavLink>
       ) : null}
+      {/* Tier 1 lane B: registration and invite join are reachable before any membership. */}
+      {!firstOrg && memberships.isSuccess ? (
+        <NavLink to="/org/register" className={linkClass}>
+          <Buildings aria-hidden="true" size={18} />
+          <span className="hidden sm:inline">For organizations</span>
+          <span className="sr-only sm:hidden">For organizations</span>
+        </NavLink>
+      ) : null}
+      {/* End Tier 1 lane B */}
       {user.isAdmin ? (
         <NavLink to="/admin" className={linkClass}>
           <ShieldCheck aria-hidden="true" size={18} />
