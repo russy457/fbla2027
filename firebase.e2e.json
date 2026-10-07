@@ -1,0 +1,51 @@
+{
+  "//": "Emulator-only config for npm run test:e2e:tier0. Same rules, indexes, and Functions as firebase.json, on separate ports so the Tier 0 e2e can run while npm run demo (or another project) holds the default ports. Never used for deploys.",
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": [
+    {
+      "source": "functions-dist",
+      "codebase": "default",
+      "runtime": "nodejs22",
+      "predeploy": [
+        "npm run build:functions"
+      ]
+    }
+  ],
+  "emulators": {
+    "singleProjectMode": true,
+    "auth": {
+      "port": 19099
+    },
+    "firestore": {
+      "port": 18080,
+      "websocketPort": 19150
+    },
+    "functions": {
+      "port": 15001
+    },
+    "storage": {
+      "port": 19199
+    },
+    "hub": {
+      "port": 14400
+    },
+    "logging": {
+      "port": 14500
+    },
+    "eventarc": {
+      "port": 19299
+    },
+    "tasks": {
+      "port": 19499
+    },
+    "ui": {
+      "enabled": false
+    }
+  }
+}

@@ -17,6 +17,8 @@ export const clientEnvSchema = z.object({
   VITE_FIREBASE_STORAGE_BUCKET: required(),
   VITE_FIREBASE_APP_ID: required(),
   VITE_USE_EMULATORS: envFlag(),
+  /** Demo controls ("Sign in as...", Advance clock, Run due jobs). Unset means: on when using emulators. */
+  VITE_DEMO_MODE: z.enum(["true", "false"]).optional(),
   VITE_TURNSTILE_SITE_KEY: optionalEnvString(),
   VITE_MAPBOX_TOKEN: optionalEnvString(),
   VITE_APPCHECK_SITE_KEY: optionalEnvString(),
@@ -30,6 +32,14 @@ export type ClientEnvResult = { ok: true; env: ClientEnv } | { ok: false; error:
 /** Parses an env record (import.meta.env in the app, a plain object in tests). Throws on failure. */
 export const parseClientEnv = (source: EnvRecord): ClientEnv =>
   parseEnv(clientEnvSchema, source, { exampleFile: ".env.example" });
+
+/**
+ * True when demo-only UI may render (SPEC#clock, X5, X12). An explicit
+ * VITE_DEMO_MODE wins; otherwise demo mode follows VITE_USE_EMULATORS, so a
+ * local run shows the controls and a deployed build hides them by default.
+ */
+export const isDemoModeEnv = (env: ClientEnv): boolean =>
+  env.VITE_DEMO_MODE === undefined ? env.VITE_USE_EMULATORS : env.VITE_DEMO_MODE === "true";
 
 /** Non-throwing variant for UI that wants to show the problem instead of crashing. */
 export const readClientEnv = (source: EnvRecord = import.meta.env): ClientEnvResult => {

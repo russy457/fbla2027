@@ -1,13 +1,16 @@
 /**
  * router.tsx
- * Every route in the app (plan D2). Volunteer screens share AppLayout (top
- * nav on desktop, bottom tabs on mobile). Coordinator screens live under
- * /org/:orgId/*, admin under /admin, and the kiosk renders without the shell.
+ * Every route in the app (SPEC#screen-nav D2). Public screens (Explore, Help,
+ * Verify, Login, Onboarding) share AppLayout with signed-in screens. Guards
+ * are layout routes: RequireProfile (signed in + onboarding done, G11) wraps
+ * volunteer screens, RequireCoordinator wraps /org/:orgId/*, and
+ * RequireAdmin wraps /admin. The kiosk renders without the shell (G15).
  * Each screen is code-split with lazyWithReload so a stale chunk after a
  * deploy heals itself with one reload.
  */
 import { Suspense } from "react";
 import { createBrowserRouter, type RouteObject } from "react-router-dom";
+import { RequireAdmin, RequireCoordinator, RequireProfile } from "./components/guards/RouteGuards";
 import { LoadingState } from "./components/LoadingState";
 import { RouteError } from "./components/RouteError";
 import { AppLayout } from "./layouts/AppLayout";
@@ -18,6 +21,7 @@ const MyShiftsPage = lazyWithReload(() => import("./pages/MyShiftsPage"));
 const ImpactPage = lazyWithReload(() => import("./pages/ImpactPage"));
 const HelpPage = lazyWithReload(() => import("./pages/HelpPage"));
 const VerifyPage = lazyWithReload(() => import("./pages/VerifyPage"));
+const LoginPage = lazyWithReload(() => import("./pages/LoginPage"));
 const OnboardingPage = lazyWithReload(() => import("./pages/OnboardingPage"));
 const OrgDashboardPage = lazyWithReload(() => import("./pages/OrgDashboardPage"));
 const KioskPage = lazyWithReload(() => import("./pages/KioskPage"));
@@ -30,14 +34,22 @@ export const routes: RouteObject[] = [
     errorElement: <RouteError />,
     children: [
       { index: true, element: <ExplorePage /> },
-      { path: "me/shifts", element: <MyShiftsPage /> },
-      { path: "impact", element: <ImpactPage /> },
+      { path: "explore", element: <ExplorePage /> },
       { path: "help", element: <HelpPage /> },
       { path: "help/:slug", element: <HelpPage /> },
+      { path: "verify", element: <VerifyPage /> },
       { path: "verify/:code", element: <VerifyPage /> },
+      { path: "login", element: <LoginPage /> },
       { path: "onboarding", element: <OnboardingPage /> },
-      { path: "org/:orgId/dashboard", element: <OrgDashboardPage /> },
-      { path: "admin", element: <AdminPage /> },
+      {
+        element: <RequireProfile />,
+        children: [
+          { path: "me/shifts", element: <MyShiftsPage /> },
+          { path: "impact", element: <ImpactPage /> },
+          { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "dashboard", element: <OrgDashboardPage /> }] },
+          { path: "admin", element: <RequireAdmin />, children: [{ index: true, element: <AdminPage /> }] }
+        ]
+      },
       { path: "*", element: <NotFoundPage /> }
     ]
   },

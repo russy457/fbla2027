@@ -6,12 +6,23 @@
  * into the app shell bundle. firebase.ts re-exports probeEmulators.
  */
 
-/** Must match the "emulators" block in firebase.json. */
+/** Reads an optional VITE_EMULATOR_*_PORT override; anything that is not a valid port is ignored. */
+const portOverride = (name: string, fallback: number): number => {
+  const raw = (import.meta.env as Record<string, unknown>)[name];
+  const port = typeof raw === "string" ? Number(raw) : Number.NaN;
+  return Number.isInteger(port) && port > 0 && port < 65536 ? port : fallback;
+};
+
+/**
+ * Must match the "emulators" block in firebase.json. The Tier 0 e2e runs its
+ * own emulators on other ports (firebase.e2e.json) and passes them in with
+ * VITE_EMULATOR_AUTH_PORT, _FIRESTORE_PORT, _FUNCTIONS_PORT, _STORAGE_PORT.
+ */
 export const EMULATOR_PORTS = Object.freeze({
-  auth: 9099,
-  firestore: 8080,
-  functions: 5001,
-  storage: 9199
+  auth: portOverride("VITE_EMULATOR_AUTH_PORT", 9099),
+  firestore: portOverride("VITE_EMULATOR_FIRESTORE_PORT", 8080),
+  functions: portOverride("VITE_EMULATOR_FUNCTIONS_PORT", 5001),
+  storage: portOverride("VITE_EMULATOR_STORAGE_PORT", 9199)
 });
 
 export type EmulatorService = keyof typeof EMULATOR_PORTS;

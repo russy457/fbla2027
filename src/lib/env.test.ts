@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseClientEnv, readClientEnv } from "./env";
+import { isDemoModeEnv, parseClientEnv, readClientEnv } from "./env";
 
 const EXAMPLE_DEFAULTS = {
   VITE_FIREBASE_API_KEY: "demo-key",
@@ -35,5 +35,17 @@ describe("client env", () => {
   it("readClientEnv returns the parsed env on success", () => {
     const result = readClientEnv(EXAMPLE_DEFAULTS);
     expect(result.ok && result.env.VITE_FIREBASE_PROJECT_ID).toBe("demo-fbla2027");
+  });
+});
+
+describe("demo mode flag", () => {
+  it("follows VITE_USE_EMULATORS when VITE_DEMO_MODE is unset", () => {
+    expect(isDemoModeEnv(parseClientEnv(EXAMPLE_DEFAULTS))).toBe(true);
+    expect(isDemoModeEnv(parseClientEnv({ ...EXAMPLE_DEFAULTS, VITE_USE_EMULATORS: "false" }))).toBe(false);
+  });
+
+  it("lets an explicit VITE_DEMO_MODE win", () => {
+    expect(isDemoModeEnv(parseClientEnv({ ...EXAMPLE_DEFAULTS, VITE_DEMO_MODE: "false" }))).toBe(false);
+    expect(isDemoModeEnv(parseClientEnv({ ...EXAMPLE_DEFAULTS, VITE_USE_EMULATORS: "false", VITE_DEMO_MODE: "true" }))).toBe(true);
   });
 });

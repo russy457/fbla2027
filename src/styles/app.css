@@ -139,3 +139,13 @@
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
+
+/* Kiosk code change (D4 "New code fades in"). Opacity only, so it is cheap and collapses under reduced motion. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
