@@ -5,13 +5,15 @@
  * display preferences, and a bottom tab bar on mobile. Landmarks (header,
  * nav, main, footer) are real elements so screen reader users can jump
  * between them. After each navigation, focus moves to <main> so keyboard and
- * screen reader users start reading the new screen from the top.
+ * screen reader users start reading the new screen from the top. The header
+ * also holds the Quick help button that opens the help slide-over.
  */
 import { Suspense, useEffect, useRef, type ReactElement } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import FadeContent from "@/components/bits/FadeContent";
 import { DevEnvironmentBanner } from "@/components/DevEnvironmentBanner";
 import { DisplayPreferences } from "@/components/DisplayPreferences";
+import { HelpPanelLauncher } from "@/components/help/HelpPanelLauncher";
 import { LoadingState } from "@/components/LoadingState";
 import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
@@ -60,18 +62,22 @@ export const AppLayout = (): ReactElement => {
           <Link to="/" className="inline-flex min-h-touch items-center rounded-md text-lg font-semibold tracking-tight text-fg">
             {APP_NAME}
           </Link>
-          <nav aria-label="Main" className="hidden md:block">
-            <ul className="flex items-center gap-1">
-              {VOLUNTEER_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-                <li key={to}>
-                  <NavLink to={to} end={end} className={desktopLinkClass}>
-                    <Icon aria-hidden="true" size={18} weight="regular" />
-                    {label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <div className="flex items-center gap-2">
+            <nav aria-label="Main" className="hidden md:block">
+              <ul className="flex items-center gap-1">
+                {VOLUNTEER_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+                  <li key={to}>
+                    <NavLink to={to} end={end} className={desktopLinkClass}>
+                      <Icon aria-hidden="true" size={18} weight="regular" />
+                      {label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            {/* Quick help slide-over, also opened with the "?" key (SPEC 9.6). */}
+            <HelpPanelLauncher />
+          </div>
         </div>
       </header>
 

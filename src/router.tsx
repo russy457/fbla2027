@@ -33,6 +33,7 @@ export const routes: RouteObject[] = [
       { path: "me/shifts", element: <MyShiftsPage /> },
       { path: "impact", element: <ImpactPage /> },
       { path: "help", element: <HelpPage /> },
+      { path: "help/:slug", element: <HelpPage /> },
       { path: "verify/:code", element: <VerifyPage /> },
       { path: "onboarding", element: <OnboardingPage /> },
       { path: "org/:orgId/dashboard", element: <OrgDashboardPage /> },
