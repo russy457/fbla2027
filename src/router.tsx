@@ -51,6 +51,10 @@ const CheckinPage = lazyWithReload(() => import("./pages/CheckinPage"));
 // Tier 1 integration
 const ProfilePage = lazyWithReload(() => import("./pages/volunteer/ProfilePage"));
 const OrganizationPage = lazyWithReload(() => import("./pages/OrganizationPage"));
+// Tier 2 lane B
+const CollectionPage = lazyWithReload(() => import("./pages/CollectionPage"));
+const OrgCollectionsPage = lazyWithReload(() => import("./pages/org/OrgCollectionsPage"));
+// End Tier 2 lane B
 
 export const routes: RouteObject[] = [
   {
@@ -62,6 +66,9 @@ export const routes: RouteObject[] = [
       { path: "opportunity/:instanceId", element: <OpportunityPage /> },
       // Tier 1 integration: public organization page (SPEC 9.2 "Organization")
       { path: "organizations/:orgId", element: <OrganizationPage /> },
+      // Tier 2 lane B: public curated collection page (SPEC 9.1)
+      { path: "collections/:collectionId", element: <CollectionPage /> },
+      // End Tier 2 lane B
       { path: "help", element: <HelpPage /> },
       { path: "help/:slug", element: <HelpPage /> },
       { path: "verify", element: <VerifyPage /> },
@@ -97,8 +104,11 @@ export const routes: RouteObject[] = [
               { path: "reports", element: <OrgReportsPage /> },
               { path: "settings", element: <OrgSettingsPage /> }
             ]
-          }
+          },
           // End Tier 1 lane B
+          // Tier 2 lane B: coordinator-curated collections
+          { path: "org/:orgId", element: <RequireCoordinator />, children: [{ path: "collections", element: <OrgCollectionsPage /> }] }
+          // End Tier 2 lane B
         ]
       },
       // Tier 1 lane C

@@ -97,6 +97,9 @@ import { markNotificationsReadInput, markNotificationsReadOutput } from "./schem
 import { updateProfileInput, updateProfileOutput } from "./schemas/ops/profileOps";
 // Tier 1 review fixes
 import { getOrgReportUrlInput, getPdfUrlInput, pdfUrlOutput } from "./schemas/ops/pdfOps";
+// Tier 2 lane B
+import { shiftPlannerParseInput, shiftPlannerParseOutput } from "./schemas/ops/plannerOps";
+// End Tier 2 lane B
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -162,7 +165,10 @@ export const OPS = {
   ai: {
     ping: op(pingInput, pingOutput),
     // Tier 1 lane C
-    askAssistant: op(askAssistantInput, askAssistantOutput)
+    askAssistant: op(askAssistantInput, askAssistantOutput),
+    // Tier 2 lane B
+    shiftPlannerParse: op(shiftPlannerParseInput, shiftPlannerParseOutput)
+    // End Tier 2 lane B
   }
 } as const;
 

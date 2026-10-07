@@ -10,6 +10,8 @@
  *               org's instances for titles
  *   volunteer:  the caller's own logs (uid == me), organizations, and the
  *               instances those logs mention
+ * Tier 2 lane B: signups carry lateCancel (reliability distribution), and the
+ * volunteer rows include the caller's own signups (track record chart).
  */
 import { Timestamp, collection, doc, getDoc, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import {
@@ -19,6 +21,7 @@ import {
   signupDocSchema,
   startOfLocalDay,
   startOfNextLocalDay,
+  type ReliabilityReportSignup,
   type ReportLogRow,
   type ReportOrgInfo,
   type ReportRange,
@@ -59,7 +62,8 @@ const toSignupRow = (signup: ParsedSignup): ReportSignupRow => ({
   instanceId: signup.instanceId,
   opportunityId: signup.opportunityId,
   status: signup.status,
-  startMs: signup.instanceStart.toMillis()
+  startMs: signup.instanceStart.toMillis(),
+  lateCancel: signup.lateCancel
 });
 
 export interface OrgReportRows {
@@ -89,6 +93,7 @@ export interface VolunteerReportRows {
   readonly logs: ReportLogRow[];
   readonly orgs: Record<string, ReportOrgInfo>;
   readonly shifts: Record<string, ReportShiftInfo>;
+  readonly signups: ReliabilityReportSignup[];
 }
 
 const loadShifts = async (instanceIds: readonly string[]): Promise<Record<string, ReportShiftInfo>> => {
@@ -99,8 +104,12 @@ const loadShifts = async (instanceIds: readonly string[]): Promise<Record<string
 
 export const loadVolunteerReportRows = async (uid: string): Promise<VolunteerReportRows> => {
   const { db } = getFirebase();
-  const snapshot = await getDocs(query(collection(db, COLLECTIONS.hoursLogs), where("uid", "==", uid), orderBy("date", "desc"), limit(MAX_REPORT_DOCS)));
+  const [snapshot, signupSnapshot] = await Promise.all([
+    getDocs(query(collection(db, COLLECTIONS.hoursLogs), where("uid", "==", uid), orderBy("date", "desc"), limit(MAX_REPORT_DOCS))),
+    getDocs(query(collection(db, COLLECTIONS.signups), where("uid", "==", uid), limit(MAX_REPORT_DOCS)))
+  ]);
+  const signups = parseQuerySnapshot(signupDocSchema, signupSnapshot).map((signup) => ({ uid: signup.uid, status: signup.status, lateCancel: signup.lateCancel, startMs: signup.instanceStart.toMillis() }));
   const logs = parseQuerySnapshot(hoursLogDocSchema, snapshot).map(toLogRow);
   const [orgs, shifts] = await Promise.all([getOrganizations(), loadShifts(logs.flatMap((log) => (log.instanceId === null ? [] : [log.instanceId])))]);
-  return { logs, orgs: Object.fromEntries(orgs.map((org) => [org.id, { name: org.name, verified: org.verified }])), shifts };
+  return { logs, orgs: Object.fromEntries(orgs.map((org) => [org.id, { name: org.name, verified: org.verified }])), shifts, signups };
 };

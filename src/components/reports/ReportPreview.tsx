@@ -18,6 +18,8 @@ import {
   type SignupStatus,
   type VolunteerReportData
 } from "@fbla/shared";
+// Tier 2 lane B: reliability charts
+import { OrgReliabilityPreview, TrackRecordPreview } from "./ReliabilityPreview";
 
 export type ReportPreviewData =
   | { readonly kind: "org-participation"; readonly data: OrgReportData }
@@ -105,6 +107,9 @@ const orgSection = (section: ReportSection, data: OrgReportData): ReactNode => {
       return data.attendance.every((row) => row.count === 0) ? EMPTY : <Table caption="Attendance breakdown" headers={["Status", "Signups"]} rows={data.attendance.map((row) => [STATUS_TEXT[row.status], String(row.count)])} />;
     case "topVolunteers":
       return <Table caption="Top volunteers" headers={["Volunteer", "Shifts", "Hours"]} rows={data.topVolunteers.map((row) => [row.displayName, String(row.shifts), hours(row.minutes)])} />;
+    // Tier 2 lane B
+    case "reliability":
+      return <OrgReliabilityPreview distribution={data.reliability} />;
     default:
       return null;
   }
@@ -134,6 +139,9 @@ const volunteerSection = (section: ReportSection, data: VolunteerReportData): Re
           {MILESTONES.join(", ")}.{data.milestones.next === null ? " Every milestone reached." : ` ${data.milestones.hoursToNext?.toFixed(2)} hours to ${data.milestones.next}.`}
         </p>
       );
+    // Tier 2 lane B
+    case "trackRecord":
+      return <TrackRecordPreview record={data.trackRecord} />;
     default:
       return null;
   }

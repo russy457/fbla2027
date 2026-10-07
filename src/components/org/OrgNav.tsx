@@ -7,7 +7,7 @@
  */
 import type { ReactElement } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { CalendarBlank, ChartBar, GearSix, House, type Icon } from "@phosphor-icons/react";
+import { CalendarBlank, ChartBar, GearSix, House, Stack, type Icon } from "@phosphor-icons/react";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { cn } from "@/lib/cn";
 import { useSessionUser } from "@/store/authStore";
@@ -23,6 +23,8 @@ const ITEMS: readonly OrgNavItem[] = [
   { path: "dashboard", label: "Dashboard", icon: House },
   { path: "shifts", label: "Shifts", icon: CalendarBlank },
   { path: "reports", label: "Reports", icon: ChartBar },
+  // Tier 2 lane B
+  { path: "collections", label: "Collections", icon: Stack },
   { path: "settings", label: "Settings", icon: GearSix }
 ];
 

@@ -37,8 +37,12 @@ export const COLLECTIONS = Object.freeze({
   // Tier 1 lane A: in-app notifications (notifications/{uid}/items) and saved items (users/{uid}/saved).
   notifications: "notifications",
   notificationItems: "items",
-  saved: "saved"
+  saved: "saved",
   // End Tier 1 lane A
+  // Tier 2 lane B: curated collections (SPEC 3.19) and org reviews (SPEC 3.20), both client-written under the rules.
+  curatedCollections: "collections",
+  reviews: "reviews"
+  // End Tier 2 lane B
 });
 
 export const PATHS = Object.freeze({

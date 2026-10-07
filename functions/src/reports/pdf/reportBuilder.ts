@@ -198,9 +198,11 @@ export class PdfReportBuilder {
     this.cursorY += 6;
   }
 
-  /** Horizontal bar chart: one labeled bar per item, values printed as text so nothing relies on color. */
-  drawBarChart(items: readonly BarItem[]): void {
-    const labelWidth = 90;
+  /**
+   * Horizontal bar chart: one labeled bar per item, values printed as text so nothing relies on color.
+   * Tier 2 lane B: `labelWidth` widens the label column for longer labels (reliability bands).
+   */
+  drawBarChart(items: readonly BarItem[], labelWidth = 90): void {
     const valueWidth = 70;
     const trackWidth = this.contentWidth - labelWidth - valueWidth;
     const max = Math.max(1, ...items.map((item) => item.value));

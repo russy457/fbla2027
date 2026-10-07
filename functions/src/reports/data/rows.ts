@@ -51,7 +51,9 @@ export const signupRowOf = (doc: QueryDocumentSnapshot): ReportSignupRow => {
     instanceId: signup.instanceId,
     opportunityId: signup.opportunityId,
     status: signup.status,
-    startMs: signup.instanceStart.toMillis()
+    startMs: signup.instanceStart.toMillis(),
+    // Tier 2 lane B: the reliability distribution weighs late cancels (SPEC 7.2).
+    lateCancel: signup.lateCancel
   };
 };
 

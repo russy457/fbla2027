@@ -23,6 +23,8 @@ import { renderOrgHoursByOpportunity } from "./pdf/sections/orgHoursByOpportunit
 import { renderOrgSummary } from "./pdf/sections/orgSummary";
 import { renderOrgTopVolunteers } from "./pdf/sections/orgTopVolunteers";
 import { renderVolunteerHoursByOrg, renderVolunteerMilestones, renderVolunteerShiftList, renderVolunteerSummary } from "./pdf/sections/volunteerSections";
+// Tier 2 lane B
+import { renderOrgReliability, renderVolunteerTrackRecord } from "./pdf/sections/reliabilityCharts";
 
 interface CommonRenderInput {
   readonly sections: readonly string[];
@@ -57,7 +59,9 @@ const ORG_RENDERERS: Partial<Record<ReportSection, SectionRenderer<OrgReportData
   hoursByOpportunity: (builder, data) => renderOrgHoursByOpportunity(builder, data.hoursByOpportunity),
   hoursByMonth: (builder, data) => renderHoursByMonth(builder, data.hoursByMonth),
   attendance: (builder, data) => renderOrgAttendance(builder, data.attendance),
-  topVolunteers: (builder, data) => renderOrgTopVolunteers(builder, data.topVolunteers)
+  topVolunteers: (builder, data) => renderOrgTopVolunteers(builder, data.topVolunteers),
+  // Tier 2 lane B
+  reliability: (builder, data) => renderOrgReliability(builder, data.reliability)
 };
 
 const VOLUNTEER_RENDERERS: Partial<Record<ReportSection, SectionRenderer<VolunteerReportData>>> = {
@@ -65,7 +69,9 @@ const VOLUNTEER_RENDERERS: Partial<Record<ReportSection, SectionRenderer<Volunte
   hoursByOrg: (builder, data) => renderVolunteerHoursByOrg(builder, data.hoursByOrg),
   hoursByMonth: (builder, data) => renderHoursByMonth(builder, data.hoursByMonth),
   shiftList: (builder, data, timeZone) => renderVolunteerShiftList(builder, data.shiftList, timeZone),
-  milestones: (builder, data) => renderVolunteerMilestones(builder, data.milestones)
+  milestones: (builder, data) => renderVolunteerMilestones(builder, data.milestones),
+  // Tier 2 lane B
+  trackRecord: (builder, data) => renderVolunteerTrackRecord(builder, data.trackRecord)
 };
 
 const runSections = <D>(builder: PdfReportBuilder, renderers: Partial<Record<ReportSection, SectionRenderer<D>>>, sections: readonly ReportSection[], data: D, timeZone: string): void => {

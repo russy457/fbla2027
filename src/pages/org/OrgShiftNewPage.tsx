@@ -56,6 +56,8 @@ const initialOpportunity = (prefill: PlannerPrefill | null): OpportunityFields =
   ...EMPTY_OPPORTUNITY,
   ...(prefill?.title ? { title: prefill.title } : {}),
   ...(prefill?.causeArea ? { causeArea: prefill.causeArea } : {}),
+  // Tier 2 lane B: AI planner description
+  ...(prefill?.description ? { description: prefill.description } : {}),
   ...(prefill?.location ? { location: { address: { ...EMPTY_ADDRESS, line1: prefill.location } } } : {})
 });
 

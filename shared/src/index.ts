@@ -57,3 +57,9 @@ export * from "./zipAreas";
 export * from "./schemas/ops/profileOps";
 // Tier 1 review fixes: short-lived PDF links
 export * from "./schemas/ops/pdfOps";
+// Tier 2 lane B: AI planner op, reliability charts, collections, reviews
+export * from "./schemas/ops/plannerOps";
+export * from "./reliabilityReport";
+export * from "./schemas/curationDocs";
+export * from "./reviews";
+// End Tier 2 lane B
