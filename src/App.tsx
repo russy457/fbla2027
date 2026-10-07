@@ -8,6 +8,7 @@ import { useState, type ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { SmoothScroll } from "./components/SmoothScroll";
 import { useAuthListener } from "./hooks/useAuthListener";
 import { useDemoClockSync } from "./hooks/useDemoClockSync";
 import { usePreferenceSync } from "./hooks/usePreferenceSync";
@@ -37,6 +38,7 @@ export const App = (): ReactElement => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <SmoothScroll />
         <SessionSync />
         <RouterProvider router={router} future={{ v7_startTransition: true }} />
       </QueryClientProvider>

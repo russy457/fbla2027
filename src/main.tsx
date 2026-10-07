@@ -10,6 +10,7 @@ import "@fontsource-variable/besley/wght.css";
 import "@fontsource-variable/besley/wght-italic.css";
 import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
 import "@fontsource-variable/jetbrains-mono";
+import "lenis/dist/lenis.css";
 import "./styles/app.css";
 import { App } from "./App";
 import { APP_NAME } from "./lib/brand";
