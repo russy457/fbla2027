@@ -46,7 +46,7 @@ export const HoursTotal = ({ uid, hours }: HoursTotalProps): ReactElement => {
   useEffect(() => writeLastSeen(uid, total), [uid, total]);
 
   return (
-    <p className="flex items-baseline gap-3">
+    <p className="flex flex-wrap items-baseline gap-x-3">
       <span className="font-mono text-6xl font-semibold tracking-tight text-fg tabular-nums md:text-7xl">
         {countFrom === null ? (
           total
