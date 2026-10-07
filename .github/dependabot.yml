@@ -1,0 +1,19 @@
+# dependabot.yml
+# Weekly dependency update PRs (plan X18) for npm (root workspace, which
+# covers shared/ and functions/) and for the GitHub Actions used in CI.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      firebase:
+        patterns: ["firebase", "firebase-*", "@firebase/*"]
+      testing:
+        patterns: ["vitest", "@vitest/*", "@playwright/test", "@testing-library/*", "@axe-core/*", "jsdom"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// storage.rules
+// Deny-all placeholder. Tier 0 adds owner-only letter/report paths, image/*
+// and application/pdf content-type checks, and the 5 MB size limit (plan G17).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

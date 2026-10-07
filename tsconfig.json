@@ -1,0 +1,13 @@
+{
+  "//": "Solution file: `tsc -b` typechecks every project below. Each project is noEmit; Vite and esbuild produce the real output.",
+  "files": [],
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./shared/tsconfig.json" },
+    { "path": "./functions/tsconfig.json" }
+  ]
+}

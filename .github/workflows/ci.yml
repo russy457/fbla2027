@@ -1,0 +1,59 @@
+# ci.yml
+# Runs `npm run verify` (typecheck, unit tests with coverage, web build,
+# functions bundle, token check) on Ubuntu and Windows with Node 22, then
+# checks the generated Functions deploy directory installs on its own (G3).
+# Gitleaks scans for committed secrets on Ubuntu.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Java is not needed by verify yet; Tier 0 emulator tests (rules, functions) use it.
+      - name: Set up Java 21 (emulators)
+        if: runner.os == 'Linux'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - run: npm ci
+
+      - run: npm run verify
+
+      - name: Install the Functions deploy directory on its own (G3)
+        if: runner.os == 'Linux'
+        working-directory: functions-dist
+        run: npm ci --omit=dev --ignore-scripts
+
+      - name: Scan for committed secrets
+        if: runner.os == 'Linux'
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

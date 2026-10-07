@@ -1,0 +1,17 @@
+{
+  "name": "functions",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Cloud Functions source (TypeScript). Bundled by scripts/build-functions.mjs into functions-dist/ for the emulator and deploys.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "dependencies": {
+    "@fbla/shared": "^0.1.0",
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0",
+    "zod": "^4.6.5"
+  }
+}
