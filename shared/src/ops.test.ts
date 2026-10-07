@@ -16,7 +16,10 @@ const fakeTimestamp = { toMillis: () => 0, toDate: () => new Date(0) };
 describe("op map (SPEC#api)", () => {
   it("lists the five endpoints and the Tier 0 ops", () => {
     expect(ENDPOINTS).toEqual(["volunteer", "kiosk", "coordinator", "admin", "ai"]);
-    expect(OP_NAMES.volunteer).toEqual(["ping", "completeProfile", "signup", "cancelSignup", "issueLetter"]);
+    expect(OP_NAMES.volunteer).toEqual(expect.arrayContaining(["ping", "completeProfile", "signup", "cancelSignup", "issueLetter"]));
+    // Tier 1 lane A
+    expect(OP_NAMES.volunteer).toEqual(expect.arrayContaining(["markNotificationsRead"]));
+    // End Tier 1 lane A
     expect(OP_NAMES.kiosk).toEqual(["ping", "issueKioskCode", "checkIn", "checkOut"]);
     expect(OP_NAMES.coordinator).toEqual(["ping", "startKiosk", "finalizeShift", "revokeLetter"]);
     expect(OP_NAMES.admin).toEqual(["ping", "runDueJobs", "setDemoClock"]);

@@ -48,6 +48,9 @@ import {
   setDemoClockInput,
   setDemoClockOutput
 } from "./schemas/ops/systemOps";
+// Tier 1 lane A
+import { markNotificationsReadInput, markNotificationsReadOutput } from "./schemas/ops/inboxOps";
+// End Tier 1 lane A
 
 const op = <I extends z.ZodType, O extends z.ZodType>(input: I, output: O) => ({ input, output }) as const;
 
@@ -57,7 +60,10 @@ export const OPS = {
     completeProfile: op(completeProfileInput, completeProfileOutput),
     signup: op(signupInput, signupOutput),
     cancelSignup: op(cancelSignupInput, cancelSignupOutput),
-    issueLetter: op(issueLetterInput, issueLetterOutput)
+    issueLetter: op(issueLetterInput, issueLetterOutput),
+    // Tier 1 lane A
+    markNotificationsRead: op(markNotificationsReadInput, markNotificationsReadOutput)
+    // End Tier 1 lane A
   },
   kiosk: {
     ping: op(pingInput, pingOutput),

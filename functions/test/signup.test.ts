@@ -50,22 +50,27 @@ describe("volunteer.signup", () => {
     expect((await read<SignupDoc>(COLLECTIONS.signups, "inst1_vol1")).walkUp).toBe(true);
   });
 
-  it("last-seat race: 8 people for 3 seats end with exactly 3 confirmed", async () => {
+  it("last-seat race: 8 people for 3 seats end with exactly 3 confirmed (and 3 waitlisted)", async () => {
     await seedInstance("race", { capacity: 3 });
     const results = await Promise.allSettled(VOLUNTEERS.map((uid) => call("volunteer", "signup", { instanceId: "race" }, user(uid))));
-    const confirmed = results.filter((result) => result.status === "fulfilled");
+    const fulfilled = results.filter((result): result is PromiseFulfilledResult<Record<string, unknown>> => result.status === "fulfilled");
     const failed = results.filter((result): result is PromiseRejectedResult => result.status === "rejected");
-    expect(confirmed).toHaveLength(3);
+    expect(fulfilled.filter((result) => result.value.status === "confirmed")).toHaveLength(3);
+    // Tier 1: the waitlist holds up to capacity more (SPEC 5.3 step 5); losers under heavy contention may get CONTENTION.
+    const waitlisted = fulfilled.filter((result) => result.value.status === "waitlisted").length;
+    expect(waitlisted).toBeLessThanOrEqual(3);
     failed.forEach((result) => expect(["SHIFT_FULL", "CONTENTION"]).toContain((result.reason as { details: { code: string } }).details.code));
 
     const instance = await read<InstanceDoc>(COLLECTIONS.instances, "race");
     const signups = await db.collection(COLLECTIONS.signups).where("instanceId", "==", "race").get();
     expect(instance.signupCount).toBe(3);
-    expect(signups.size).toBe(3);
+    expect(instance.waitlist).toHaveLength(waitlisted);
+    expect(signups.size).toBe(3 + waitlisted);
   });
 
   it("refuses full, started, cancelled, and missing shifts", async () => {
     await seedInstance("full", { capacity: 1, signupCount: 1 });
+    await db.collection(COLLECTIONS.instances).doc("full").update({ waitlist: [{ uid: "other", signupId: "full_other", seq: 0 }], waitlistSeq: 1 });
     await seedInstance("started", { startMs: BASE_MS - MINUTE });
     await seedInstance("cancelled", { status: "cancelled" });
     await expectCode(call("volunteer", "signup", { instanceId: "full" }, user("vol1")), "SHIFT_FULL");

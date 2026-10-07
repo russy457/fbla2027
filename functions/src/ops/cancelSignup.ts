@@ -3,9 +3,11 @@
  * volunteer.cancelSignup (SPEC#fn-cancelsignup, SPEC 5.3). One transaction
  * over the instance and the signup. A confirmed cancel frees a seat and is a
  * "late cancel" when it happens within 24 hours of the start; a promoted
- * volunteer may instead release the seat without that mark (T2). Promoting
- * the head of the waitlist into the freed seat is Tier 1, so
- * promotedSignupId is always null for now.
+ * volunteer may instead release the seat without that mark (T2). Before
+ * the 2 h cutoff the freed seat goes to the head of the waitlist in the same
+ * transaction (lowest seq), who gets a waitlist-promoted notification with
+ * Confirm / Can't make it actions; after the cutoff the seat stays open for
+ * walk-ups.
  */
 import {
   AppError,
@@ -21,6 +23,8 @@ import {
 import { volunteerOf } from "../lib/auth";
 import { defineCallable } from "../lib/defineCallable";
 import { msOf, readDoc, runTx, ts } from "../lib/firestore";
+import { SYSTEM_ACTOR } from "../shifts/finalize";
+import { applyPromotion, readPromotion } from "../shifts/promotion";
 import { withHistory } from "../shifts/signupRecords";
 
 interface CancelDecision {
@@ -67,12 +71,16 @@ export const cancelSignup = defineCallable({
       assertTransition(signup.status, "cancelled", "cancelSignup");
       const decision = decideCancel(signup, input.release === true, nowMs, startMs, deps.env.config);
 
-      tx.update(
-        instanceRef,
-        signup.status === "waitlisted"
-          ? { waitlist: instance.waitlist.filter((entry) => entry.signupId !== input.signupId), updatedAt: ts(nowMs) }
-          : { signupCount: Math.max(0, instance.signupCount - 1), updatedAt: ts(nowMs) }
-      );
+      if (signup.status === "waitlisted") {
+        tx.update(instanceRef, { waitlist: instance.waitlist.filter((entry) => entry.signupId !== input.signupId), updatedAt: ts(nowMs) });
+      }
+      // A freed seat goes to the waitlist (reads first, then every write).
+      const seatsAfterCancel = Math.max(0, instance.signupCount - 1);
+      const plan = signup.status === "confirmed" ? await readPromotion(tx, db, instance, seatsAfterCancel, nowMs) : null;
+      const promotion = plan === null ? null : applyPromotion(tx, db, resource.data.instanceId, instance, plan, SYSTEM_ACTOR, "cancelSignup", nowMs);
+      if (promotion !== null) {
+        tx.update(instanceRef, { signupCount: seatsAfterCancel + promotion.seatsTaken, waitlist: promotion.waitlist, updatedAt: ts(nowMs) });
+      }
       tx.update(signupRef, {
         status: "cancelled",
         cancelReason: decision.cancelReason,
@@ -81,7 +89,7 @@ export const cancelSignup = defineCallable({
         history: withHistory(signup.history, signup.status, "cancelled", caller.uid, "cancelSignup", nowMs),
         updatedAt: ts(nowMs)
       });
-      return { status: "cancelled" as const, lateCancel: decision.lateCancel, promotedSignupId: null };
+      return { status: "cancelled" as const, lateCancel: decision.lateCancel, promotedSignupId: promotion?.promotedSignupIds[0] ?? null };
     });
   }
 });

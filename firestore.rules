@@ -177,5 +177,31 @@ service cloud.firestore {
     match /rateLimits/{id} { allow read, write: if false; }
     match /jobLeases/{id} { allow read, write: if false; }
     match /turnstileTokens/{id} { allow read, write: if false; }
+
+    // Tier 1 lane A
+    // In-app notifications (SPEC 3.15): the owner reads; only Functions write
+    // (markNotificationsRead flips `read`).
+    match /notifications/{uid}/items/{itemId} {
+      allow read: if isSelf(uid);
+      allow write: if false;
+    }
+
+    // Saved items (SPEC 3.18): the owner reads, creates, and deletes. The id
+    // must be {kind}_{refId}, the body exactly {kind, refId, savedAt}, and
+    // savedAt the server time. No updates: save and unsave only.
+    match /users/{uid}/saved/{itemId} {
+      allow read, delete: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['kind', 'refId', 'savedAt'])
+        && request.resource.data.keys().hasAll(['kind', 'refId', 'savedAt'])
+        && request.resource.data.kind in ['org', 'opportunity']
+        && request.resource.data.refId is string
+        && request.resource.data.refId.size() > 0
+        && request.resource.data.refId.size() <= 200
+        && itemId == request.resource.data.kind + '_' + request.resource.data.refId
+        && request.resource.data.savedAt == request.time;
+      allow update: if false;
+    }
+    // End Tier 1 lane A
   }
 }

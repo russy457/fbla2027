@@ -24,7 +24,12 @@ export const COLLECTIONS = Object.freeze({
   jobLeases: "jobLeases",
   jobRuns: "jobRuns",
   demoClock: "demoClock",
-  meta: "meta"
+  meta: "meta",
+  // Tier 1 lane A: in-app notifications (notifications/{uid}/items) and saved items (users/{uid}/saved).
+  notifications: "notifications",
+  notificationItems: "items",
+  saved: "saved"
+  // End Tier 1 lane A
 });
 
 export const PATHS = Object.freeze({
@@ -36,5 +41,11 @@ export const PATHS = Object.freeze({
   runDueJobsLease: () => `${COLLECTIONS.jobLeases}/runDueJobs`,
   demoClock: () => `${COLLECTIONS.demoClock}/global`,
   /** Storage path of a letter PDF (SPEC 3.22). */
-  letterPdf: (uid: string, letterId: string) => `letters/${uid}/${letterId}.pdf`
+  letterPdf: (uid: string, letterId: string) => `letters/${uid}/${letterId}.pdf`,
+  // Tier 1 lane A
+  notificationItems: (uid: string) => `${COLLECTIONS.notifications}/${uid}/${COLLECTIONS.notificationItems}`,
+  notificationItem: (uid: string, itemId: string) => `${COLLECTIONS.notifications}/${uid}/${COLLECTIONS.notificationItems}/${itemId}`,
+  savedItems: (uid: string) => `${COLLECTIONS.users}/${uid}/${COLLECTIONS.saved}`,
+  savedItem: (uid: string, itemId: string) => `${COLLECTIONS.users}/${uid}/${COLLECTIONS.saved}/${itemId}`
+  // End Tier 1 lane A
 });

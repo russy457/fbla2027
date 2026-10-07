@@ -5,10 +5,12 @@
  * end with exactly `capacity` confirmed: Firestore retries the losers, who
  * then see the seat taken and get SHIFT_FULL.
  *
- * Tier 0 confirms only when a seat is free. The waitlist (SPEC step 5) is
- * Tier 1; the instance already carries waitlist/waitlistSeq so adding it
- * needs no data change. The doc id `{instanceId}_{uid}` makes retries return
- * the existing signup instead of creating a second one.
+ * A free seat confirms (a walk-up after the 2 h cutoff). With no seat, before
+ * the cutoff and while the waitlist is shorter than capacity, the signup is
+ * waitlisted with the next waitlistSeq (SPEC step 5); otherwise SHIFT_FULL or
+ * WAITLIST_CLOSED. The decision is the shared decideSeat(). The doc id
+ * `{instanceId}_{uid}` makes retries return the existing signup instead of
+ * creating a second one.
  */
 import {
   ACTIVE_SIGNUP_STATUSES,
@@ -16,7 +18,9 @@ import {
   COLLECTIONS,
   ageOn,
   assertTransition,
+  decideSeat,
   displayNameFor,
+  waitlistPosition,
   signupIdFor,
   type InstanceDoc,
   type OrganizationDoc,
@@ -35,7 +39,7 @@ const isActive = (signup: SignupDoc): boolean => (ACTIVE_SIGNUP_STATUSES as read
 const waitlistPlace = (instance: InstanceDoc, seq: number | null) =>
   seq === null
     ? { waitlistPosition: null, waitlistSize: null }
-    : { waitlistPosition: 1 + instance.waitlist.filter((entry) => entry.seq < seq).length, waitlistSize: instance.waitlist.length };
+    : { waitlistPosition: waitlistPosition(instance.waitlist, seq), waitlistSize: instance.waitlist.length };
 
 export const signup = defineCallable({
   endpoint: "volunteer",
@@ -73,14 +77,26 @@ export const signup = defineCallable({
       const isMinor = age < ADULT_AGE;
       if (isMinor && !instance.orgVerified) throw new AppError("MINOR_UNVERIFIED_ORG");
 
-      // Step 4 (Tier 0): a free seat confirms; otherwise the shift is full.
-      if (instance.signupCount >= instance.capacity) {
-        throw new AppError(nowMs >= msOf(instance.cutoffAt) ? "WAITLIST_CLOSED" : "SHIFT_FULL");
-      }
-      assertTransition(null, "confirmed", "signup");
+      // Steps 4-6: a seat, a place on the waitlist, or a refusal.
+      const seat = decideSeat({
+        capacity: instance.capacity,
+        signupCount: instance.signupCount,
+        waitlistLength: instance.waitlist.length,
+        nowMs,
+        cutoffAtMs: msOf(instance.cutoffAt)
+      });
+      if (seat.kind === "refused") throw new AppError(seat.code);
+      const status = seat.kind;
+      assertTransition(null, status, "signup");
 
       const displayName = displayNameFor(profile.firstName, profile.lastName);
-      tx.update(instanceRef, { signupCount: instance.signupCount + 1, updatedAt: ts(nowMs) });
+      const seq = status === "waitlisted" ? instance.waitlistSeq : null;
+      tx.update(
+        instanceRef,
+        seq === null
+          ? { signupCount: instance.signupCount + 1, updatedAt: ts(nowMs) }
+          : { waitlist: [...instance.waitlist, { uid: caller.uid, signupId, seq }], waitlistSeq: seq + 1, updatedAt: ts(nowMs) }
+      );
       tx.create(
         signupRef,
         newSignupDoc({
@@ -88,9 +104,9 @@ export const signup = defineCallable({
           instance,
           uid: caller.uid,
           displayName,
-          status: "confirmed",
-          walkUp: nowMs >= msOf(instance.cutoffAt),
-          waitlistSeq: null,
+          status,
+          walkUp: seat.kind === "confirmed" && seat.walkUp,
+          waitlistSeq: seq,
           nowMs
         })
       );
@@ -98,7 +114,9 @@ export const signup = defineCallable({
       // Step 7: the org now has volunteer history, so it can be archived but not deleted.
       if (org !== null && !org.hasActivity) tx.update(orgRef, { hasActivity: true, updatedAt: ts(nowMs) });
 
-      return { signupId, status: "confirmed" as const, waitlistPosition: null, waitlistSize: null };
+      return seq === null
+        ? { signupId, status, waitlistPosition: null, waitlistSize: null }
+        : { signupId, status, waitlistPosition: waitlistPosition(instance.waitlist, seq), waitlistSize: instance.waitlist.length + 1 };
     });
   }
 });
