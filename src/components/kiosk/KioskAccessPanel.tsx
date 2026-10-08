@@ -74,31 +74,33 @@ export const KioskAccessPanel = ({ mode, instanceId, orgId, shiftTitle, onExited
   const copy = COPY[mode];
 
   return (
-    <main id="main" className="flex min-h-dvh items-center justify-center bg-bg px-4 py-10">
-      <section aria-labelledby="kiosk-access-title" className="flex w-full max-w-sm flex-col gap-5">
-        <div className="kiosk-access-scene" aria-hidden="true" />
-        <LockKey aria-hidden="true" size={36} className="text-accent" />
-        <div className="flex flex-col gap-2" role={mode === "expired" ? "alert" : undefined}>
-          <h1 id="kiosk-access-title" ref={headingRef} tabIndex={-1} className="text-2xl font-semibold text-fg outline-none">
-            {copy.title}
-          </h1>
+    <main id="main" className="kiosk-access-page min-h-dvh bg-bg">
+      <section aria-labelledby="kiosk-access-title">
+        <div className="kiosk-access-hero">
+          <div className="kiosk-access-hero__copy" role={mode === "expired" ? "alert" : undefined}>
+            <p>For coordinators</p>
+            <h1 id="kiosk-access-title" ref={headingRef} tabIndex={-1} className="outline-none">{copy.title}</h1>
+          </div>
+        </div>
+        <div className="kiosk-access-content">
+          <LockKey aria-hidden="true" size={32} className="text-accent" />
           {shiftTitle ? <p className="text-sm font-semibold text-fg-muted">Shift: {shiftTitle}</p> : null}
           <p className="text-fg-muted">{copy.body}</p>
+          {mode === "start" ? (
+            <StartButton instanceId={instanceId} />
+          ) : (
+            <SignInForm
+              submitLabel={mode === "exit" ? "Sign in and exit kiosk" : "Sign in"}
+              authenticate={mode === "exit" ? (email, password) => exitKioskWithCredentials(email, password, orgId) : undefined}
+              onSignedIn={() => onExited?.()}
+            />
+          )}
+          {mode === "exit" && onCancelExit ? (
+            <button type="button" onClick={onCancelExit} className={buttonClassName("quiet", "w-fit")}>
+              Back to the kiosk
+            </button>
+          ) : null}
         </div>
-        {mode === "start" ? (
-          <StartButton instanceId={instanceId} />
-        ) : (
-          <SignInForm
-            submitLabel={mode === "exit" ? "Sign in and exit kiosk" : "Sign in"}
-            authenticate={mode === "exit" ? (email, password) => exitKioskWithCredentials(email, password, orgId) : undefined}
-            onSignedIn={() => onExited?.()}
-          />
-        )}
-        {mode === "exit" && onCancelExit ? (
-          <button type="button" onClick={onCancelExit} className={buttonClassName("quiet", "w-fit")}>
-            Back to the kiosk
-          </button>
-        ) : null}
       </section>
     </main>
   );

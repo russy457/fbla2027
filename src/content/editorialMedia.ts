@@ -70,3 +70,19 @@ export const STORYTIME_PHOTO: EditorialPhoto = {
   sourceUrl: "https://www.pexels.com/photo/children-in-the-school-reading-a-book-with-a-teacher-8535177/",
   objectPosition: "center 64%"
 };
+
+export const DONATION_CENTER_PHOTO: EditorialPhoto = {
+  src: "/images/donation-center.jpg",
+  alt: "Volunteers sorting clothing and food donations together",
+  attribution: "Gustavo Fring / Pexels",
+  sourceUrl: "https://www.pexels.com/photo/people-packing-donations-7156163/",
+  objectPosition: "center center"
+};
+
+export const COMMUNITY_GARDEN_PHOTO: EditorialPhoto = {
+  src: "/images/community-garden.jpg",
+  alt: "Volunteers moving soil in a community garden",
+  attribution: "Zack Gilbert / Pexels",
+  sourceUrl: "https://www.pexels.com/photo/volunteers-working-in-bloomington-community-garden-39778154/",
+  objectPosition: "center center"
+};

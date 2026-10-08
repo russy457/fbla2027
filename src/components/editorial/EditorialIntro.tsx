@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import {
-  COMMUNITY_DONATIONS_PHOTO,
+  DONATION_CENTER_PHOTO,
   FOOD_SORTING_PHOTO,
   READING_TOGETHER_PHOTO,
   SHELTER_CAT_PHOTO,
@@ -26,7 +26,10 @@ const CAUSES: readonly CauseLink[] = [
 /** The public home opens with one strong image and direct paths into real filters. */
 export const EditorialIntro = (): ReactElement => (
   <section aria-labelledby="home-title" className="home-hero">
-    <div className="home-hero__inner">
+    <div className="home-hero__media" aria-hidden="true">
+      <img src={DONATION_CENTER_PHOTO.src} alt="" fetchPriority="high" decoding="async" />
+    </div>
+    <div className="home-hero__flow">
       <div className="home-hero__copy">
         <p className="home-hero__eyebrow">A place to show up</p>
         <h1 id="home-title" tabIndex={-1} className="home-hero__title outline-none">
@@ -42,32 +45,20 @@ export const EditorialIntro = (): ReactElement => (
           </Link>
         </div>
       </div>
-      <div className="home-hero__visual">
-        <img
-          src={COMMUNITY_DONATIONS_PHOTO.src}
-          alt={COMMUNITY_DONATIONS_PHOTO.alt}
-          width={1200}
-          height={1600}
-          fetchPriority="high"
-          decoding="async"
-          style={{ objectPosition: COMMUNITY_DONATIONS_PHOTO.objectPosition }}
-          className="home-hero__image"
-        />
+      <div className="home-causes-wrap">
+        <p className="home-causes-heading">Start with what matters to you</p>
+        <nav aria-label="Explore by cause" className="home-causes">
+          {CAUSES.map(({ label, cause, photo }) => (
+            <Link key={cause} to={`/explore?cause=${cause}`} className="home-cause">
+              <span className="home-cause__image-wrap">
+                <img src={photo.src} alt="" width={300} height={360} loading="eager" fetchPriority="low" decoding="sync" style={{ objectPosition: photo.objectPosition }} />
+                <span aria-hidden="true" className="home-cause__shade" />
+                <span className="home-cause__label">{label}</span>
+              </span>
+            </Link>
+          ))}
+        </nav>
       </div>
-    </div>
-    <div className="home-causes-wrap">
-      <p className="home-causes-heading">Start with what matters to you</p>
-      <nav aria-label="Explore by cause" className="home-causes">
-        {CAUSES.map(({ label, cause, photo }) => (
-          <Link key={cause} to={`/explore?cause=${cause}`} className="home-cause">
-            <span className="home-cause__image-wrap">
-              <img src={photo.src} alt="" width={300} height={360} loading="eager" fetchPriority="low" decoding="sync" style={{ objectPosition: photo.objectPosition }} />
-              <span aria-hidden="true" className="home-cause__shade" />
-              <span className="home-cause__label">{label}</span>
-            </span>
-          </Link>
-        ))}
-      </nav>
     </div>
   </section>
 );

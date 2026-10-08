@@ -28,6 +28,7 @@ import { LegalLinks } from "./LegalLinks"; // Tier 1 lane C
 // Tier 2 lane C
 import { CommandPaletteLauncher } from "@/components/palette/CommandPaletteLauncher";
 import { CookieConsent } from "@/components/CookieConsent";
+import { pageVisualFor } from "@/content/pageVisuals";
 import { RouteHead } from "@/components/seo/RouteHead";
 import { VOLUNTEER_NAV_ITEMS } from "./navItems";
 
@@ -85,6 +86,8 @@ export const AppLayout = (): ReactElement => {
   }, [pathname]);
 
   const isHome = pathname === "/" || pathname === "/explore";
+  const isEditorialInterior = !isHome && pathname !== "/onboarding";
+  const visual = pageVisualFor(pathname);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -102,8 +105,10 @@ export const AppLayout = (): ReactElement => {
       ) : null}
       {/* Tier 2 lane C: per-route title, description, canonical, Open Graph (SPEC Tier 3 SEO). */}
       <RouteHead />
+      {/* In flow above the photo scene, so this notice never overlaps the navigation. */}
+      <CookieConsent />
 
-      <header className="site-header" data-condensed={condensed} data-home={isHome} data-explore={pathname === "/explore"}>
+      <header className="site-header" data-condensed={condensed} data-home={isHome} data-scene="true">
         <div className="site-header__inner">
           <Link to="/" className="site-header__brand">
             {APP_NAME}
@@ -135,15 +140,25 @@ export const AppLayout = (): ReactElement => {
         </div>
       </header>
 
-      {/* Tier 2 lane C: storage notice, in flow so it never covers controls. */}
-      <CookieConsent />
-
-      <main id="main" tabIndex={-1} className={cn("w-full flex-1 outline-none", pathname === "/" || pathname === "/explore" ? "" : "mx-auto max-w-6xl px-4 pt-8 pb-16 sm:px-6 md:pt-12", pathname === "/onboarding" && "onboarding-main")}>
-        <FadeContent key={pathname}>
-          <Suspense fallback={<LoadingState label="Loading this screen" />}>
-            <Outlet />
-          </Suspense>
-        </FadeContent>
+      <main id="main" tabIndex={-1} className={cn("w-full flex-1 outline-none", isEditorialInterior && "interior-scene", pathname === "/onboarding" && "onboarding-main")}>
+        {isEditorialInterior ? (
+          <div className="interior-scene__media" aria-hidden="true">
+            <img src={visual.photo.src} alt="" fetchPriority="high" decoding="async" style={{ objectPosition: visual.position }} />
+          </div>
+        ) : null}
+        {pathname === "/onboarding" ? (
+          <div className="onboarding-stage">
+            <img src={visual.photo.src} alt="" fetchPriority="high" decoding="async" />
+            <p>A good place to begin.</p>
+          </div>
+        ) : null}
+        <div className={isEditorialInterior ? "interior-scene__flow" : undefined}>
+          <FadeContent key={pathname} className={isEditorialInterior ? "interior-scene__route" : pathname === "/onboarding" ? "onboarding-route-shell" : undefined}>
+            <Suspense fallback={<LoadingState label="Loading this screen" />}>
+              <Outlet />
+            </Suspense>
+          </FadeContent>
+        </div>
       </main>
 
       <footer className="border-t border-border bg-surface">

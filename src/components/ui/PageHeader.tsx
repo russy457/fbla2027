@@ -22,8 +22,6 @@ export const PageHeader = ({ title, children, level = 1, id }: PageHeaderProps):
   if (level === 1) {
     return (
       <header className="page-hero">
-        <img className="page-hero__photo" src={visual.photo.src} alt="" loading="eager" decoding="async" style={{ objectPosition: visual.position }} />
-        <div className="page-hero__shade" aria-hidden="true" />
         <div className="page-hero__copy">
           <p className="page-hero__eyebrow">{visual.eyebrow}</p>
           <Heading id={id} tabIndex={-1} className="page-hero__title outline-none">{title}</Heading>
