@@ -14,7 +14,7 @@ const LandingPage = (): ReactElement => (
     <section className="landing-next" aria-labelledby="landing-next-title">
       <div>
         <p className="home-section-eyebrow">Ready when you are</p>
-        <h2 id="landing-next-title">Find a shift <em>that fits.</em></h2>
+        <h2 id="landing-next-title">Find a shift that fits.</h2>
       </div>
       <Link to="/explore" className="landing-next__link">Browse open shifts <ArrowUpRight aria-hidden="true" size={19} /></Link>
     </section>

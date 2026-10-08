@@ -40,7 +40,7 @@ export const EditorialIntro = (): ReactElement => (
       <div className="home-hero__copy">
         <p className="home-hero__eyebrow">A place to show up</p>
         <h1 id="home-title" tabIndex={-1} className="home-hero__title outline-none">
-          Make time for <em>good work.</em>
+          Make time for <span>good work.</span>
         </h1>
         <p className="home-hero__description">Find a cause, choose a shift, and keep your hours in one place.</p>
         <div className="home-hero__actions">

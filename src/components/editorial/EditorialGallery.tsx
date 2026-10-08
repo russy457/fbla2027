@@ -41,7 +41,7 @@ export const EditorialGallery = (): ReactElement => (
     <div className="home-gallery__heading">
       <div>
         <p className="home-section-eyebrow">Find your place</p>
-        <h2 id="ways-title">There are many ways <em>to help.</em></h2>
+        <h2 id="ways-title">There are many ways to help.</h2>
       </div>
       <p>Pick the work that feels right for you. Each path opens matching volunteer shifts.</p>
     </div>

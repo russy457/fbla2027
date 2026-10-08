@@ -4,7 +4,7 @@ Updated 2026-10-07 from the design interview and `inspopic.jpg`. [SPEC.md](SPEC.
 
 ## Design direction
 
-**Warm community editorial.** The site should feel composed, human, and confident. The reference image contributes its photographic opening, broad light sections, contrast between plain and italic type, small rounded controls, and image led browsing. Use those ideas for a volunteer platform, with real task information kept clear.
+**Warm community editorial.** The site should feel composed, human, and confident. The reference image contributes its photographic opening, broad light sections, small rounded controls, and image led browsing. Use those ideas for a volunteer platform, with real task information kept clear.
 
 The main job is to help someone find a shift, sign up, show up, and keep a trustworthy hours record. Coordinators need fast access to rosters, check-in, approvals, and reports. Every route should feel like the same site. The home page can be expressive; task screens should be calm and efficient.
 
@@ -25,7 +25,7 @@ Design feasibility check: impact 5, context fit 4, implementation 5, performance
 
 The page background is `#FCFBF9`, barely different from white. Clean surfaces are white. Darkest text and the home opening use `#2C1D15`; muted copy uses `#6D594B`; links, selected states, and primary buttons use `#70482F` and `#593723` on hover. Lines and soft surfaces use `#D8CEC4` and `#F6F3EF`. Status colors keep independent semantic roles for success, warning, danger, and neutral.
 
-Use the self hosted Besley variable face for display text and italic emphasis, Atkinson Hyperlegible Next for body and controls, and JetBrains Mono only for codes and tabular values. The home title pairs large, light sans text with one italic serif line. Type needs to stay readable at 100%, 125%, and 150% text settings. A future font change should require token and font import updates, not component rewrites.
+Use the self hosted Besley variable face for standalone display text, Atkinson Hyperlegible Next for body, controls, and large photo headings, and JetBrains Mono only for codes and tabular values. Each heading uses one font throughout its phrase. Type needs to stay readable at 100%, 125%, and 150% text settings. A future font change should require token and font import updates, not component rewrites.
 
 Primary actions can be rounded pills. Forms, grouped data, and lists should have clear edges and compact spacing. Avoid gradients as decoration, glass effects, colored frames behind standalone heading and paragraph sections, excessive shadows, and identical card stacks.
 
