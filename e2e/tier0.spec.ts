@@ -100,7 +100,7 @@ test("keyboard only: sign in, sign up on Explore, and check in", async ({ browse
   await page.keyboard.press("Tab");
   await page.keyboard.type(DEMO_PASSWORD);
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { level: 1, name: /Find a time that fits your life/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Find shifts/ })).toBeVisible();
   const signUp = page.getByRole("button", { name: `Sign up: ${SHIFT_TITLE}` });
   await expect(signUp).toBeVisible();
   expect(await seriousAxeViolations(page)).toEqual([]);

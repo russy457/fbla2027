@@ -35,7 +35,7 @@ const VIEW_OPTIONS: ReadonlyArray<{ readonly view: ExploreView; readonly label: 
 ];
 
 export const ExploreViewToggle = ({ view, onChange }: ViewToggleProps): ReactElement => (
-  <div role="group" aria-label="Show shifts as" className="inline-flex w-fit gap-1 rounded-md border border-border bg-surface p-1">
+  <div role="group" aria-label="Show shifts as" className="inline-flex w-fit gap-1 rounded-md bg-surface p-1">
     {VIEW_OPTIONS.map(({ view: option, label, icon: Icon }) => (
       <button
         key={option}
@@ -62,7 +62,7 @@ export const ExploreMapView = ({ accessToken, points, homeArea, isLoading }: Exp
   <section aria-labelledby="explore-map-title" className="flex flex-col gap-4">
     <div className="flex flex-col gap-1">
       <h2 id="explore-map-title" className="text-xl font-semibold text-fg">
-        Organizations with matching shifts
+        Map results
       </h2>
       <p className="max-w-[60ch] text-sm text-fg-muted">
         Markers show each organization's general area (about 5 km), not an exact address.

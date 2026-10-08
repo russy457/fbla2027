@@ -15,7 +15,7 @@ const BASE =
 
 const VARIANTS: Readonly<Record<ButtonVariant, string>> = {
   primary: "bg-accent text-accent-fg hover:bg-accent-hover",
-  secondary: "border border-border-strong bg-surface text-fg hover:bg-surface-sunken",
+  secondary: "bg-surface-sunken text-fg hover:bg-accent-subtle",
   quiet: "text-fg-muted hover:bg-surface-sunken hover:text-fg"
 };
 

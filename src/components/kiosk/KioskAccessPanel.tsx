@@ -78,7 +78,6 @@ export const KioskAccessPanel = ({ mode, instanceId, orgId, shiftTitle, onExited
       <section aria-labelledby="kiosk-access-title">
         <div className="kiosk-access-hero">
           <div className="kiosk-access-hero__copy" role={mode === "expired" ? "alert" : undefined}>
-            <p>For coordinators</p>
             <h1 id="kiosk-access-title" ref={headingRef} tabIndex={-1} className="outline-none">{copy.title}</h1>
           </div>
         </div>

@@ -24,7 +24,7 @@ interface RecommendedShiftsProps {
   readonly headingLevel?: 1 | 2;
 }
 
-export const RecommendedShifts = ({ picks, hasInterests, title = "Recommended for you", headingLevel = 2 }: RecommendedShiftsProps): ReactElement | null => {
+export const RecommendedShifts = ({ picks, hasInterests, title = "Recommended", headingLevel = 2 }: RecommendedShiftsProps): ReactElement | null => {
   const Heading = headingLevel === 1 ? "h1" : "h2";
   const headingClass = headingLevel === 1 ? "text-3xl font-semibold tracking-tight text-fg outline-none md:text-4xl" : "text-xl font-semibold text-fg";
 
@@ -53,7 +53,7 @@ export const RecommendedShifts = ({ picks, hasInterests, title = "Recommended fo
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {picks.map(({ row, why }) => (
           <li key={row.instance.id} className="min-w-0">
-            <SpotlightCard className="h-full rounded-md border border-border bg-surface p-5">
+            <SpotlightCard className="h-full rounded-md bg-surface p-5">
               <div className="flex h-full flex-col gap-2">
                 <p className="flex items-start gap-1.5 text-sm font-semibold text-accent">
                   <Sparkle aria-hidden="true" size={16} weight="fill" className="mt-0.5 shrink-0" />

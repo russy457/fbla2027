@@ -5,8 +5,6 @@
  * submits (D20 focus restore).
  */
 import type { ReactElement, ReactNode } from "react";
-import { useLocation } from "react-router-dom";
-import { pageVisualFor } from "@/content/pageVisuals";
 
 interface PageHeaderProps {
   readonly title: string;
@@ -17,13 +15,10 @@ interface PageHeaderProps {
 
 export const PageHeader = ({ title, children, level = 1, id }: PageHeaderProps): ReactElement => {
   const Heading = level === 1 ? "h1" : "h2";
-  const { pathname } = useLocation();
-  const visual = pageVisualFor(pathname);
   if (level === 1) {
     return (
       <header className="page-hero">
         <div className="page-hero__copy">
-          <p className="page-hero__eyebrow">{visual.eyebrow}</p>
           <Heading id={id} tabIndex={-1} className="page-hero__title outline-none">{title}</Heading>
           {children ? <div className="page-hero__intro">{children}</div> : null}
         </div>

@@ -18,6 +18,7 @@ Design feasibility check: impact 5, context fit 4, implementation 5, performance
 - Do not name or imply one home city. Demo organizations are fictional.
 - Keep existing functionality. `/` is a distinct landing page and `/explore` is the shift finder. Restructure markup and shared components when it improves the design.
 - Write short, unpretentious copy. No em dashes, invented impact numbers, hype, or robotic phrasing.
+- Editorial headings use one or two words. Keep task, error, legal, and accessibility headings descriptive when clarity needs more words. Do not place tiny eyebrow labels above headings.
 - Keep all visual decisions modular. Palette values belong in `src/styles/tokens.css`; semantic roles are exposed through `src/styles/app.css`. Photo metadata belongs in `src/content/editorialMedia.ts`, and route assignments belong in `src/content/pageVisuals.ts`.
 - Use React Bits only for subtle motion with a purpose. Respect reduced motion.
 
@@ -27,7 +28,7 @@ The page background is `#FCFBF9`, barely different from white. Clean surfaces ar
 
 Use the self hosted Besley variable face for standalone display text, Atkinson Hyperlegible Next for body, controls, and large photo headings, and JetBrains Mono only for codes and tabular values. Each heading uses one font throughout its phrase. Type needs to stay readable at 100%, 125%, and 150% text settings. A future font change should require token and font import updates, not component rewrites.
 
-Primary actions can be rounded pills. Forms, grouped data, and lists should have clear edges and compact spacing. Avoid gradients as decoration, glass effects, colored frames behind standalone heading and paragraph sections, excessive shadows, and identical card stacks.
+Primary actions can be rounded pills. Forms, grouped data, and lists should have clear edges and compact spacing. Use surfaces and spacing before borders; reserve lines for functional separation in dense lists and tables. Avoid gradients as decoration, glass effects, colored frames behind standalone heading and paragraph sections, excessive shadows, and identical card stacks.
 
 ## Photography
 

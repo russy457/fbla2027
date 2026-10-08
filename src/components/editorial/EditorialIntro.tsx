@@ -34,14 +34,14 @@ const CAUSES: readonly CauseLink[] = [
 export const EditorialIntro = (): ReactElement => (
   <section aria-labelledby="home-title" className="home-hero">
     <div className="home-hero__media" aria-hidden="true">
-      <img src={DONATION_CENTER_PHOTO.src} alt="" fetchPriority="high" decoding="async" />
+      <picture>
+        <source media="(max-width: 40rem)" srcSet={TREE_PLANTING_PHOTO.src} />
+        <img src={DONATION_CENTER_PHOTO.src} alt="" fetchPriority="high" decoding="async" />
+      </picture>
     </div>
     <div className="home-hero__flow">
       <div className="home-hero__copy">
-        <p className="home-hero__eyebrow">A place to show up</p>
-        <h1 id="home-title" tabIndex={-1} className="home-hero__title outline-none">
-          Make time for <span>good work.</span>
-        </h1>
+        <h1 id="home-title" tabIndex={-1} className="home-hero__title outline-none">Show up.</h1>
         <p className="home-hero__description">Find a cause, choose a shift, and keep your hours in one place.</p>
         <div className="home-hero__actions">
           <Link to="/explore" className="home-hero__primary">
@@ -53,7 +53,7 @@ export const EditorialIntro = (): ReactElement => (
         </div>
       </div>
       <div className="home-causes-wrap">
-        <p className="home-causes-heading">Start with what matters to you</p>
+        <h2 className="home-causes-heading">Browse causes</h2>
         <nav aria-label="Explore by cause" className="home-causes">
           {CAUSES.map(({ label, cause, photo }) => (
             <Link key={cause} to={`/explore?cause=${cause}`} className="home-cause">

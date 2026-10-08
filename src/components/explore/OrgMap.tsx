@@ -81,7 +81,7 @@ const OrgMap = ({ accessToken, points, homeArea }: OrgMapProps): ReactElement =>
     };
   }, [accessToken, points, homeArea, navigate, reduceMotion]);
 
-  return <div ref={containerRef} className="h-[60vh] min-h-80 w-full overflow-hidden rounded-lg border border-border bg-surface-sunken" />;
+  return <div ref={containerRef} className="h-[60vh] min-h-80 w-full overflow-hidden rounded-lg bg-surface-sunken" />;
 };
 
 export default OrgMap;

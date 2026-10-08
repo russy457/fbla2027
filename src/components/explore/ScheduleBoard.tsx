@@ -68,8 +68,7 @@ export const ScheduleBoard = ({ days, unfilteredCount, signups, birthDate, signe
     <section className="schedule-board" aria-labelledby="schedule-title">
       <div className="schedule-board__heading">
         <div>
-          <p className="schedule-board__eyebrow">Your next shift starts here</p>
-          <h2 id="schedule-title">Open shifts.</h2>
+          <h2 id="schedule-title">Open shifts</h2>
         </div>
         <p aria-live="polite">{count === 1 ? "1 shift" : `${count} shifts`} available</p>
       </div>

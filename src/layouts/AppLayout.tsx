@@ -149,7 +149,7 @@ export const AppLayout = (): ReactElement => {
         {pathname === "/onboarding" ? (
           <div className="onboarding-stage">
             <img src={visual.photo.src} alt="" fetchPriority="high" decoding="async" />
-            <p>A good place to begin.</p>
+            <p>Join in</p>
           </div>
         ) : null}
         <div className={isEditorialInterior ? "interior-scene__flow" : undefined}>

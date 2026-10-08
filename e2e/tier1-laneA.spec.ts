@@ -122,14 +122,14 @@ test("150% text + high contrast: Tier 0 screens have no horizontal overflow at 3
     expect(await hasHorizontalOverflow(page), `${path} scrolls sideways`).toBe(false);
   };
 
-  await check("/", /Make time for good work/);
-  await check("/explore", /Find a time that fits your life/);
+  await check("/", /Show up/);
+  await check("/explore", /Find shifts/);
   await check(`/opportunity/${INSTANCE_ID}`, /.+/);
   await check("/verify", /Verify/);
   await check("/login", /Sign in/);
   await signInWithForm(page, ACCOUNTS.volunteer, "/");
-  await check("/", /Make time for good work/);
-  await check("/explore", /Find a time that fits your life/);
+  await check("/", /Show up/);
+  await check("/explore", /Find shifts/);
   await check("/me/shifts", "My Shifts");
   await check("/impact", "Impact");
   await check("/me/notifications", "Notifications");
@@ -150,14 +150,14 @@ test("reduced motion: the OS setting and the in-app toggle zero the motion token
   const reduced = await browser.newContext({ reducedMotion: "reduce" });
   const reducedPage = await reduced.newPage();
   await reducedPage.goto("/");
-  await expect(reducedPage.getByRole("heading", { level: 1, name: /Make time for good work/ })).toBeVisible();
+  await expect(reducedPage.getByRole("heading", { level: 1, name: /Show up/ })).toBeVisible();
   expect(await durationBase(reducedPage)).toBe("0ms");
   await reduced.close();
 
   const normal = await browser.newContext({ reducedMotion: "no-preference" });
   const page = await normal.newPage();
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: /Make time for good work/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Show up/ })).toBeVisible();
   expect(await durationBase(page)).not.toBe("0ms");
   await page.getByRole("checkbox", { name: "Reduce motion" }).check();
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");

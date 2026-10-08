@@ -18,8 +18,7 @@ const causes = [
 export const ExploreCauseRibbon = (): ReactElement => (
   <section aria-labelledby="explore-causes-title" className="explore-cause-section">
     <div className="explore-cause-heading">
-      <p className="home-section-eyebrow">Browse by cause</p>
-      <h2 id="explore-causes-title">Start with what matters to you.</h2>
+      <h2 id="explore-causes-title">By cause</h2>
     </div>
     <nav aria-label="Browse shifts by cause" className="explore-cause-grid">
       {causes.map(({ name, slug, photo }) => (

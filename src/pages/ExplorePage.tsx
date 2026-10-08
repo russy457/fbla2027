@@ -102,8 +102,7 @@ const ExplorePage = (): ReactElement => {
         </div>
         <div className="explore-scene__flow">
           <div className="explore-scene__intro">
-            <p className="explore-scene__eyebrow">Volunteer schedule</p>
-            <h1 id="explore-title" tabIndex={-1}>Find a time that <span>fits your life.</span></h1>
+            <h1 id="explore-title" tabIndex={-1}>Find shifts</h1>
             <p>Choose a day, find a shift, and save your spot.</p>
             <a href="#schedule" className="explore-scene__jump">Browse shifts <ArrowDown aria-hidden="true" size={18} /></a>
           </div>

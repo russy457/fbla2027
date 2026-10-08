@@ -106,7 +106,7 @@ export const ExploreFilters = ({ filters, onChange, resultCount, signedIn, canUs
       ) : null}
 
       {isOpen ? (
-        <fieldset id={`${id}-panel`} className="grid grid-cols-1 gap-4 rounded-lg border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <fieldset id={`${id}-panel`} className="grid grid-cols-1 gap-4 rounded-lg bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
           <legend className="px-1 text-sm font-semibold text-fg">Filters</legend>
           <Field id={`${id}-cause`} label="Cause">
             <select id={`${id}-cause`} value={filters.cause ?? ""} onChange={select("cause")} className={fieldClass}>
