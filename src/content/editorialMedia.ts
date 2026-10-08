@@ -86,3 +86,27 @@ export const COMMUNITY_GARDEN_PHOTO: EditorialPhoto = {
   sourceUrl: "https://www.pexels.com/photo/volunteers-working-in-bloomington-community-garden-39778154/",
   objectPosition: "center center"
 };
+
+export const SENIORS_VOLUNTEERS_PHOTO: EditorialPhoto = {
+  src: "/images/seniors-volunteers.jpg",
+  alt: "Two volunteers looking through a photo album with an older adult",
+  attribution: "RDNE Stock project / Pexels",
+  sourceUrl: "https://www.pexels.com/photo/volunteer-men-having-conversation-to-an-elderly-man-6647035/",
+  objectPosition: "center center"
+};
+
+export const HOUSING_BUILD_PHOTO: EditorialPhoto = {
+  src: "/images/housing-build.jpg",
+  alt: "Volunteers building a home together",
+  attribution: "Brad Weaver / Pexels",
+  sourceUrl: "https://www.pexels.com/photo/team-of-volunteers-building-a-house-frame-32881356/",
+  objectPosition: "center center"
+};
+
+export const COMMUNITY_MURAL_PHOTO: EditorialPhoto = {
+  src: "/images/community-mural.jpg",
+  alt: "An artist painting a colorful community mural",
+  attribution: "Tanha Tamanna Syed / Pexels",
+  sourceUrl: "https://www.pexels.com/photo/artist-painting-colorful-mural-on-wall-in-dhaka-37000709/",
+  objectPosition: "center center"
+};

@@ -1,10 +1,14 @@
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "@phosphor-icons/react";
+import type { CauseArea } from "@fbla/shared";
 import {
+  COMMUNITY_MURAL_PHOTO,
   DONATION_CENTER_PHOTO,
   FOOD_SORTING_PHOTO,
+  HOUSING_BUILD_PHOTO,
   READING_TOGETHER_PHOTO,
+  SENIORS_VOLUNTEERS_PHOTO,
   SHELTER_CAT_PHOTO,
   TREE_PLANTING_PHOTO,
   type EditorialPhoto
@@ -12,7 +16,7 @@ import {
 
 interface CauseLink {
   readonly label: string;
-  readonly cause: string;
+  readonly cause: CauseArea;
   readonly photo: EditorialPhoto;
 }
 
@@ -20,7 +24,10 @@ const CAUSES: readonly CauseLink[] = [
   { label: "Food", cause: "hunger-food-security", photo: FOOD_SORTING_PHOTO },
   { label: "Outdoors", cause: "environment", photo: TREE_PLANTING_PHOTO },
   { label: "Learning", cause: "education-youth", photo: READING_TOGETHER_PHOTO },
-  { label: "Animals", cause: "animal-welfare", photo: SHELTER_CAT_PHOTO }
+  { label: "Animals", cause: "animal-welfare", photo: SHELTER_CAT_PHOTO },
+  { label: "Housing", cause: "housing-homelessness", photo: HOUSING_BUILD_PHOTO },
+  { label: "Seniors", cause: "seniors", photo: SENIORS_VOLUNTEERS_PHOTO },
+  { label: "Arts", cause: "arts-culture", photo: COMMUNITY_MURAL_PHOTO }
 ];
 
 /** The public home opens with one strong image and direct paths into real filters. */

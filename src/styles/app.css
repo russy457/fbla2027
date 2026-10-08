@@ -331,8 +331,8 @@
 .home-hero__secondary { display: inline-flex; align-items: center; min-height: var(--touch-target); color: var(--hero-fg); font-size: 0.9rem; font-weight: 600; text-decoration: underline; text-underline-offset: 0.3rem; }
 .home-causes-wrap { position: relative; max-width: 82rem; margin: -3.2rem auto 0; padding: 0 1.5rem 3.5rem; }
 .home-causes-heading { margin: 0 0 1rem; color: var(--hero-muted); font-size: 0.82rem; font-weight: 600; text-align: center; }
-.home-causes { display: flex; justify-content: center; gap: clamp(0.5rem, 2.2vw, 1.5rem); }
-.home-cause { display: block; width: clamp(8.5rem, 12vw, 11rem); flex: 0 0 auto; border-radius: 999px; }
+.home-causes { display: flex; width: 100%; justify-content: flex-start; gap: clamp(0.65rem, 1.2vw, 1.25rem); }
+.home-cause { display: block; min-width: 0; flex: 1 1 0; border-radius: 999px; }
 .home-cause__image-wrap { position: relative; display: block; aspect-ratio: 0.82; overflow: hidden; border: 3px solid var(--hero-image-border); border-radius: 999px; background: var(--neutral-700); }
 .home-cause__image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--duration-slow) var(--easing-out); }
 .home-cause:hover img { transform: scale(1.05); }
@@ -473,6 +473,9 @@
   .site-nav__link { width: 100%; }
   .site-header[data-condensed="true"] .site-header__inner { display: flex; }
   .home-causes-wrap { margin-top: 0; padding-top: 1.25rem; }
+  .home-causes { overflow-x: auto; padding-bottom: 0.5rem; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .home-causes::-webkit-scrollbar { display: none; }
+  .home-cause { flex: 0 0 clamp(7.5rem, 19vw, 9rem); scroll-snap-align: start; }
 }
 
 @media (max-width: 40rem) {
@@ -517,7 +520,7 @@
   .home-causes-heading { text-align: left; }
   .home-causes { justify-content: flex-start; gap: 0.65rem; overflow-x: auto; padding-bottom: 0.5rem; scroll-snap-type: x proximity; scrollbar-width: none; }
   .home-causes::-webkit-scrollbar { display: none; }
-  .home-cause { width: 7.1rem; scroll-snap-align: start; }
+  .home-cause { flex-basis: 7.5rem; }
   .home-cause__label { bottom: 0.8rem; font-size: 0.78rem; }
   .home-gallery { padding: 4rem 1.25rem 5rem; }
   .home-gallery__heading { display: block; }
