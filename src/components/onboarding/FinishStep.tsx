@@ -34,7 +34,7 @@ export const FinishStep = ({ stepNumber, stepCount, draft, onBack, onDone }: Fin
 
   const finish = async (): Promise<void> => {
     if (!canFinish) {
-      setError({ ...NETWORK_USER_ERROR, title: "One more thing", message: "Finish the human check above first.", fix: "Wait for the check to load." });
+      setError({ ...NETWORK_USER_ERROR, title: "One more thing", message: "Finish the human check above first.", fix: turnstileStatus === "unavailable" ? "Reload this page or try another browser." : "Wait for the check to load." });
       return;
     }
     setIsSaving(true);

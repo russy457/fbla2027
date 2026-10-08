@@ -4,7 +4,8 @@
  * Loads Cloudflare's script once (allowed by the hosting CSP), renders the
  * widget explicitly, and reports the token (or null when it expires). With
  * a local Functions server, verification is disabled server-side, so the
- * client skips the widget too. This includes the cloud Firestore demo.
+ * client skips the widget too. A deployed server can explicitly disable it
+ * until a production Turnstile widget is configured.
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { readClientEnv } from "@/lib/env";
@@ -16,7 +17,7 @@ interface TurnstileApi {
       sitekey: string;
       callback: (token: string) => void;
       "expired-callback": () => void;
-      "error-callback": () => void;
+      "error-callback": (code?: string) => boolean;
     }
   ) => string;
   remove: (widgetId: string) => void;
@@ -59,16 +60,17 @@ interface TurnstileWidgetProps {
 export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<TurnstileStatus>("loading");
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const env = readClientEnv();
   const siteKey = env.ok ? env.env.VITE_TURNSTILE_SITE_KEY : undefined;
-  const usingLocalFunctions = env.ok && (env.env.VITE_USE_EMULATORS || env.env.VITE_FUNCTIONS_EMULATOR);
+  const skipHumanCheck = env.ok && (env.env.VITE_USE_EMULATORS || env.env.VITE_FUNCTIONS_EMULATOR || env.env.VITE_TURNSTILE_ENABLED === "false");
 
   useEffect(() => {
     onStatus(status);
   }, [status, onStatus]);
 
   useEffect(() => {
-    if (usingLocalFunctions) {
+    if (skipHumanCheck) {
       setStatus("skipped");
       return undefined;
     }
@@ -84,6 +86,7 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
         widgetId = api.render(containerRef.current, {
           sitekey: siteKey,
           callback: (token) => {
+            setErrorCode(null);
             onToken(token);
             setStatus("verified");
           },
@@ -91,7 +94,12 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
             onToken(null);
             setStatus("ready");
           },
-          "error-callback": () => setStatus("unavailable")
+          "error-callback": (code) => {
+            onToken(null);
+            setErrorCode(code ?? null);
+            setStatus("unavailable");
+            return true;
+          }
         });
         setStatus("ready");
       })
@@ -103,7 +111,7 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
       const api = (window as TurnstileWindow).turnstile;
       if (widgetId && api) api.remove(widgetId);
     };
-  }, [siteKey, usingLocalFunctions, onToken]);
+  }, [siteKey, skipHumanCheck, onToken]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -111,8 +119,9 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
       <p aria-live="polite" className="text-sm text-fg-muted">
         {status === "loading" ? "Loading a quick human check..." : null}
         {status === "verified" ? "Human check done." : null}
-        {status === "skipped" ? "Human check skipped for this local demo." : null}
-        {status === "unavailable" ? "We couldn't load the human check. Check your connection, then reload this page." : null}
+        {status === "skipped" ? "You're ready to finish." : null}
+        {status === "unavailable" && errorCode?.startsWith("600") ? "The human check couldn't verify this browser. Reload this page or try another browser." : null}
+        {status === "unavailable" && !errorCode?.startsWith("600") ? "We couldn't load the human check. Check your connection, then reload this page." : null}
       </p>
     </div>
   );

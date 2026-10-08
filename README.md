@@ -29,7 +29,7 @@ On macOS or Linux use `cp .env.example .env.local`. The values in `.env.example`
 | --- | --- |
 | `npm run demo` | Doctor checks, builds Functions, starts the emulators, seeds demo data, and runs the app at http://localhost:5173 |
 | `npm run demo:restart` | Stops only this project's listeners, verifies signup against isolated emulators, then starts the full stack in one terminal |
-| `npm run demo:cloud` | Runs the app with live cloud Auth and Firestore, plus local Functions and Storage emulators; keeps the laptop on during the presentation |
+| `npm run demo:cloud` | Legacy hybrid mode for testing cloud Auth and Firestore with local Functions |
 | `npm run seed:cloud -- --yes` | One-time fictional seed for the pinned cloud project; refuses to overwrite a nonempty database |
 | `npm run verify:signup` | Uses isolated emulators to sign in, call signup, and confirm Firestore documents and seat counts |
 | `npm run demo:windows` | Opens four isolated local Chrome sessions for coordinator, kiosk setup, volunteer, and admin; run after `npm run demo` |
@@ -41,21 +41,23 @@ On macOS or Linux use `cp .env.example .env.local`. The values in `.env.example`
 | `npm test` | Vitest for the app, `shared/`, and `functions/`, with coverage (shared at 100%) |
 | `npm run test:e2e` | Playwright smoke test with an axe accessibility scan |
 | `npm run build` | Typecheck and production web build into `dist/` |
+| `npm run build:production` | Builds the live app with cloud services and onboarding enabled |
+| `npm run deploy:production` | Builds and deploys the live app to Firebase Hosting |
 | `npm run build:functions` | Bundles `functions/src` + `shared/` into the standalone `functions-dist/` deploy directory |
 | `npm run check:tokens` | Fails if a hardcoded color appears in `src/components` |
 | `npm run seed:demo` | Seeds the running emulators (Tier 0 fills this in) |
 | `npm run demo:reset` | Rebuilds demo data (Tier 0 fills this in) |
 | `npm run verify` | Everything CI runs: typecheck, test, build, build:functions, check:tokens |
 
-If the site loads but login or demo controls say they cannot reach the server, the Auth or Functions emulator is missing. From this directory, run `npm run demo:restart` in one terminal and leave it open. It checks signup writes before opening the site. `npm run dev` also starts all local services; run only one of these commands at a time. To rerun the signup check independently, use `npm run verify:signup`; it uses separate emulator ports. Local signups are written to the Firestore emulator and appear in its UI at http://localhost:4000, not in the cloud Firebase console. The Spark project has no deployed Functions for live signup writes.
+If the local site loads but login or demo controls cannot reach the server, the Auth or Functions emulator is missing. Run `npm run demo:restart` in one terminal and leave it open. It checks signup writes before opening the site. `npm run dev` also starts all local services; run only one of these commands at a time. To rerun the signup check independently, use `npm run verify:signup`; it uses separate emulator ports. Local signups appear in the emulator UI at http://localhost:4000.
 
-## Cloud Firestore presentation on Spark
+## Live Firebase presentation
 
-The `fbla2027-ethanteng` cloud project has Email/Password Auth enabled and a fictional demo seed. Run `npm run demo:cloud` **instead of** `npm run dev` or `npm run demo:restart`. The browser then uses cloud Auth and Firestore, and calls the local Functions emulator for trusted actions. A signup appears in the cloud Firebase console immediately. Keep the terminal and laptop running while presenting. Sign in as `volunteer@demo.fbla2027.test`, `minor@demo.fbla2027.test`, `coordinator@demo.fbla2027.test`, or `admin@demo.fbla2027.test`. Their separate passwords are keyed by `demo-volunteer`, `demo-minor`, `demo-coordinator`, and `demo-admin` in `.cloud-demo-accounts.local` (gitignored, mode 600). The one-click local demo role buttons are hidden in this mode.
+Open the [live site](https://fbla2027-ethanteng.web.app). It uses cloud Auth, Firestore, Functions, and Storage without a local server. Sign in as `volunteer@demo.fbla2027.test`, `minor@demo.fbla2027.test`, `coordinator@demo.fbla2027.test`, or `admin@demo.fbla2027.test`. Their separate passwords are keyed by `demo-volunteer`, `demo-minor`, `demo-coordinator`, and `demo-admin` in `.cloud-demo-accounts.local` (gitignored, mode 600). The one-click local demo role buttons are hidden on the live site.
 
-This setup uses only Spark services in the cloud. Functions and file storage remain local, so the hosted Firebase site cannot run the full workflow, and Firestore-triggered and scheduled Functions do not run against cloud data. The cloud project has no Storage bucket; seeded letter metadata can appear in Firestore without a downloadable cloud PDF. `npm run seed:cloud -- --yes` is only for an empty project; it refuses to overwrite existing data. Local `npm run dev` still uses the separate emulator database.
+The project is on Blaze. Cloud signups appear in the Firebase console, and scheduled jobs and Firestore triggers run in the cloud. `npm run seed:cloud -- --yes` is only for an empty project; it refuses to overwrite existing data. Local `npm run dev` still uses a separate emulator database. If the admin resets live demo data, all four accounts use the private `resetPassword` in `.cloud-demo-accounts.local` afterward.
 
-The [Firebase Hosting site](https://fbla2027-ethanteng.web.app) is a browsing preview on Spark. It loads public shifts from cloud Firestore and clearly marks account creation and trusted actions as unavailable there. Rebuild and redeploy that preview with `npm run deploy:hosting`. The complete interactive presentation still uses `npm run demo:cloud` on the presentation laptop.
+Use `npm run deploy:production` to update the hosted app. Keep `npm run demo` as the offline rehearsal path.
 
 ## Repository layout
 

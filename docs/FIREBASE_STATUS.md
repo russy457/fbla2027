@@ -1,20 +1,23 @@
 # Firebase setup status
 
-Updated 2026-10-07. This project is separate from previous FBLA projects.
+Updated 2026-10-07. The competition project is `fbla2027-ethanteng` (display name **fbla 2027**).
 
-| Item | State |
+| Service | State |
 |---|---|
-| Firebase project | `fbla2027-ethanteng`, display name **fbla 2027** |
-| Web app | Registered as **fbla 2027** |
-| Pricing plan | Spark. No billing account linked; no upgrade is planned. |
-| Cloud Firestore | `(default)` Native database in `us-central1` |
-| Firestore security rules and indexes | Deployed from `firestore.rules` and `firestore.indexes.json` |
-| Authentication | Email/Password enabled on Spark through `firebase deploy --only auth`; four fictional demo accounts seeded. |
-| Hosting | Browsing preview deployed at `https://fbla2027-ethanteng.web.app` on Spark. |
-| Cloud Functions and Storage | Not deployed. Firebase requires Blaze for Functions deployment and Storage access. |
+| Plan | Blaze, billing linked |
+| Hosting | Production app at https://fbla2027-ethanteng.web.app |
+| Authentication | Email and password enabled; four fictional demo accounts |
+| Cloud Firestore | `(default)` in `us-central1`, with deployed rules and indexes |
+| Cloud Functions | Six callable or HTTP endpoints, three Firestore triggers, and one scheduled job deployed in `us-central1` |
+| Cloud Storage | Default bucket `fbla2027-ethanteng.firebasestorage.app`, with deployed rules |
+| Turnstile | Browser site key and server verification configured for live onboarding |
+| Help assistant | OpenRouter free model router configured server-side; article fallback remains available when the model is rate limited or fails |
+| App Check | Client registration and enforcement are currently off. Turnstile protects profile completion. |
 
-The project console is [Firebase project overview](https://console.firebase.google.com/project/fbla2027-ethanteng/overview). Cloud Firestore now contains 140 fictional seed documents. A live signup was verified through the local callable emulator and appeared in the cloud `signups` collection. Private demo passwords are saved only in `.cloud-demo-accounts.local` on the presentation laptop.
+The live site uses cloud Auth, Firestore, Functions, and Storage without a running laptop. A cloud volunteer signup was verified in the `signups` and `signupContacts` collections, including its shift seat count. The seeded service letter PDF was uploaded to Storage. Private demo passwords are in `.cloud-demo-accounts.local` on the presentation laptop, not in the repository.
 
-The hosted site is a browsing preview: public opportunities load from cloud Firestore, and new account creation is disabled so no one starts an account that cannot be completed. It is built with `npm run build:hosting` and deployed with `npm run deploy:hosting`. The current app sends trusted writes to Cloud Functions. On Spark, `npm run demo:cloud` runs those Functions on the presentation laptop while the browser uses cloud Auth and Firestore. A local callable signup changes the live cloud `signups` document and shift seat count. Cloud Storage remains unavailable, so the app uses the local Storage emulator in this mode. Firestore triggers and scheduled Functions do not run for cloud writes. The full hosted signup, kiosk, hours, reports, and AI workflows **cannot run on Spark** without a backend elsewhere; no Cloud Functions are deployed. No billing link or paid service has been enabled.
+Run `npm run deploy:production` to rebuild and publish the web app. Deploy rules and Functions separately after backend changes. `npm run demo` remains the offline rehearsal path; `npm run demo:cloud` is a legacy hybrid mode and is no longer needed for the hosted presentation.
 
-The web app's Firebase configuration is public by design; provider secrets belong on the server, never in a `VITE_` variable. Sources: [Firebase pricing plans](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans), [Authentication](https://firebase.google.com/docs/auth/), and [Cloud Storage billing requirements](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024).
+Secrets live in Firebase Secret Manager. The browser receives only public Firebase configuration, the Mapbox public token, and the Turnstile site key. Do not put OpenRouter or Turnstile secrets in a `VITE_` variable. If the demo data is reset, use the `resetPassword` field in `.cloud-demo-accounts.local` for all four demo accounts afterward.
+
+[Firebase console](https://console.firebase.google.com/project/fbla2027-ethanteng/overview)

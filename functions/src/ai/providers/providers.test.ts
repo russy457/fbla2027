@@ -63,7 +63,7 @@ describe("openrouter provider", () => {
     const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe(OPENROUTER_URL);
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer k");
-    expect(JSON.parse(String(init.body))).toMatchObject({ model: "vendor/model", max_tokens: 1024, response_format: { type: "json_schema" } });
+    expect(JSON.parse(String(init.body))).toMatchObject({ model: "vendor/model", max_tokens: 1024, provider: { require_parameters: true }, response_format: { type: "json_schema" } });
   });
 
   it.each([

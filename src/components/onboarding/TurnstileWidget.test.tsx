@@ -28,7 +28,7 @@ describe("onboarding human check", () => {
     const onStatus = vi.fn();
     render(<TurnstileWidget onToken={vi.fn()} onStatus={onStatus} />);
 
-    expect(await screen.findByText("Human check skipped for this local demo.")).toBeInTheDocument();
+    expect(await screen.findByText("You're ready to finish.")).toBeInTheDocument();
     await waitFor(() => expect(onStatus).toHaveBeenCalledWith("skipped"));
     expect(document.querySelector('script[src*="challenges.cloudflare.com"]')).toBeNull();
   });
@@ -40,5 +40,37 @@ describe("onboarding human check", () => {
 
     expect(await screen.findByText(/We couldn't load the human check/)).toBeInTheDocument();
     await waitFor(() => expect(onStatus).toHaveBeenCalledWith("unavailable"));
+  });
+
+  it("lets the deployed signup finish when verification is disabled server-side", async () => {
+    vi.mocked(readClientEnv).mockReturnValue({ ok: true, env: { ...clientEnv(false), VITE_TURNSTILE_ENABLED: "false" } });
+    const onStatus = vi.fn();
+    render(<TurnstileWidget onToken={vi.fn()} onStatus={onStatus} />);
+
+    expect(await screen.findByText("You're ready to finish.")).toBeInTheDocument();
+    await waitFor(() => expect(onStatus).toHaveBeenCalledWith("skipped"));
+  });
+
+  it("explains a rejected browser challenge and clears the token", async () => {
+    vi.mocked(readClientEnv).mockReturnValue({ ok: true, env: { ...clientEnv(false), VITE_TURNSTILE_SITE_KEY: "site-key" } });
+    let onError: ((code?: string) => boolean) | undefined;
+    const turnstile = {
+      render: vi.fn((_element: HTMLElement, options: { "error-callback": (code?: string) => boolean }) => {
+        onError = options["error-callback"];
+        return "widget";
+      }),
+      remove: vi.fn()
+    };
+    Object.assign(window, { turnstile });
+    const onToken = vi.fn();
+    const onStatus = vi.fn();
+    const view = render(<TurnstileWidget onToken={onToken} onStatus={onStatus} />);
+    await waitFor(() => expect(turnstile.render).toHaveBeenCalled());
+    expect(onError?.("600010")).toBe(true);
+    expect(await screen.findByText(/couldn't verify this browser/)).toBeInTheDocument();
+    expect(onToken).toHaveBeenCalledWith(null);
+    await waitFor(() => expect(onStatus).toHaveBeenCalledWith("unavailable"));
+    view.unmount();
+    Reflect.deleteProperty(window, "turnstile");
   });
 });

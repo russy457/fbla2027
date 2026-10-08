@@ -41,6 +41,7 @@ export const createOpenRouterModel = (options: OpenRouterModelOptions): Assistan
           body: JSON.stringify({
             model: options.model,
             max_tokens: request.maxOutputTokens,
+            provider: { require_parameters: true },
             messages: [
               { role: "system", content: request.system },
               { role: "user", content: request.question }

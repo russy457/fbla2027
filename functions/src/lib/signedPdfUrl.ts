@@ -37,9 +37,14 @@ export const signedPdfUrl = async (deps: ServerDeps, path: string): Promise<PdfU
   if (env.storageEmulatorHost !== null) {
     return { url: emulatorUrl(env.storageEmulatorHost, env.storageBucket, path), expiresAt };
   }
-  const [url] = await deps.storage
-    .bucket(env.storageBucket)
-    .file(path)
-    .getSignedUrl({ version: "v4", action: "read", expires: expiresMs, responseType: "application/pdf" });
-  return { url, expiresAt };
+  try {
+    const [url] = await deps.storage
+      .bucket(env.storageBucket)
+      .file(path)
+      .getSignedUrl({ version: "v4", action: "read", expires: expiresMs, responseType: "application/pdf" });
+    return { url, expiresAt };
+  } catch (error) {
+    deps.log.error("PDF URL signing failed", { message: error instanceof Error ? error.message : String(error) });
+    throw error;
+  }
 };

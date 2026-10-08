@@ -1,45 +1,45 @@
 # Demo Runbook
 
-How the team sets up, runs, and recovers the demo. The current no-cost plan uses the Firebase Emulator Suite on a team laptop, so the complete workflow can run without a Blaze upgrade or venue internet. A browsing preview is deployed to Firebase Hosting on Spark; the full Functions and Storage deployment steps below are conditional on upgrading to Blaze. Before the event, rehearse with separate browser profiles for coordinator, kiosk, and volunteer roles on the laptop and confirm the presentation setup meets current event rules.
+How the team sets up, runs, and recovers the demo. The full app is hosted on Firebase at https://fbla2027-ethanteng.web.app with Blaze, Cloud Functions, Firestore, Auth, and Storage. The Firebase Emulator Suite remains the offline rehearsal option. Before the event, rehearse with separate browser profiles for coordinator, kiosk, and volunteer roles and confirm the presentation setup meets current event rules.
 
 | | |
 |---|---|
 | Source of truth | `docs/SPEC.md` (10.6 env, 10.7 demo accounts, 10.12 App Check, 10.14 docs) |
 | Rehearsal owner | (name) |
 | Explainers owner | (name) |
-| Status | Project, web app, Firestore database, rules, and indexes created on 2026-10-07. The project stays on Spark. The Hosting browsing preview is live; the local emulator demo runs full workflows. See `docs/FIREBASE_STATUS.md`. |
+| Status | Full cloud deployment live on 2026-10-07. See `docs/FIREBASE_STATUS.md`. |
 
 Contents: [1. First deploy](#1-first-deploy) · [2. Competition day](#2-competition-day) · [3. Demo script](#3-demo-script) · [4. Reset and recovery](#4-reset-and-recovery) · [5. Explainers](#5-explainers) · [6. Questions judges ask](#6-questions-judges-ask) · [7. Rehearsal log](#7-rehearsal-log)
 
 ---
 
-## Current Spark demo
+## Offline emulator demo
 
 Run `npm run demo` from a machine with Node 22, Java 21, installed dependencies, and the local emulator files cached. It starts Auth, Firestore, Functions, and Storage emulators, seeds fictional data, and serves the app at `http://localhost:5173`. The local Functions build skips the deploy lockfile, so no package download is needed during a rehearsal. The emulator project id starts with `demo-` and cannot reach the real Firebase project. The coordinator, kiosk, and volunteer roles can use separate browser profiles or contexts on that same machine. Rehearse the full script below on this setup and keep the machine's power and local files ready before entering the presentation area.
 
-This local setup covers the application's core workflows at no Firebase cost. The AI help assistant uses its deterministic article fallback unless a server-side provider key is configured. The Firebase Hosting site on Spark cannot host the backend operations because the deployed Cloud Functions require Blaze. The downloaded competition guidelines say Internet access is provided but may be unreliable, so the local setup is also the connection-loss backup.
+This local setup covers the application's core workflows without the network. Its AI help assistant uses the article fallback unless a server-side provider key is configured. The downloaded competition guidelines say Internet access is provided but may be unreliable, so the local setup is also the connection-loss backup.
 
-### Cloud Firestore presentation on Spark
+### Live presentation
 
-The cloud project now has Email/Password Auth and 140 fictional seed documents. Run `npm run demo:cloud` on the presentation laptop to point the browser at the real `fbla2027-ethanteng` Auth and Firestore services while keeping trusted callable actions and file storage local. This command must stay open. Sign in manually using a demo email and its corresponding private password in `.cloud-demo-accounts.local`. The cloud Firebase console then shows live signups; a test signup and shift seat-count update have been verified. Run only one of `npm run demo:cloud` and `npm run demo` at once.
+Open https://fbla2027-ethanteng.web.app and sign in using a demo email and its corresponding private password in `.cloud-demo-accounts.local`. The Firebase console shows live signups; a test signup and shift seat-count update have been verified. The hosted site needs no terminal. The local `npm run demo` flow stays available for an offline rehearsal.
 
-The cloud mode does not run Firestore-triggered or scheduled Functions, and it cannot serve the complete app from Firebase Hosting. The local demo remains the full workflow and the offline fallback. The cloud seed is a one-time operation: `npm run seed:cloud -- --yes` refuses to overwrite a nonempty Firestore database or Auth user list. Never share or commit `.cloud-demo-accounts.local`.
+The cloud seed is a one-time operation: `npm run seed:cloud -- --yes` refuses to overwrite a nonempty Firestore database or Auth user list. Never share or commit `.cloud-demo-accounts.local`. After an admin demo reset, use its `resetPassword` value for all four accounts.
 
 ---
 
 ## 1. First deploy
 
-This section is for a future full deployment only if the team explicitly chooses Blaze. The current project remains on Spark. Every command below names the project explicitly; the repo has no `.firebaserc` on purpose, so nothing deploys by accident.
+The full deployment is active. Every command below names the project explicitly; the repo has no `.firebaserc` on purpose.
 
 ### 1.1 Project setup (Firebase console)
 
-1. The separate project `fbla2027-ethanteng` already exists with display name **fbla 2027**. A full hosted version needs **Blaze** for Cloud Functions v2 and Storage. Link billing only after an explicit team decision, then set a budget alert at $5 (PORT_PLAN AI limits).
+1. The project `fbla2027-ethanteng` exists with display name **fbla 2027** and Blaze billing linked. Set a billing budget alert in the Google Cloud console.
 2. **Authentication**: enable Email/Password. This part is available on Spark and does not need billing.
 3. **Firestore**: the default Native database in `us-central1`, its rules, and indexes are already deployed.
-4. **Storage**: create the default bucket.
+4. **Storage**: the default bucket is `fbla2027-ethanteng.firebasestorage.app`.
 5. **Hosting**: the default site already exists at `https://fbla2027-ethanteng.web.app`; it is `APP_BASE_URL` below.
-6. **App Check**: register the web app with reCAPTCHA Enterprise and note the site key. Register debug tokens only for development browsers; the three demo devices use the real provider on the deployed site (SPEC 10.12).
-7. **Cloudflare Turnstile**: create a widget for the hosting domain; note the site key and secret.
+6. **App Check**: this optional extra gate is currently off; register the web app with reCAPTCHA Enterprise before enabling `APPCHECK_ENFORCE`.
+7. **Cloudflare Turnstile**: the live widget and server secret are configured. Keep the secret in Firebase Secret Manager.
 8. Optional **Mapbox** map: create a public `pk.` token whose URL restrictions list only the hosting domains. Never create or paste an `sk.` token anywhere in this repo. Leave it out to hide the map toggle.
 9. Revoke the old Trove Mapbox `sk.` token, rotate the old OpenRouter key and Turnstile secret, and restrict or retire the old Firebase project (SPEC 1.5).
 
@@ -53,7 +53,8 @@ This section is for a future full deployment only if the team explicitly chooses
 | `VITE_USE_EMULATORS` | `false` |
 | `VITE_DEMO_MODE` | `true` (shows "Sign in as...", the demo controls, and Reset demo data to admins) |
 | `VITE_TURNSTILE_SITE_KEY` | the Turnstile site key |
-| `VITE_APPCHECK_SITE_KEY` | the reCAPTCHA Enterprise key |
+| `VITE_TURNSTILE_ENABLED` | `true` on the hosted app |
+| `VITE_APPCHECK_SITE_KEY` | blank until App Check is registered and enabled |
 | `VITE_MAPBOX_TOKEN` | blank, or the URL-restricted `pk.` token |
 | `APP_BASE_URL` | `https://<project>.web.app` (canonical URLs, `robots.txt`, `sitemap.xml`; the build warns when it is missing) |
 
@@ -64,10 +65,11 @@ This section is for a future full deployment only if the team explicitly chooses
 | `DEMO_MODE` | `true` on the competition project |
 | `ALLOW_DEMO_CLOCK` | `true` (the demo clock is otherwise allowed only on `demo-` projects) |
 | `APP_BASE_URL` | `https://<project>.web.app` (kiosk QR links, letter verify links) |
-| `APPCHECK_ENFORCE` | `true` |
+| `APPCHECK_ENFORCE` | `false` until App Check is registered and enabled |
 | `TURNSTILE_ENABLED` | `true` |
 | `AI_ENABLED` | `true` to let the help assistant call the model; `false` keeps the top-3-articles fallback |
-| `AI_PROVIDER`, `AI_MODEL` | `anthropic` and the model id (blank uses the provider default) |
+| `AI_PROVIDER`, `AI_MODEL` | `openrouter`, `openrouter/free` for this project |
+| `AI_TIMEOUT_MS` | `20000` for the free model router |
 | `KIOSK_MIN_INSTANCES` | `0` normally, `1` on competition day only |
 
 **Secrets** (Secret Manager; set once, never in a file):
@@ -76,17 +78,17 @@ This section is for a future full deployment only if the team explicitly chooses
 npx firebase functions:secrets:set KIOSK_MASTER_SECRET --project <projectId>
 npx firebase functions:secrets:set TURNSTILE_SECRET --project <projectId>
 npx firebase functions:secrets:set DEMO_ACCOUNT_PASSWORD --project <projectId>
-npx firebase functions:secrets:set ANTHROPIC_API_KEY --project <projectId>
+npx firebase functions:secrets:set OPENROUTER_API_KEY --project <projectId>
 ```
 
-`KIOSK_MASTER_SECRET` is any long random string (for example 48 random bytes in base64). `DEMO_ACCOUNT_PASSWORD` must be at least 8 characters; `admin.resetDemoData` refuses to run without it. `OPENROUTER_API_KEY` is needed only if `AI_PROVIDER=openrouter`.
+`KIOSK_MASTER_SECRET` is any long random string (for example 48 random bytes in base64). `DEMO_ACCOUNT_PASSWORD` must be at least 8 characters; `admin.resetDemoData` refuses to run without it. `OPENROUTER_API_KEY` is needed only if `AI_PROVIDER=openrouter`. The Functions runtime service account needs Service Account Token Creator to sign five minute PDF download links.
 
 ### 1.3 Deploy order
 
 Run from a clean checkout of the commit being shown, after `npm ci` and a green `npm run verify`.
 
 ```
-npm run build                                   # web app into dist/ (reads .env.production.local)
+npm run build:production                        # web app into dist/ (reads .env.production.local)
 npx firebase deploy --only firestore:rules,firestore:indexes,storage --project <projectId>
 npx firebase deploy --only functions --project <projectId>     # predeploy runs npm run build:functions
 npx firebase deploy --only hosting --project <projectId>

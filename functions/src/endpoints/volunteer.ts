@@ -43,4 +43,6 @@ export const volunteerOps: readonly RegisteredOp[] = [
   // End Tier 2 lane A
 ];
 
-export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: deploySecrets("TURNSTILE_SECRET") });
+const turnstileSecrets = () => process.env.TURNSTILE_ENABLED === "true" ? deploySecrets("TURNSTILE_SECRET") : [];
+
+export const volunteer = defineEndpoint("volunteer", volunteerOps, { memory: "512MiB", secrets: turnstileSecrets() });

@@ -23,6 +23,8 @@ export const clientEnvSchema = z.object({
   /** Demo controls ("Sign in as...", Advance clock, Run due jobs). Unset means: on when using emulators. */
   VITE_DEMO_MODE: z.enum(["true", "false"]).optional(),
   VITE_TURNSTILE_SITE_KEY: optionalEnvString(),
+  /** Mirrors the deployed Functions setting when the external human-check provider is unavailable. */
+  VITE_TURNSTILE_ENABLED: z.enum(["true", "false"]).optional(),
   VITE_MAPBOX_TOKEN: optionalEnvString(),
   VITE_APPCHECK_SITE_KEY: optionalEnvString(),
   VITE_APPCHECK_DEBUG_TOKEN: optionalEnvString()
