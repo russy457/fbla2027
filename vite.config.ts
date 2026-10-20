@@ -14,11 +14,47 @@ import tailwindcss from "@tailwindcss/vite";
 // Tier 2 lane C
 import { readdirSync } from "node:fs";
 import { DEFAULT_BASE_URL, buildRobotsTxt, buildSitemapXml, sitemapPaths } from "./src/lib/seo/sitemap";
+import {
+  COMMUNITY_DONATIONS_PHOTO,
+  DONATION_CENTER_PHOTO,
+  PACKING_DONATIONS_PHOTO,
+  TREE_PLANTING_PHOTO
+} from "./src/content/editorialMedia";
 
 const DEV_PORT = 5173;
 
 // Tier 2 lane C: robots.txt + sitemap.xml at build time. Help article slugs are their file names.
 const HELP_DIR = fileURLToPath(new URL("./src/content/help", import.meta.url));
+const heroPreloadSource = `(() => {
+  const path = window.location.pathname;
+  const src = path === "/"
+    ? (window.matchMedia("(max-width: 40rem)").matches ? ${JSON.stringify(TREE_PLANTING_PHOTO.src)} : ${JSON.stringify(DONATION_CENTER_PHOTO.src)})
+    : path === "/explore"
+      ? (window.matchMedia("(max-width: 58rem)").matches ? ${JSON.stringify(COMMUNITY_DONATIONS_PHOTO.src)} : ${JSON.stringify(PACKING_DONATIONS_PHOTO.src)})
+      : null;
+  if (src === null) return;
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  link.href = src;
+  link.setAttribute("fetchpriority", "high");
+  document.head.append(link);
+})();`;
+
+/** A tiny classic script starts public hero images before the app bundle loads. */
+const heroPreload = (): Plugin => ({
+  name: "fbla-hero-preload",
+  configureServer(server) {
+    server.middlewares.use((request, response, next) => {
+      if (request.url?.split("?")[0] !== "/hero-preload.js") return next();
+      response.setHeader("Content-Type", "application/javascript; charset=utf-8");
+      response.end(heroPreloadSource);
+    });
+  },
+  generateBundle() {
+    this.emitFile({ type: "asset", fileName: "hero-preload.js", source: heroPreloadSource });
+  }
+});
 const seoFiles = (): Plugin => {
   let configuredBaseUrl = "";
   return {
@@ -42,7 +78,7 @@ const seoFiles = (): Plugin => {
 };
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), seoFiles() /* Tier 2 lane C */],
+  plugins: [react(), tailwindcss(), heroPreload(), seoFiles() /* Tier 2 lane C */],
   // Tier 2 lane C: APP_BASE_URL (not a secret) is readable as import.meta.env.APP_BASE_URL.
   envPrefix: ["VITE_", "APP_BASE_URL"],
   resolve: {

@@ -27,13 +27,13 @@ export const ACCOUNTS = {
 const AUTH_EMULATOR = `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST ?? "127.0.0.1:9099"}`;
 const FUNCTIONS_EMULATOR = `http://127.0.0.1:${process.env.E2E_FUNCTIONS_PORT ?? "5001"}/${PROJECT_ID}/us-central1`;
 
-/** Signs in through the real Login form and waits until the header shows Sign out. */
+/** Signs in through the real Login form and waits for the signed-in account menu. */
 export const signInWithForm = async (page: Page, email: string, next = "/"): Promise<void> => {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(DEMO_PASSWORD);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByRole("button", { name: /Sign out/ })).toBeVisible();
+  await expect(page.locator("summary[aria-label='Account menu']")).toBeVisible();
 };
 
 /** An ID token for the seeded admin from the Auth emulator. */

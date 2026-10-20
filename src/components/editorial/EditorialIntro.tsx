@@ -11,6 +11,7 @@ import {
   SENIORS_VOLUNTEERS_PHOTO,
   SHELTER_CAT_PHOTO,
   TREE_PLANTING_PHOTO,
+  editorialThumbnailSrc,
   type EditorialPhoto
 } from "@/content/editorialMedia";
 
@@ -58,7 +59,7 @@ export const EditorialIntro = (): ReactElement => (
           {CAUSES.map(({ label, cause, photo }) => (
             <Link key={cause} to={`/explore?cause=${cause}`} className="home-cause">
               <span className="home-cause__image-wrap">
-                <img src={photo.src} alt="" width={300} height={360} loading="eager" fetchPriority="low" decoding="sync" style={{ objectPosition: photo.objectPosition }} />
+                <img src={editorialThumbnailSrc(photo)} alt="" width={300} height={360} loading="eager" fetchPriority="low" decoding="async" style={{ objectPosition: photo.objectPosition }} />
                 <span aria-hidden="true" className="home-cause__shade" />
                 <span className="home-cause__label">{label}</span>
               </span>

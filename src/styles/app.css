@@ -295,8 +295,8 @@
 .onboarding-main > div { position: relative; z-index: 1; }
 .onboarding-scene { display: none; }
 .kiosk-screen-header { position: relative; isolation: isolate; min-height: clamp(12rem, 25svh, 20rem); background: var(--hero); color: var(--hero-fg); }
-.kiosk-screen-header::before { position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--hero) 0%, rgb(44 29 21 / 89%) 54%, rgb(44 29 21 / 30%) 100%), url('/images/food-sorting-joel-muniz.jpg') center / cover no-repeat; content: ""; }
-.kiosk-access-hero { position: relative; display: flex; align-items: center; min-height: clamp(22rem, 54svh, 40rem); overflow: hidden; background: var(--hero) url('/images/packing-donations.jpg') center 45% / cover no-repeat; color: var(--hero-fg); }
+.kiosk-screen-header::before { position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--hero) 0%, rgb(44 29 21 / 89%) 54%, rgb(44 29 21 / 30%) 100%), url('/images/food-sorting-joel-muniz.webp') center / cover no-repeat; content: ""; }
+.kiosk-access-hero { position: relative; display: flex; align-items: center; min-height: clamp(22rem, 54svh, 40rem); overflow: hidden; background: var(--hero) url('/images/packing-donations.webp') center 45% / cover no-repeat; color: var(--hero-fg); }
 .kiosk-access-hero::before { position: absolute; inset: 0; background: linear-gradient(90deg, rgb(37 25 19 / 92%) 0%, rgb(37 25 19 / 65%) 45%, rgb(37 25 19 / 12%) 85%); content: ""; }
 .kiosk-access-hero__copy { position: relative; width: min(100%, 80rem); margin-inline: auto; padding: 3rem clamp(1.25rem, 4vw, 3rem); }
 .kiosk-access-hero__copy h1 { max-width: 15ch; color: var(--hero-fg); font-family: var(--type-sans); font-size: clamp(2.8rem, 6vw, 5.5rem); font-weight: 400; line-height: 1; letter-spacing: -0.06em; }
@@ -418,7 +418,7 @@
 }
 
 @media (max-width: 58rem) {
-  .onboarding-scene { display: block; height: 11rem; border-radius: var(--corner-lg); background: var(--surface-sunken) url('/images/community-donations.jpg') center 80% / cover no-repeat; }
+  .onboarding-scene { display: block; height: 11rem; border-radius: var(--corner-lg); background: var(--surface-sunken) url('/images/community-donations.webp') center 80% / cover no-repeat; }
   .explore-scene__media::after { background: linear-gradient(180deg, var(--explore-photo-shade-top) 0%, var(--explore-photo-shade-middle) 45%, var(--explore-photo-shade-bottom) 100%); }
   .explore-scene__intro { justify-content: flex-start; min-height: 79svh; padding-top: 10rem; }
   .explore-scene__intro h1 { max-width: 14ch; font-size: clamp(3.1rem, 8vw, 4.3rem); }
@@ -525,7 +525,7 @@
   }
 }
 
-/* Route photography shares Explore's full-height, layered scroll rhythm. */
+/* Task routes keep the layered photo rhythm while bringing work into view. */
 .site-header[data-scene="true"] { margin-bottom: -5rem; }
 .site-header[data-scene="true"]:not([data-condensed="true"]) {
   border-color: transparent;
@@ -538,7 +538,7 @@
 .interior-scene__media {
   position: sticky;
   top: 0;
-  height: 100svh;
+  height: var(--task-scene-height);
   overflow: hidden;
   background: var(--hero);
 }
@@ -554,11 +554,11 @@
   background: linear-gradient(90deg, rgb(37 25 19 / 88%) 0%, rgb(37 25 19 / 69%) 37%, rgb(37 25 19 / 5%) 80%), linear-gradient(0deg, rgb(37 25 19 / 42%), transparent 34%);
   content: "";
 }
-.interior-scene__flow { position: relative; z-index: 1; margin-top: -100svh; }
+.interior-scene__flow { position: relative; z-index: 1; margin-top: calc(-1 * var(--task-scene-height)); }
 .interior-scene__flow::before {
   position: absolute;
   z-index: -1;
-  top: calc(100svh - 3rem);
+  top: calc(var(--task-scene-height) - 2rem);
   right: 0;
   bottom: 0;
   left: 0;
@@ -568,12 +568,12 @@
 }
 .interior-scene__route { width: min(100%, 80rem); margin-inline: auto; padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(5rem, 8vw, 8rem); }
 .interior-scene .page-hero {
-  min-height: 100svh;
+  min-height: var(--task-scene-height);
   overflow: visible;
   border-radius: 0;
   background: transparent;
 }
-.interior-scene .page-hero__copy { width: min(64%, 48rem); padding: clamp(8rem, 12vw, 11rem) 0 clamp(7rem, 10vw, 9rem); }
+.interior-scene .page-hero__copy { width: min(64%, 48rem); padding: clamp(8rem, 12vw, 11rem) 0 2rem; }
 .interior-scene .page-hero__title { max-width: 14ch; font-family: var(--type-sans); font-size: clamp(3.5rem, 6.8vw, 7rem); font-weight: 400; letter-spacing: -0.065em; line-height: 0.98; }
 .interior-scene .page-hero__intro { max-width: 35ch; margin-top: 1.5rem; font-size: clamp(1rem, 1.5vw, 1.22rem); line-height: 1.55; }
 
@@ -607,13 +607,13 @@
   .site-header[data-scene="true"] { margin-bottom: -7.7rem; }
   .interior-scene__media::after { background: linear-gradient(180deg, rgb(37 25 19 / 78%), rgb(37 25 19 / 50%) 65%, rgb(37 25 19 / 38%)); }
   .interior-scene .page-hero { align-items: flex-start; }
-  .interior-scene .page-hero__copy { width: min(100%, 40rem); padding-top: clamp(11rem, 22vw, 14rem); }
+  .interior-scene .page-hero__copy { width: min(100%, 40rem); padding-top: clamp(9rem, 18vw, 10rem); }
   .home-hero__media::after { background: linear-gradient(180deg, rgb(37 25 19 / 82%), rgb(37 25 19 / 45%) 62%, rgb(37 25 19 / 77%)); }
 }
 @media (max-width: 40rem) {
   .interior-scene__media img { object-position: 62% center !important; }
   .interior-scene__flow::before, .home-gallery { border-radius: 1.4rem 1.4rem 0 0; }
-  .interior-scene .page-hero__copy { padding-top: 10.5rem; }
+  .interior-scene .page-hero__copy { padding-top: 9rem; }
   .interior-scene .page-hero__title { max-width: 14ch; font-size: clamp(2.8rem, 11vw, 4rem); }
   .interior-scene .page-hero__intro { max-width: 27ch; font-size: 1rem; }
   .home-hero__media img { object-position: 59% center; }

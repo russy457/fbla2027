@@ -143,10 +143,10 @@ export const AppLayout = (): ReactElement => {
       <main id="main" tabIndex={-1} className={cn("w-full flex-1 outline-none", isEditorialInterior && "interior-scene", pathname === "/onboarding" && "onboarding-main")}>
         {isEditorialInterior ? (
           <div className="interior-scene__media" aria-hidden="true">
-            <img src={visual.photo.src} alt="" fetchPriority="high" decoding="async" style={{ objectPosition: visual.position }} />
+            {visual.photo ? <img src={visual.photo.src} alt="" fetchPriority="high" decoding="async" style={{ objectPosition: visual.position }} /> : null}
           </div>
         ) : null}
-        {pathname === "/onboarding" ? (
+        {pathname === "/onboarding" && visual.photo ? (
           <div className="onboarding-stage">
             <img src={visual.photo.src} alt="" fetchPriority="high" decoding="async" />
             <p>Join in</p>

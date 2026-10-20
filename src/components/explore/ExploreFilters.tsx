@@ -43,6 +43,32 @@ const TYPE_LABELS: Readonly<Record<(typeof OPPORTUNITY_TYPES)[number], string>> 
   skilled: "Skilled"
 };
 
+interface AppliedFilter {
+  readonly key: keyof Filters;
+  readonly label: string;
+}
+
+const dateLabel = (value: string): string => {
+  const [year = 1970, month = 1, day = 1] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(year, month - 1, day));
+};
+
+const appliedFilters = (filters: Filters, orgName: string | null): AppliedFilter[] =>
+  [
+    filters.q.trim() ? { key: "q", label: `Search: ${filters.q.trim()}` } : null,
+    filters.cause ? { key: "cause", label: `Cause: ${CAUSE_AREA_LABELS[filters.cause]}` } : null,
+    filters.type ? { key: "type", label: `Type: ${TYPE_LABELS[filters.type]}` } : null,
+    filters.day ? { key: "day", label: `Day: ${DAY_LABELS[filters.day]}` } : null,
+    filters.block ? { key: "block", label: `Time: ${BLOCK_LABELS[filters.block]}` } : null,
+    filters.from ? { key: "from", label: `From: ${dateLabel(filters.from)}` } : null,
+    filters.to ? { key: "to", label: `Through: ${dateLabel(filters.to)}` } : null,
+    filters.within ? { key: "within", label: `Within ${filters.within} miles` } : null,
+    filters.seats ? { key: "seats", label: "Seats available" } : null,
+    filters.eligible ? { key: "eligible", label: "Eligible for my age" } : null,
+    filters.verified ? { key: "verified", label: "Verified organizations" } : null,
+    filters.org ? { key: "org", label: `Organization: ${orgName ?? "selected"}` } : null
+  ].filter((filter): filter is AppliedFilter => filter !== null);
+
 const fieldClass =
   "min-h-touch w-full rounded-md border border-border-strong bg-surface px-3 text-sm text-fg focus-visible:outline-(length:--focus-ring-width) focus-visible:outline-focus";
 
@@ -65,8 +91,10 @@ const Check = ({ checked, onChange, children }: { checked: boolean; onChange: (c
 export const ExploreFilters = ({ filters, onChange, resultCount, signedIn, canUseDistance, orgName }: ExploreFiltersProps): ReactElement => {
   const id = useId();
   const count = activeFilterCount({ ...filters, q: "" });
+  const applied = appliedFilters(filters, orgName);
   const [isOpen, setIsOpen] = useState(count > 0);
   const set = <K extends keyof Filters>(key: K, value: Filters[K]): void => onChange({ ...filters, [key]: value });
+  const clearOne = <K extends keyof Filters>(key: K): void => set(key, EMPTY_FILTERS[key]);
   const select = <K extends keyof Filters>(key: K) => (event: ChangeEvent<HTMLSelectElement>) =>
     set(key, (event.target.value === "" ? null : event.target.value) as Filters[K]);
 
@@ -94,16 +122,6 @@ export const ExploreFilters = ({ filters, onChange, resultCount, signedIn, canUs
           {count > 0 ? `Filters (${count})` : "Filters"}
         </button>
       </form>
-
-      {orgName ? (
-        <p className="flex flex-wrap items-center gap-2 text-sm text-fg">
-          Showing shifts from <strong>{orgName}</strong>
-          <button type="button" onClick={() => set("org", null)} className={buttonClassName("quiet")}>
-            <X aria-hidden="true" size={16} />
-            Show all organizations
-          </button>
-        </p>
-      ) : null}
 
       {isOpen ? (
         <fieldset id={`${id}-panel`} className="grid grid-cols-1 gap-4 rounded-lg bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -205,6 +223,21 @@ export const ExploreFilters = ({ filters, onChange, resultCount, signedIn, canUs
           </button>
         ) : null}
       </div>
+      {applied.length > 0 ? (
+        <div role="group" aria-label="Active filters" className="flex flex-wrap gap-x-4 gap-y-1">
+          {applied.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => clearOne(key)}
+              aria-label={`Remove ${label} filter`}
+              className="inline-flex min-h-touch items-center gap-1 text-sm font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-(length:--focus-ring-width) focus-visible:outline-focus"
+            >
+              {label} <X aria-hidden="true" size={14} />
+            </button>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 };

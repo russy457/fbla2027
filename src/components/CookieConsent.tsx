@@ -15,9 +15,7 @@
  */
 import { useState, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { Cookie } from "@phosphor-icons/react";
 import { buttonClassName } from "@/components/ui/buttonStyles";
-import { APP_NAME } from "@/lib/brand";
 import { getConsent, setConsent } from "@/lib/consent";
 
 const HEADING_ID = "storage-notice-title";
@@ -35,25 +33,19 @@ export const CookieConsent = (): ReactElement | null => {
 
   return (
     <section aria-labelledby={HEADING_ID} className="border-b border-border bg-surface-sunken">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div className="flex min-w-0 items-start gap-3">
-          <Cookie aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-fg-muted" />
-          <div className="min-w-0">
-            <h2 id={HEADING_ID} className="font-sans text-sm font-semibold text-fg">
-              Essential storage only
-            </h2>
-            <p className="text-sm text-pretty text-fg-muted">
-              {APP_NAME} keeps your sign-in and display settings in this browser. No analytics or advertising cookies. The
-              optional map loads Mapbox only when you open it.{" "}
-              <Link to="/privacy" className="font-semibold text-accent underline underline-offset-2 hover:text-accent-hover">
-                Privacy policy
-              </Link>
-            </p>
-          </div>
-        </div>
-        <button type="button" onClick={dismiss} className={buttonClassName("secondary", "shrink-0 self-start sm:self-center")}>
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-4 py-2 sm:px-6">
+        <h2 id={HEADING_ID} className="font-sans text-sm font-semibold text-fg">
+          Essential storage only
+        </h2>
+        <button type="button" onClick={dismiss} className={buttonClassName("secondary", "col-start-2 row-start-1 shrink-0")}>
           Got it
         </button>
+        <p className="col-span-2 text-sm text-pretty text-fg-muted sm:col-span-1 sm:row-start-2">
+          We store sign-in and display settings. No analytics or ads. Mapbox loads only when you open the map.{" "}
+          <Link to="/privacy" className="font-semibold text-accent underline underline-offset-2 hover:text-accent-hover">
+            Privacy policy
+          </Link>
+        </p>
       </div>
     </section>
   );

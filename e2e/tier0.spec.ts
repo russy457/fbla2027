@@ -80,8 +80,8 @@ test("coordinator starts the kiosk on the tablet", async () => {
   await expect(kiosk.page).toHaveURL(new RegExp(`${KIOSK}$`));
   const codeOnKiosk = kiosk.page.getByTestId("kiosk-code");
   await expect(codeOnKiosk).toHaveText(/^\d{3} \d{3}$/);
-  // The coordinator session did not stay on the tablet: no app shell, no Sign out.
-  await expect(kiosk.page.getByRole("button", { name: /Sign out/ })).toHaveCount(0);
+  // The coordinator session did not stay on the tablet: the app account menu is gone.
+  await expect(kiosk.page.locator("summary[aria-label='Account menu']")).toHaveCount(0);
   const codeBox = await codeOnKiosk.boundingBox();
   expect(codeBox?.height ?? 0).toBeGreaterThanOrEqual(120);
   await expect(kiosk.page.getByText("No arrivals yet")).toBeVisible();

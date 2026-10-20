@@ -40,7 +40,7 @@ export const EditorialGallery = (): ReactElement => (
         <article key={story.cause} className="home-story">
           <Link to={`/explore?cause=${story.cause}`} className="home-story__link" aria-label={`Explore ${story.title.toLowerCase()} shifts`}>
             <span className="home-story__image-wrap">
-              <img src={story.photo.src} alt={story.photo.alt} width={1000} height={800} loading="eager" fetchPriority="low" decoding="async" style={{ objectPosition: story.photo.objectPosition }} />
+              <img src={story.photo.src} alt={story.photo.alt} width={1000} height={800} loading="lazy" decoding="async" style={{ objectPosition: story.photo.objectPosition }} />
               <span className="home-story__arrow"><ArrowUpRight aria-hidden="true" size={20} /></span>
             </span>
             <span className="home-story__title">{story.title}</span>

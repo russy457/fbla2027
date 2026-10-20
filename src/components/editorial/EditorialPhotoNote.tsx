@@ -6,7 +6,7 @@ import { READING_TOGETHER_PHOTO } from "@/content/editorialMedia";
 /** A quiet photographic pause between the cause gallery and live shift search. */
 export const EditorialPhotoNote = (): ReactElement => (
   <section aria-labelledby="photo-note-title" className="photo-note">
-    <img src={READING_TOGETHER_PHOTO.src} alt="" loading="eager" decoding="async" />
+    <img src={READING_TOGETHER_PHOTO.src} alt="" loading="lazy" decoding="async" />
     <div className="photo-note__copy">
       <h2 id="photo-note-title">Join in.</h2>
       <Link to="/explore">See open shifts <ArrowDownRight aria-hidden="true" size={18} /></Link>

@@ -29,8 +29,8 @@ describe("CookieConsent", () => {
   it("explains essential-only storage in a labelled region", () => {
     renderNotice();
     const region = screen.getByRole("region", { name: "Essential storage only" });
-    expect(region).toHaveTextContent("No analytics or advertising cookies");
-    expect(region).toHaveTextContent("loads Mapbox only when you open it");
+    expect(region).toHaveTextContent("No analytics or ads");
+    expect(region).toHaveTextContent("Mapbox loads only when you open the map");
     expect(screen.getByRole("link", { name: "Privacy policy" })).toHaveAttribute("href", "/privacy");
   });
 

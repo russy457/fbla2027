@@ -14,9 +14,12 @@ import {
 } from "./editorialMedia";
 
 export interface PageVisual {
-  readonly photo: EditorialPhoto;
+  readonly photo: EditorialPhoto | null;
   readonly position: string;
 }
+
+/** Named shifts and organizations need their own approved photos before showing one. */
+const PLAIN_SCENE: PageVisual = { photo: null, position: "center center" };
 
 /** Explore uses distinct crops so its headline stays off the volunteers at both widths. */
 export const EXPLORE_SCENE_PHOTOS = {
@@ -26,8 +29,7 @@ export const EXPLORE_SCENE_PHOTOS = {
 
 /** One place to change the mood or crop of an entire route family. */
 export const pageVisualFor = (pathname: string): PageVisual => {
-  if (pathname.startsWith("/opportunity/")) return { photo: COMMUNITY_GARDEN_PHOTO, position: "center center" };
-  if (pathname.startsWith("/organizations/")) return { photo: DONATION_CENTER_PHOTO, position: "center center" };
+  if (pathname.startsWith("/opportunity/") || pathname.startsWith("/organizations/")) return PLAIN_SCENE;
   if (pathname.startsWith("/collections/")) return { photo: TREE_PLANTING_PHOTO, position: "center 70%" };
   if (pathname === "/me/shifts" || pathname === "/checkin") return { photo: COMMUNITY_GARDEN_PHOTO, position: "center center" };
   if (pathname.startsWith("/impact")) return { photo: DONATION_CENTER_PHOTO, position: "center center" };
@@ -37,7 +39,8 @@ export const pageVisualFor = (pathname: string): PageVisual => {
   if (pathname.startsWith("/help")) return { photo: STORYTIME_PHOTO, position: "center 66%" };
   if (pathname.startsWith("/verify")) return { photo: READING_TOGETHER_PHOTO, position: "center 57%" };
   if (pathname === "/login" || pathname === "/onboarding") return { photo: DONATION_CENTER_PHOTO, position: "center center" };
-  if (pathname.startsWith("/org/")) return { photo: DONATION_CENTER_PHOTO, position: "center center" };
+  if (pathname === "/org/register") return { photo: DONATION_CENTER_PHOTO, position: "center center" };
+  if (pathname.startsWith("/org/")) return PLAIN_SCENE;
   if (pathname === "/admin") return { photo: FOOD_SORTING_PHOTO, position: "center center" };
   if (pathname === "/privacy" || pathname === "/terms" || pathname === "/accessibility") return { photo: READING_TOGETHER_PHOTO, position: "center 57%" };
   return { photo: TREE_PLANTING_PHOTO, position: "center 68%" };

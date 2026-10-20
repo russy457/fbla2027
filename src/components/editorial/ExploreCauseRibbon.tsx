@@ -5,7 +5,8 @@ import {
   FOOD_SORTING_PHOTO,
   READING_TOGETHER_PHOTO,
   SHELTER_CAT_PHOTO,
-  TREE_PLANTING_PHOTO
+  TREE_PLANTING_PHOTO,
+  editorialThumbnailSrc
 } from "@/content/editorialMedia";
 
 const causes = [
@@ -23,7 +24,7 @@ export const ExploreCauseRibbon = (): ReactElement => (
     <nav aria-label="Browse shifts by cause" className="explore-cause-grid">
       {causes.map(({ name, slug, photo }) => (
         <Link key={slug} to={`/explore?cause=${slug}`} className="explore-cause-tile">
-          <img src={photo.src} alt="" loading="eager" decoding="async" style={{ objectPosition: photo.objectPosition }} />
+          <img src={editorialThumbnailSrc(photo)} alt="" loading="lazy" decoding="async" style={{ objectPosition: photo.objectPosition }} />
           <span className="explore-cause-tile__shade" aria-hidden="true" />
           <span className="explore-cause-tile__label">{name}<ArrowUpRight aria-hidden="true" size={17} /></span>
         </Link>
