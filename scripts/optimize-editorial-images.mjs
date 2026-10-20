@@ -14,10 +14,13 @@ const files = (await readdir(sourceDir)).filter((name) => name.endsWith(".jpg"))
 for (const file of files) {
   const source = join(sourceDir, file);
   const stem = file.slice(0, -4);
+  // The textured garden hero stays sharp at desktop width without a large first download.
+  const fullWidth = stem === "home-garden" ? 1600 : 1800;
+  const fullQuality = stem === "home-garden" ? 74 : 82;
   const full = await sharp(source)
     .rotate()
-    .resize({ width: 1800, height: 1800, fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 82, effort: 6 })
+    .resize({ width: fullWidth, height: 1800, fit: "inside", withoutEnlargement: true })
+    .webp({ quality: fullQuality, effort: 6 })
     .toFile(join(outputDir, `${stem}.webp`));
   const thumb = await sharp(source)
     .rotate()

@@ -17,7 +17,7 @@ interface LetterPreviewProps {
 export const LetterPreview = ({ summary }: LetterPreviewProps): ReactElement => (
   <div className="flex min-w-0 flex-col gap-3">
     {/* At large text sizes on a phone the table scrolls inside its own box instead of widening the page (D21). */}
-    <div className="max-w-full overflow-x-auto">
+    <div className="max-w-full overflow-x-auto" role="region" aria-label="Letter hours table" tabIndex={0}>
     <table className="w-full text-left text-sm">
       <caption className="sr-only">Hours this letter will include, by organization</caption>
       <thead>

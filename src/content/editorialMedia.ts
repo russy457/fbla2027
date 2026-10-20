@@ -34,6 +34,22 @@ export const TREE_PLANTING_PHOTO: EditorialPhoto = {
   objectPosition: "center 62%"
 };
 
+export const HOME_GARDEN_PHOTO: EditorialPhoto = {
+  src: "/images/home-garden.webp",
+  alt: "A volunteer tending a community garden among spring flowers",
+  attribution: "Zack Gilbert / Pexels. Illustrative photo.",
+  sourceUrl: "https://www.pexels.com/photo/volunteering-in-a-vibrant-community-garden-39779050/",
+  objectPosition: "center 54%"
+};
+
+export const HOME_PLANTING_PHOTO: EditorialPhoto = {
+  src: "/images/home-planting.webp",
+  alt: "Two volunteers tending a young tree in an open field",
+  attribution: "Thirdman / Pexels. Illustrative photo.",
+  sourceUrl: "https://www.pexels.com/photo/volunteers-on-tree-planting-7656721/",
+  objectPosition: "46% center"
+};
+
 export const READING_TOGETHER_PHOTO: EditorialPhoto = {
   src: "/images/reading-together.webp",
   alt: "An adult helping a child read a book",

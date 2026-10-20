@@ -17,12 +17,14 @@ export const PageHeader = ({ title, children, level = 1, id }: PageHeaderProps):
   const Heading = level === 1 ? "h1" : "h2";
   if (level === 1) {
     return (
-      <header className="page-hero">
-        <div className="page-hero__copy">
-          <Heading id={id} tabIndex={-1} className="page-hero__title outline-none">{title}</Heading>
-          {children ? <div className="page-hero__intro">{children}</div> : null}
-        </div>
-      </header>
+      <div className="page-hero-block">
+        <header className="page-hero">
+          <div className="page-hero__copy">
+            <Heading id={id} tabIndex={-1} className="page-hero__title outline-none">{title}</Heading>
+          </div>
+        </header>
+        {children ? <div className="page-hero__intro">{children}</div> : null}
+      </div>
     );
   }
   return (

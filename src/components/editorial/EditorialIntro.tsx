@@ -1,11 +1,12 @@
-import type { ReactElement } from "react";
+import type { CSSProperties, ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import type { CauseArea } from "@fbla/shared";
 import {
   COMMUNITY_MURAL_PHOTO,
-  DONATION_CENTER_PHOTO,
   FOOD_SORTING_PHOTO,
+  HOME_GARDEN_PHOTO,
+  HOME_PLANTING_PHOTO,
   HOUSING_BUILD_PHOTO,
   READING_TOGETHER_PHOTO,
   SENIORS_VOLUNTEERS_PHOTO,
@@ -33,33 +34,46 @@ const CAUSES: readonly CauseLink[] = [
 
 /** The public home opens with one strong image and direct paths into real filters. */
 export const EditorialIntro = (): ReactElement => (
-  <section aria-labelledby="home-title" className="home-hero">
-    <div className="home-hero__media" aria-hidden="true">
-      <picture>
-        <source media="(max-width: 40rem)" srcSet={TREE_PLANTING_PHOTO.src} />
-        <img src={DONATION_CENTER_PHOTO.src} alt="" fetchPriority="high" decoding="async" />
-      </picture>
-    </div>
-    <div className="home-hero__flow">
-      <div className="home-hero__copy">
-        <h1 id="home-title" tabIndex={-1} className="home-hero__title outline-none">Show up.</h1>
-        <p className="home-hero__description">Find a cause, choose a shift, and keep your hours in one place.</p>
-        <div className="home-hero__actions">
-          <Link to="/explore" className="home-hero__primary">
-            Explore shifts <ArrowUpRight aria-hidden="true" size={19} />
-          </Link>
-          <Link to="/org/register" className="home-hero__secondary">
-            For nonprofits
-          </Link>
+  <>
+    <section aria-labelledby="home-title" className="home-hero">
+      <div className="home-hero__media" aria-hidden="true">
+        <picture>
+          <source media="(max-width: 40rem)" srcSet={HOME_PLANTING_PHOTO.src} />
+          <img
+            src={HOME_GARDEN_PHOTO.src}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            style={{
+              "--home-photo-position": HOME_GARDEN_PHOTO.objectPosition,
+              "--home-photo-position-mobile": HOME_PLANTING_PHOTO.objectPosition
+            } as CSSProperties}
+          />
+        </picture>
+      </div>
+      <div className="home-hero__flow">
+        <div className="home-hero__copy">
+          <h1 id="home-title" tabIndex={-1} className="home-hero__title outline-none">Show up.</h1>
+          <p className="home-hero__description">Find a cause, choose a shift, and keep your hours in one place.</p>
+          <div className="home-hero__actions">
+            <Link to="/explore" className="home-hero__primary">
+              Explore shifts <ArrowUpRight aria-hidden="true" size={19} />
+            </Link>
+            <Link to="/org/register" className="home-hero__secondary">
+              For nonprofits
+            </Link>
+          </div>
         </div>
       </div>
+    </section>
+    <section className="home-causes-section" aria-labelledby="home-causes-title">
       <div className="home-causes-wrap">
-        <h2 className="home-causes-heading">Browse causes</h2>
+        <h2 id="home-causes-title" className="home-causes-heading">Browse causes</h2>
         <nav aria-label="Explore by cause" className="home-causes">
           {CAUSES.map(({ label, cause, photo }) => (
             <Link key={cause} to={`/explore?cause=${cause}`} className="home-cause">
               <span className="home-cause__image-wrap">
-                <img src={editorialThumbnailSrc(photo)} alt="" width={300} height={360} loading="eager" fetchPriority="low" decoding="async" style={{ objectPosition: photo.objectPosition }} />
+                <img src={editorialThumbnailSrc(photo)} alt="" width={300} height={360} loading="lazy" decoding="async" style={{ objectPosition: photo.objectPosition }} />
                 <span aria-hidden="true" className="home-cause__shade" />
                 <span className="home-cause__label">{label}</span>
               </span>
@@ -67,6 +81,6 @@ export const EditorialIntro = (): ReactElement => (
           ))}
         </nav>
       </div>
-    </div>
-  </section>
+    </section>
+  </>
 );

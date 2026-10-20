@@ -16,9 +16,9 @@ import { readdirSync } from "node:fs";
 import { DEFAULT_BASE_URL, buildRobotsTxt, buildSitemapXml, sitemapPaths } from "./src/lib/seo/sitemap";
 import {
   COMMUNITY_DONATIONS_PHOTO,
-  DONATION_CENTER_PHOTO,
+  HOME_GARDEN_PHOTO,
+  HOME_PLANTING_PHOTO,
   PACKING_DONATIONS_PHOTO,
-  TREE_PLANTING_PHOTO
 } from "./src/content/editorialMedia";
 
 const DEV_PORT = 5173;
@@ -28,7 +28,7 @@ const HELP_DIR = fileURLToPath(new URL("./src/content/help", import.meta.url));
 const heroPreloadSource = `(() => {
   const path = window.location.pathname;
   const src = path === "/"
-    ? (window.matchMedia("(max-width: 40rem)").matches ? ${JSON.stringify(TREE_PLANTING_PHOTO.src)} : ${JSON.stringify(DONATION_CENTER_PHOTO.src)})
+    ? (window.matchMedia("(max-width: 40rem)").matches ? ${JSON.stringify(HOME_PLANTING_PHOTO.src)} : ${JSON.stringify(HOME_GARDEN_PHOTO.src)})
     : path === "/explore"
       ? (window.matchMedia("(max-width: 58rem)").matches ? ${JSON.stringify(COMMUNITY_DONATIONS_PHOTO.src)} : ${JSON.stringify(PACKING_DONATIONS_PHOTO.src)})
       : null;
