@@ -1,4 +1,4 @@
-# fbla 2027
+# Tandem
 
 A volunteer management platform for nonprofits, built for the FBLA 2026-27 Coding & Programming event ("Serving the Community: Nonprofit Volunteer Management"). Volunteers find shifts and sign up; coordinators run a live check-in kiosk at the event; hours are logged automatically and turned into verified service-hour letters anyone can check at `/verify`. The product name lives in `src/lib/brand.ts`.
 
@@ -53,7 +53,7 @@ If the local site loads but login or demo controls cannot reach the server, the 
 
 ## Live Firebase presentation
 
-Open the [live site](https://fbla2027-ethanteng.web.app). It uses cloud Auth, Firestore, Functions, and Storage without a local server. Sign in as `volunteer@demo.fbla2027.test`, `minor@demo.fbla2027.test`, `coordinator@demo.fbla2027.test`, or `admin@demo.fbla2027.test`. Their separate passwords are keyed by `demo-volunteer`, `demo-minor`, `demo-coordinator`, and `demo-admin` in `.cloud-demo-accounts.local` (gitignored, mode 600). The one-click local demo role buttons are hidden on the live site.
+Open the [live site](https://tandemvolunteer.web.app). It uses cloud Auth, Firestore, Functions, and Storage without a local server. Sign in as `volunteer@demo.fbla2027.test`, `minor@demo.fbla2027.test`, `coordinator@demo.fbla2027.test`, or `admin@demo.fbla2027.test`. Their separate passwords are keyed by `demo-volunteer`, `demo-minor`, `demo-coordinator`, and `demo-admin` in `.cloud-demo-accounts.local` (gitignored, mode 600). The one-click local demo role buttons are hidden on the live site.
 
 The project is on Blaze. Cloud signups appear in the Firebase console, and scheduled jobs and Firestore triggers run in the cloud. `npm run seed:cloud -- --yes` is only for an empty project; it refuses to overwrite existing data. Local `npm run dev` still uses a separate emulator database. If the admin resets live demo data, all four accounts use the private `resetPassword` in `.cloud-demo-accounts.local` afterward.
 

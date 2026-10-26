@@ -1,14 +1,14 @@
-# Handoff: fbla2027 ("fbla 2027")
+# Handoff: Tandem
 
-Last updated 2026-10-07. Read this first if you are picking up the project, whether you are a teammate or a new Claude session.
+This handoff records the October 7 build. For current hosting, billing, and onboarding status, see [FIREBASE_STATUS.md](FIREBASE_STATUS.md).
 
 ## 1. What this is
 
 A web app for the FBLA 2026-27 Coding & Programming topic **"Serving the Community: Nonprofit Volunteer Management"**, judged on the 110-point rubric. It is a port of last year's app (Trove, `github.com/russy457/fblaslc2026`): every feature and the code structure were carried over and re-aimed at volunteer management. The old visual design was **not** kept.
 
-- Source checkout: `github.com/russy457/fbla2027` was the original source. This workspace has no `.git` directory, so the current changes are local files and have not been committed or pushed here.
-- Product name: **fbla 2027** (one constant, `APP_NAME` in `src/lib/brand.ts`).
-- Demo target under the current Spark-only decision: the local Firebase Emulator Suite on a team laptop, with separate browser profiles for the roles. A full cloud deployment would require Blaze and an explicit new decision.
+- Source checkout: `github.com/russy457/fbla2027`. The repository address still uses the original project ID.
+- Product name: **Tandem** (`APP_NAME` in `shared/src/brand.ts`).
+- Demo target: [tandemvolunteer.web.app](https://tandemvolunteer.web.app). The local Firebase Emulator Suite remains available for offline rehearsal.
 
 ## 2. Status
 

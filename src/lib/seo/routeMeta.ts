@@ -43,7 +43,7 @@ const ROUTE_META: readonly RouteMetaEntry[] = [
     description: "A local nonprofit's mission and upcoming volunteer shifts.",
     noindex: PUBLIC
   },
-  { pattern: "/help", title: "Help Center", description: "Answers about signing up, checking in, hours, and verified letters.", noindex: PUBLIC },
+  { pattern: "/help", title: "Help", description: "Answers about signing up, checking in, hours, and verified letters.", noindex: PUBLIC },
   { pattern: "/help/:slug", title: "Help", description: "An article from the Help Center.", noindex: PUBLIC },
   { pattern: "/verify", title: "Verify a letter", description: "Check that a volunteer hours letter is real and current.", noindex: PUBLIC },
   { pattern: "/verify/:code", title: "Letter verification", description: "Verification result for a volunteer hours letter.", noindex: PRIVATE },

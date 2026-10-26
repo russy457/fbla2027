@@ -4,7 +4,7 @@
 |---|---|
 | Date | 2026-10-07 |
 | Event | FBLA 2026-27 Coding & Programming, "Serving the Community: Nonprofit Volunteer Management" |
-| App | fbla 2027 (constant in `src/lib/brand.ts`) |
+| App | Tandem (constant in `shared/src/brand.ts`) |
 | Required by | `docs/SPEC.md` 10.14 ("Each rubric row to the screen and file that earns it; competitor table") |
 | Status of this doc | The downloaded `Coding-and-Programming.pdf` rating sheet was reviewed on 2026-10-07. All feature paths below exist locally and the design system is being applied. The cloud project remains on Spark, so Functions-dependent flows are available only in the local emulator demo. |
 
@@ -81,7 +81,7 @@ Rubric row names paraphrase the official 2026-27 rating sheet in [`Coding-and-Pr
 
 Competitor cells describe typical, publicly described capabilities as of 2026, stated with hedges on purpose. Plans and features change and differ by tier. **The team must re-check every competitor cell against each vendor's current site before presenting**, and should say "as far as we found" when asked.
 
-| Capability | fbla 2027 | VolunteerHub | SignUpGenius | Golden | Better Impact | Galaxy Digital | Paper sign-in sheets |
+| Capability | Tandem | VolunteerHub | SignUpGenius | Golden | Better Impact | Galaxy Digital | Paper sign-in sheets |
 |---|---|---|---|---|---|---|---|
 | Live 3-device kiosk check-in with rotating code | yes (built, Tier 0) | kiosk check-in typical; rotating code not typical | check-in on some plans (varies); rotating code not typical | mobile/kiosk check-in typical; rotating code not typical | kiosk check-in typical; rotating code not typical | kiosk check-in typical; rotating code not typical | no (anyone can sign any name) |
 | Verified hours letters with public verification page | yes (built, Tier 0) | hour reports typical; public verify page not typical | not typical | hour records typical; public verify page not typical | hour records typical; public verify page not typical | hour records typical; public verify page not typical | no (signature only) |

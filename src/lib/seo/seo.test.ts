@@ -19,14 +19,14 @@ describe("applyHead", () => {
   });
 
   it("writes the title, description, canonical, and Open Graph tags", () => {
-    applyHead(document, { title: "Help Center | fbla 2027", description: "Answers.", url: "https://pitch.example/help", noindex: false });
-    expect(document.title).toBe("Help Center | fbla 2027");
+    applyHead(document, { title: "Help | Tandem", description: "Answers.", url: "https://tandem.example/help", noindex: false });
+    expect(document.title).toBe("Help | Tandem");
     expect(meta('meta[name="description"]')).toBe("Answers.");
-    expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://pitch.example/help");
-    expect(meta('meta[property="og:title"]')).toBe("Help Center | fbla 2027");
-    expect(meta('meta[property="og:url"]')).toBe("https://pitch.example/help");
+    expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://tandem.example/help");
+    expect(meta('meta[property="og:title"]')).toBe("Help | Tandem");
+    expect(meta('meta[property="og:url"]')).toBe("https://tandem.example/help");
     expect(meta('meta[property="og:type"]')).toBe("website");
-    expect(meta('meta[property="og:site_name"]')).toBe("fbla 2027");
+    expect(meta('meta[property="og:site_name"]')).toBe("Tandem");
     expect(meta('meta[name="twitter:card"]')).toBe("summary");
     expect(meta('meta[name="robots"]')).toBeNull();
   });
@@ -54,7 +54,7 @@ describe("applyHead", () => {
 describe("route meta", () => {
   it("has public defaults and marks private screens noindex", () => {
     expect(metaForPath("/").title).toBeNull();
-    expect(metaForPath("/help")).toMatchObject({ title: "Help Center", noindex: false });
+    expect(metaForPath("/help")).toMatchObject({ title: "Help", noindex: false });
     expect(metaForPath("/organizations/common-table")).toMatchObject({ title: "Organization", noindex: false });
     expect(metaForPath("/me/shifts").noindex).toBe(true);
     expect(metaForPath("/impact/hours/new")).toMatchObject({ title: "Impact", noindex: true });
@@ -65,8 +65,8 @@ describe("route meta", () => {
   });
 
   it("builds titles and canonical paths", () => {
-    expect(documentTitle("Help Center")).toBe("Help Center | fbla 2027");
-    expect(documentTitle(null)).toBe("fbla 2027");
+    expect(documentTitle("Help")).toBe("Help | Tandem");
+    expect(documentTitle(null)).toBe("Tandem");
     expect(canonicalPath("/explore")).toBe("/explore");
     expect(canonicalPath("/help/")).toBe("/help");
     expect(canonicalPath("/")).toBe("/");
@@ -75,7 +75,7 @@ describe("route meta", () => {
 
 describe("resolveBaseUrl", () => {
   it("prefers APP_BASE_URL, then the page origin, then the local default", () => {
-    expect(resolveBaseUrl("https://pitch.example/", "http://localhost:63173")).toBe("https://pitch.example");
+    expect(resolveBaseUrl("https://tandem.example/", "http://localhost:63173")).toBe("https://tandem.example");
     expect(resolveBaseUrl("", "http://localhost:63173")).toBe("http://localhost:63173");
     expect(resolveBaseUrl("not a url", "also bad")).toBe(DEFAULT_BASE_URL);
     expect(resolveBaseUrl(undefined, undefined)).toBe(DEFAULT_BASE_URL);
@@ -84,8 +84,8 @@ describe("resolveBaseUrl", () => {
 
 describe("robots.txt and sitemap.xml", () => {
   it("normalizes the base URL and rejects other schemes", () => {
-    expect(normalizeBaseUrl(" https://pitch.example/app/ ")).toBe("https://pitch.example/app");
-    expect(() => normalizeBaseUrl("ftp://pitch.example")).toThrow(/http/);
+    expect(normalizeBaseUrl(" https://tandem.example/app/ ")).toBe("https://tandem.example/app");
+    expect(() => normalizeBaseUrl("ftp://tandem.example")).toThrow(/http/);
   });
 
   it("lists public screens and help articles, never private screens", () => {
@@ -93,20 +93,20 @@ describe("robots.txt and sitemap.xml", () => {
     expect(paths).toContain("/");
     expect(paths).toContain("/explore");
     expect(paths.slice(-2)).toEqual(["/help/kiosk-check-in", "/help/waitlist-and-promotion"]);
-    const xml = buildSitemapXml("https://pitch.example/", paths);
-    expect(xml).toContain("<loc>https://pitch.example/help/kiosk-check-in</loc>");
+    const xml = buildSitemapXml("https://tandem.example/", paths);
+    expect(xml).toContain("<loc>https://tandem.example/help/kiosk-check-in</loc>");
     expect(xml).not.toContain("/me/");
     expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
   });
 
   it("escapes XML special characters in URLs", () => {
-    expect(buildSitemapXml("https://pitch.example", ["/a&b"])).toContain("https://pitch.example/a&amp;b");
+    expect(buildSitemapXml("https://tandem.example", ["/a&b"])).toContain("https://tandem.example/a&amp;b");
   });
 
   it("disallows private areas and points at the sitemap", () => {
-    const robots = buildRobotsTxt("https://pitch.example");
+    const robots = buildRobotsTxt("https://tandem.example");
     for (const path of ROBOTS_DISALLOW) expect(robots).toContain(`Disallow: ${path}`);
-    expect(robots).toContain("Sitemap: https://pitch.example/sitemap.xml");
+    expect(robots).toContain("Sitemap: https://tandem.example/sitemap.xml");
     expect(robots).not.toContain("Disallow: /organizations");
   });
 });
@@ -121,12 +121,12 @@ describe("buildOrganizationJsonLd", () => {
   };
 
   it("describes the organization with public fields only", () => {
-    const data = buildOrganizationJsonLd(org, "https://pitch.example/organizations/common-table");
+    const data = buildOrganizationJsonLd(org, "https://tandem.example/organizations/common-table");
     expect(data).toMatchObject({
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "Common Table Pantry",
-      url: "https://pitch.example/organizations/common-table",
+      url: "https://tandem.example/organizations/common-table",
       sameAs: ["https://common-table.example"],
       knowsAbout: ["Hunger and food"],
       address: { "@type": "PostalAddress", addressLocality: "Example City", postalCode: "78205" }
@@ -135,7 +135,7 @@ describe("buildOrganizationJsonLd", () => {
   });
 
   it("drops unsafe websites and empty cause lists", () => {
-    const data = buildOrganizationJsonLd({ ...org, website: "javascript:alert(1)", causeLabels: [] }, "https://pitch.example/o");
+    const data = buildOrganizationJsonLd({ ...org, website: "javascript:alert(1)", causeLabels: [] }, "https://tandem.example/o");
     expect(data).not.toHaveProperty("sameAs");
     expect(data).not.toHaveProperty("knowsAbout");
     expect(buildOrganizationJsonLd({ ...org, website: "not a url" }, "u")).not.toHaveProperty("sameAs");

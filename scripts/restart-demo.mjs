@@ -44,7 +44,7 @@ try {
   const foreign = [...found].filter(([pid]) => !belongsToProject(cwdFor(pid)));
   if (foreign.length > 0) {
     for (const [pid, ports] of foreign) console.error(`demo:restart: port ${ports.join(", ")} belongs to PID ${pid} outside this project.`);
-    console.error("Close that app first; this command only stops processes from the fbla 2027 directory.");
+    console.error("Close that app first; this command only stops processes from the Tandem project directory.");
     process.exit(1);
   }
 

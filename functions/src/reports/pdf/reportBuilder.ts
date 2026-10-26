@@ -6,15 +6,14 @@
  * the page, ensureSpace/addPage for page breaks, section headings, paragraphs,
  * stat and key-value grids, and "Page X of Y" footers written last through
  * buffered pages. Changes from the port: Trove strings removed (product name
- * "fbla 2027"), no image loader, the generation time comes from the request
+ * "Tandem"), no image loader, the generation time comes from the request
  * clock (SPEC#clock), colors come from a preset theme (D16), and two new
  * helpers draw a table and a server-side bar chart (SPEC 8.6).
  * Fonts are the PDF standard Helvetica family (no font files to embed), the
  * same choice as the letter renderer.
  */
 import PDFDocument from "pdfkit";
-import { formatLongDate, type ReportTheme } from "@fbla/shared";
-import { LETTER_PRODUCT_NAME } from "../../letters/renderLetterPdf";
+import { APP_NAME, formatLongDate, type ReportTheme } from "@fbla/shared";
 import { mixHexColor, normalizeHexColor } from "./helpers/colorUtils";
 import { CONTENT_BOTTOM, CONTENT_TOP, CONTENT_WIDTH, PAGE_HEIGHT, PAGE_MARGIN, PAGE_WIDTH, SECTION_GAP } from "./helpers/layoutConstants";
 
@@ -72,7 +71,7 @@ export class PdfReportBuilder {
       size: "LETTER",
       margin: PAGE_MARGIN,
       bufferPages: true,
-      info: { Title: options.title, Author: LETTER_PRODUCT_NAME, Subject: `${LETTER_PRODUCT_NAME} report` }
+      info: { Title: options.title, Author: APP_NAME, Subject: `${APP_NAME} report` }
     });
     this.doc.on("data", (chunk: Buffer) => this.chunks.push(chunk));
     this.drawPageChrome();
@@ -220,7 +219,7 @@ export class PdfReportBuilder {
 
   private drawPageChrome(): void {
     this.doc.rect(0, 0, PAGE_WIDTH, 14).fill(this.accent);
-    this.doc.font("Helvetica-Bold").fontSize(10).fillColor(INK).text(LETTER_PRODUCT_NAME, PAGE_MARGIN, 30, { width: 200, lineBreak: false });
+    this.doc.font("Helvetica-Bold").fontSize(10).fillColor(INK).text(APP_NAME, PAGE_MARGIN, 30, { width: 200, lineBreak: false });
     this.doc.font("Helvetica").fontSize(9).fillColor(MUTED).text(this.options.title, PAGE_MARGIN, 44, { width: CONTENT_WIDTH, lineBreak: false, ellipsis: true });
   }
 

@@ -17,6 +17,7 @@
     }
   ],
   "hosting": {
+    "target": "tandem",
     "public": "dist",
     "ignore": [
       "firebase.json",

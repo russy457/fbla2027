@@ -72,7 +72,7 @@ describe("FeaturedCollections", () => {
     expect(screen.getByRole("heading", { name: "Collections" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Good first shifts" })).toHaveAttribute("href", "/collections/c1");
     expect(await screen.findByText(/1 shift and 1 organization · by Common Table Pantry/)).toBeInTheDocument();
-    expect(screen.getByText(/Empty · by the fbla 2027 team/)).toBeInTheDocument();
+    expect(screen.getByText(/Empty · by the Tandem team/)).toBeInTheDocument();
   });
 });
 

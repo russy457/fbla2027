@@ -1,4 +1,4 @@
-# fbla 2027 UI design spec
+# Tandem UI design spec
 
 Updated 2026-10-20 from the design interview, `inspopic.jpg`, and a rendered UX review. [SPEC.md](SPEC.md) remains the source of truth for routes, roles, data, and workflow behavior. The visual system can change without changing those rules. [UX_RESEARCH.md](UX_RESEARCH.md) records the research and review method; [the October review](reviews/2026-10-20/README.md) records screenshots and fixes.
 
@@ -14,7 +14,7 @@ Design feasibility check: impact 5, context fit 4, implementation 5, performance
 
 ## Fixed decisions
 
-- Keep the name **fbla 2027** as text. Do not make a logo yet.
+- Keep the name **Tandem** as text. Do not make a logo yet.
 - Do not name or imply one home city. Demo organizations are fictional.
 - Keep existing functionality. `/` is a distinct landing page and `/explore` is the shift finder. Restructure markup and shared components when it improves the design.
 - Write short, unpretentious copy. No em dashes, invented impact numbers, hype, or robotic phrasing.

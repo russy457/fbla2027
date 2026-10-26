@@ -6,7 +6,7 @@
 | Date | 2026-10-06 |
 | Competition | FBLA 2026-27 Coding & Programming, "Serving the Community: Nonprofit Volunteer Management" |
 | Build inputs | this file, TODOS.md (backlog), docs/PORT_LEDGER.md (port dispositions). The PORT_PLAN.md review record is history only. |
-| Product name | placeholder constant in `src/lib/brand.ts` |
+| Product name | Tandem (`APP_NAME` in `shared/src/brand.ts`) |
 
 Code comments and tests cite this file by anchor, for example `SPEC#fn-signup` or `SPEC#rules-signups`.
 
@@ -1296,7 +1296,7 @@ All shift times render in the org zone with a zone label (`shared/format.ts`). T
 
 ### 10.2 Emulator config
 
-Hand-written `firebase.json` (no `.firebaserc`): emulator ports auth 9099, firestore 8080, functions 5001, storage 9199, ui 4000; Vite on 5173; rules files `firestore.rules`, `storage.rules`; indexes `firestore.indexes.json`; functions source = the generated deploy directory; Hosting public dir `dist` with an SPA rewrite to `/index.html` and security headers (CSP allowing self, Firebase, Turnstile, Mapbox, Google Fonts; HSTS; `X-Content-Type-Options: nosniff`; `Referrer-Policy: strict-origin-when-cross-origin`; `Permissions-Policy: camera=(self), microphone=(), geolocation=(self)`). Every script passes `--project demo-fbla2027` unless deploying.
+Hand-written `firebase.json` and `.firebaserc`: emulator ports auth 9099, firestore 8080, functions 5001, storage 9199, ui 4000; Vite on 5173; rules files `firestore.rules`, `storage.rules`; indexes `firestore.indexes.json`; functions source = the generated deploy directory; Hosting public dir `dist` with an SPA rewrite to `/index.html` and security headers (CSP allowing self, Firebase, Turnstile, Mapbox, Google Fonts; HSTS; `X-Content-Type-Options: nosniff`; `Referrer-Policy: strict-origin-when-cross-origin`; `Permissions-Policy: camera=(self), microphone=(), geolocation=(self)`). Every script passes `--project demo-fbla2027` unless deploying.
 
 <a id="scripts"></a>
 ### 10.3 Scripts (X7)

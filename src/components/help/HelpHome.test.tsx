@@ -34,7 +34,7 @@ const typeQuery = (value: string) =>
 describe("Help Center home", () => {
   it("shows topics grouped by audience before any search", () => {
     renderHelp();
-    expect(screen.getByRole("heading", { level: 1, name: "Help Center" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Help" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Volunteering" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Running shifts" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("");

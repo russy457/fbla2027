@@ -13,7 +13,7 @@ const local = (iso: string, zone: string): number => fromZonedTime(iso, zone).ge
 const base: SignupIcsInput = {
   signupId: "inst1_vol1",
   appHost: "fbla2027.example",
-  productName: "fbla 2027",
+  productName: "Tandem",
   title: "Sort food, pack boxes; stack shelves",
   orgName: "Common Table Pantry",
   description: "Bring closed-toe shoes.",

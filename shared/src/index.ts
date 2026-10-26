@@ -5,6 +5,7 @@
  * package can be reorganized without breaking callers.
  */
 export * from "./clock";
+export * from "./brand";
 export * from "./config";
 export * from "./errors";
 export * from "./time";

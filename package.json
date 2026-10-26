@@ -1,9 +1,9 @@
 {
-  "name": "fbla2027",
+  "name": "tandem",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Volunteer management platform for nonprofits (FBLA 2026-27 Coding & Programming).",
+  "description": "Tandem volunteer management platform for nonprofits (FBLA 2026-27 Coding & Programming).",
   "license": "MIT",
   "engines": {
     "node": ">=22 <23"
@@ -18,8 +18,8 @@
     "build": "tsc -b && vite build",
     "build:hosting": "cross-env VITE_HOSTING_PREVIEW=true VITE_DEMO_MODE=false VITE_USE_EMULATORS=false VITE_FUNCTIONS_EMULATOR=false VITE_STORAGE_EMULATOR=false npm run build",
     "build:production": "cross-env VITE_HOSTING_PREVIEW=false VITE_USE_EMULATORS=false VITE_FUNCTIONS_EMULATOR=false VITE_STORAGE_EMULATOR=false npm run build",
-    "deploy:hosting": "npm run build:hosting && firebase deploy --only hosting --project fbla2027-ethanteng",
-    "deploy:production": "npm run build:production && firebase deploy --only hosting --project fbla2027-ethanteng",
+    "deploy:hosting": "npm run build:hosting && firebase deploy --only hosting:tandem --project fbla2027-ethanteng",
+    "deploy:production": "npm run build:production && firebase deploy --only hosting:tandem --project fbla2027-ethanteng",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run --coverage",

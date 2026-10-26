@@ -14,12 +14,10 @@
  */
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
-import { formatVerifyCode, formatYmd, minutesToHours, type PerOrgMinutes } from "@fbla/shared";
+import { APP_NAME, formatVerifyCode, formatYmd, minutesToHours, type PerOrgMinutes } from "@fbla/shared";
 import { mixHexColor, normalizeHexColor } from "../reports/pdf/helpers/colorUtils";
 import { CONTENT_WIDTH, PAGE_MARGIN, PAGE_WIDTH, SECTION_GAP } from "../reports/pdf/helpers/layoutConstants";
 
-/** Mirrors APP_NAME in src/lib/brand.ts (functions cannot import the web app). */
-export const LETTER_PRODUCT_NAME = "fbla 2027";
 /** Bump when the layout changes; stored on each letter as rendererVersion. */
 export const LETTER_RENDERER_VERSION = "letter-v1";
 
@@ -51,7 +49,7 @@ const hoursLabel = (minutes: number): string => minutesToHours(minutes).toFixed(
 const drawHeader = (doc: PDFKit.PDFDocument, input: LetterPdfInput): number => {
   doc.rect(0, 0, PAGE_WIDTH, 10).fill(ACCENT);
   const top = PAGE_MARGIN;
-  doc.font("Helvetica-Bold").fontSize(18).fillColor(INK).text(LETTER_PRODUCT_NAME, PAGE_MARGIN, top);
+  doc.font("Helvetica-Bold").fontSize(18).fillColor(INK).text(APP_NAME, PAGE_MARGIN, top);
   doc.font("Helvetica-Bold").fontSize(14).fillColor(ACCENT).text("Verified Volunteer Hours", PAGE_MARGIN, top + 2, { width: CONTENT_WIDTH, align: "right" });
   doc.font("Helvetica").fontSize(10).fillColor(MUTED).text(`Issued ${input.issuedAtLabel}`, PAGE_MARGIN, top + 28);
   doc.text(`Letter code ${formatVerifyCode(input.verifyCode)}`, PAGE_MARGIN, top + 28, { width: CONTENT_WIDTH, align: "right" });
@@ -113,7 +111,7 @@ export const renderLetterPdf = async (input: LetterPdfInput): Promise<Buffer> =>
   const doc = new PDFDocument({
     size: "LETTER",
     margin: PAGE_MARGIN,
-    info: { Title: `${LETTER_PRODUCT_NAME} verified volunteer hours`, Author: LETTER_PRODUCT_NAME, Subject: "Verified volunteer hours letter" }
+    info: { Title: `${APP_NAME} verified volunteer hours`, Author: APP_NAME, Subject: "Verified volunteer hours letter" }
   });
   const chunks: Buffer[] = [];
   const finished = new Promise<Buffer>((resolve, reject) => {

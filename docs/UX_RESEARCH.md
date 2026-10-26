@@ -1,6 +1,6 @@
 # UX research and design review playbook
 
-Researched 2026-10-20. This is a durable working guide for fbla 2027, not a claim that every current screen passes. [SPEC.md](SPEC.md) defines behavior; [DESIGN.md](DESIGN.md) defines the chosen visual direction. User feedback takes priority when either guide conflicts with it.
+Researched 2026-10-20. This is a durable working guide for Tandem, not a claim that every current screen passes. [SPEC.md](SPEC.md) defines behavior; [DESIGN.md](DESIGN.md) defines the chosen visual direction. User feedback takes priority when either guide conflicts with it.
 
 ## Product thesis
 

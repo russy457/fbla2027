@@ -1,6 +1,6 @@
 # Demo Runbook
 
-How the team sets up, runs, and recovers the demo. The full app is hosted on Firebase at https://fbla2027-ethanteng.web.app with Blaze, Cloud Functions, Firestore, Auth, and Storage. The Firebase Emulator Suite remains the offline rehearsal option. Before the event, rehearse with separate browser profiles for coordinator, kiosk, and volunteer roles and confirm the presentation setup meets current event rules.
+How the team sets up, runs, and recovers the demo. The full app is hosted on Firebase at https://tandemvolunteer.web.app with Blaze, Cloud Functions, Firestore, Auth, and Storage. The Firebase Emulator Suite remains the offline rehearsal option. Before the event, rehearse with separate browser profiles for coordinator, kiosk, and volunteer roles and confirm the presentation setup meets current event rules.
 
 | | |
 |---|---|
@@ -21,7 +21,7 @@ This local setup covers the application's core workflows without the network. It
 
 ### Live presentation
 
-Open https://fbla2027-ethanteng.web.app and sign in using a demo email and its corresponding private password in `.cloud-demo-accounts.local`. The Firebase console shows live signups; a test signup and shift seat-count update have been verified. The hosted site needs no terminal. The local `npm run demo` flow stays available for an offline rehearsal.
+Open https://tandemvolunteer.web.app and sign in using a demo email and its corresponding private password in `.cloud-demo-accounts.local`. Demo volunteer sign-in was verified on the new domain. A test signup and shift seat-count update were verified on the original Hosting site; repeat onboarding on the new domain after its Turnstile hostname is authorized. The hosted site needs no terminal. The local `npm run demo` flow stays available for an offline rehearsal.
 
 The cloud seed is a one-time operation: `npm run seed:cloud -- --yes` refuses to overwrite a nonempty Firestore database or Auth user list. Never share or commit `.cloud-demo-accounts.local`. After an admin demo reset, use its `resetPassword` value for all four accounts.
 
@@ -29,7 +29,7 @@ The cloud seed is a one-time operation: `npm run seed:cloud -- --yes` refuses to
 
 ## 1. First deploy
 
-The full deployment is active. Every command below names the project explicitly; the repo has no `.firebaserc` on purpose.
+The full deployment is active. Every command below names the project explicitly. `.firebaserc` maps the `tandem` Hosting target to the `tandemvolunteer` site.
 
 ### 1.1 Project setup (Firebase console)
 
@@ -37,9 +37,9 @@ The full deployment is active. Every command below names the project explicitly;
 2. **Authentication**: enable Email/Password. This part is available on Spark and does not need billing.
 3. **Firestore**: the default Native database in `us-central1`, its rules, and indexes are already deployed.
 4. **Storage**: the default bucket is `fbla2027-ethanteng.firebasestorage.app`.
-5. **Hosting**: the default site already exists at `https://fbla2027-ethanteng.web.app`; it is `APP_BASE_URL` below.
+5. **Hosting**: the tandem site exists at `https://tandemvolunteer.web.app`; it is `APP_BASE_URL` below.
 6. **App Check**: this optional extra gate is currently off; register the web app with reCAPTCHA Enterprise before enabling `APPCHECK_ENFORCE`.
-7. **Cloudflare Turnstile**: the live widget and server secret are configured. Keep the secret in Firebase Secret Manager.
+7. **Cloudflare Turnstile**: the live widget and server secret are configured. Add `tandemvolunteer.web.app` to the current widget's Hostname Management list in Cloudflare before live onboarding; error `110200` means the domain is not authorized. Keep the secret in Firebase Secret Manager.
 8. Optional **Mapbox** map: create a public `pk.` token whose URL restrictions list only the hosting domains. Never create or paste an `sk.` token anywhere in this repo. Leave it out to hide the map toggle.
 9. Revoke the old Trove Mapbox `sk.` token, rotate the old OpenRouter key and Turnstile secret, and restrict or retire the old Firebase project (SPEC 1.5).
 
@@ -56,7 +56,7 @@ The full deployment is active. Every command below names the project explicitly;
 | `VITE_TURNSTILE_ENABLED` | `true` on the hosted app |
 | `VITE_APPCHECK_SITE_KEY` | blank until App Check is registered and enabled |
 | `VITE_MAPBOX_TOKEN` | blank, or the URL-restricted `pk.` token |
-| `APP_BASE_URL` | `https://<project>.web.app` (canonical URLs, `robots.txt`, `sitemap.xml`; the build warns when it is missing) |
+| `APP_BASE_URL` | `https://tandemvolunteer.web.app` (canonical URLs, `robots.txt`, `sitemap.xml`; the build warns when it is missing) |
 
 **Functions** (read on the server). The Functions source directory is the generated `functions-dist/` (see `firebase.json`), so put them in `functions-dist/.env.<projectId>`. That file is gitignored with the rest of `functions-dist/` and survives `npm run build:functions` (the build only replaces `functions-dist/lib`).
 
@@ -64,7 +64,7 @@ The full deployment is active. Every command below names the project explicitly;
 |---|---|
 | `DEMO_MODE` | `true` on the competition project |
 | `ALLOW_DEMO_CLOCK` | `true` (the demo clock is otherwise allowed only on `demo-` projects) |
-| `APP_BASE_URL` | `https://<project>.web.app` (kiosk QR links, letter verify links) |
+| `APP_BASE_URL` | `https://tandemvolunteer.web.app` (kiosk QR links, letter verify links) |
 | `APPCHECK_ENFORCE` | `false` until App Check is registered and enabled |
 | `TURNSTILE_ENABLED` | `true` |
 | `AI_ENABLED` | `true` to let the help assistant call the model; `false` keeps the top-3-articles fallback |
@@ -91,7 +91,7 @@ Run from a clean checkout of the commit being shown, after `npm ci` and a green 
 npm run build:production                        # web app into dist/ (reads .env.production.local)
 npx firebase deploy --only firestore:rules,firestore:indexes,storage --project <projectId>
 npx firebase deploy --only functions --project <projectId>     # predeploy runs npm run build:functions
-npx firebase deploy --only hosting --project <projectId>
+npx firebase deploy --only hosting:tandem --project <projectId>
 ```
 
 Rules and indexes go first so the new Functions never meet an old rule set. Index builds can take several minutes; the Firestore console shows progress.
@@ -116,7 +116,7 @@ The seed creates the four demo accounts (SPEC 10.7) and sets the admin claim, bu
 1. `https://<region>-<projectId>.cloudfunctions.net/health` returns ok.
 2. On a laptop: sign in as the admin, open `/admin`, press **Run due jobs**, and see a new row in the job runs panel.
 3. On all three devices: run the demo script in section 3 end to end.
-4. Open `https://<project>.web.app/robots.txt` and `/sitemap.xml`; both name the hosting URL, not localhost.
+4. Open `https://tandemvolunteer.web.app/robots.txt` and `/sitemap.xml`; both name the hosting URL, not localhost.
 
 ### 1.6 Rollback
 
