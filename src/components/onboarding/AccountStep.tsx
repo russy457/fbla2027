@@ -1,13 +1,14 @@
 /**
  * AccountStep.tsx
- * Onboarding step 2 (D10): create the account with email and password. Only
- * shown to people who are signed out; it runs after the 13+ check, so no
- * account is ever created for someone under 13 (G18).
+ * Onboarding step 2 (D10): create the account with Google or with email and
+ * password. Only shown to people who are signed out; it runs after the 13+
+ * check, so no account is ever created for someone under 13 (G18).
  */
 import { useState, type ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { TextField } from "@/components/ui/TextField";
 import { AuthFormError, createAccount } from "@/lib/authClient";
 import { createAccountFormSchema, type CreateAccountForm } from "@/lib/validation/formSchemas";
@@ -50,6 +51,8 @@ export const AccountStep = ({ stepNumber, stepCount, onBack, onCreated, loginPat
       submitLabel="Create account"
       isSubmitting={isSubmitting}
     >
+      <GoogleSignInButton onSignedIn={() => onCreated()} />
+      <AuthDivider />
       <TextField label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register("email")} />
       <TextField
         label="Password"
