@@ -2,7 +2,7 @@
 
 A volunteer management platform for nonprofits, built for the FBLA 2026-27 Coding & Programming event ("Serving the Community: Nonprofit Volunteer Management"). Volunteers find shifts and sign up; coordinators run a live check-in kiosk at the event; hours are logged automatically and turned into verified service-hour letters anyone can check at `/verify`. The product name lives in `src/lib/brand.ts`.
 
-**Source of truth:** [`docs/SPEC.md`](docs/SPEC.md) defines the behavior, data model, rules, and screens. This README covers setup only.
+**Product features:** [`docs/FEATURES.md`](docs/FEATURES.md) inventories what Tandem currently does, by role and route. [`docs/SPEC.md`](docs/SPEC.md) defines the detailed behavior, data model, rules, and screens. This README covers setup only.
 
 **More docs:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (how the app, `shared/`, Functions, and rules fit together; adding an op or a screen), [`docs/DEMO.md`](docs/DEMO.md) (deployment and competition-day runbook), and [`docs/FIREBASE_STATUS.md`](docs/FIREBASE_STATUS.md) (the new cloud project's current setup). [`docs/RUBRIC_MAP.md`](docs/RUBRIC_MAP.md) maps rubric rows to screens and files.
 

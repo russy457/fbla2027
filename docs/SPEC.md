@@ -10,6 +10,8 @@
 
 Code comments and tests cite this file by anchor, for example `SPEC#fn-signup` or `SPEC#rules-signups`.
 
+For an inventory of features currently in the app, see [FEATURES.md](FEATURES.md). This document also records earlier build tiers and some deferred work; a tier label alone is not a current implementation status.
+
 ## Table of contents
 
 1. [Product summary and scope](#scope)
