@@ -70,11 +70,11 @@ describe("coordinator.updateOrganization", () => {
       isMinor: true, frozen: false, refreshedAt: tsAt(BASE_MS), createdAt: tsAt(BASE_MS), updatedAt: tsAt(BASE_MS)
     } as unknown as SignupContactDoc);
 
-    const result = await call("coordinator", "updateOrganization", { orgId: "orgA", action: "update", patch: { name: "Common Table Pantry" } }, user("coordA"));
+    const result = await call("coordinator", "updateOrganization", { orgId: "orgA", action: "update", patch: { name: "Common Table Community Pantry" } }, user("coordA"));
     expect(result).toEqual({ orgId: "orgA", verified: false, archived: false, deleted: false });
-    expect(await orgDoc("orgA")).toMatchObject({ name: "Common Table Pantry", verified: false, verifiedBy: null });
-    expect((await db.collection(COLLECTIONS.instances).doc("inst1").get()).data()).toMatchObject({ orgName: "Common Table Pantry", orgVerified: false });
-    expect((await db.collection(COLLECTIONS.opportunities).doc("opp1").get()).data()).toMatchObject({ orgName: "Common Table Pantry", orgVerified: false });
+    expect(await orgDoc("orgA")).toMatchObject({ name: "Common Table Community Pantry", verified: false, verifiedBy: null });
+    expect((await db.collection(COLLECTIONS.instances).doc("inst1").get()).data()).toMatchObject({ orgName: "Common Table Community Pantry", orgVerified: false });
+    expect((await db.collection(COLLECTIONS.opportunities).doc("opp1").get()).data()).toMatchObject({ orgName: "Common Table Community Pantry", orgVerified: false });
     const contact = (await db.collection(COLLECTIONS.signupContacts).doc("inst1_minor").get()).data() as SignupContactDoc;
     expect(contact.hidden).toBe(true);
     expect(contact.fullName).toBeUndefined();
