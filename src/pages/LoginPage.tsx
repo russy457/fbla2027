@@ -1,12 +1,14 @@
 /**
  * LoginPage.tsx
- * Route "/login" (SPEC#screen-inventory: Login). Email and password, a link
+ * Route "/login" (SPEC#screen-inventory: Login). Email and password or
+ * Google (a new Google account goes to onboarding, birth date first), a link
  * to create an account (onboarding starts with the birth date, D10), and in
  * demo mode the "Sign in as..." switcher (X5). After sign-in it returns to
  * ?next= (same-app paths only) or Explore.
  */
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { DemoRoleSwitcher } from "@/components/auth/DemoRoleSwitcher";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -28,16 +30,24 @@ const LoginPage = (): ReactElement => {
   const navigate = useNavigate();
   const session = useSession();
   const next = safeNextPath(params.get("next"));
+  // Held while the Google window is open so a new account reaches onboarding instead of ?next=.
+  const [isGooglePending, setIsGooglePending] = useState(false);
 
-  if (session.status === "user") return <Navigate to={next} replace />;
+  if (session.status === "user" && !isGooglePending) return <Navigate to={next} replace />;
 
   const goNext = (): void => navigate(next, { replace: true });
+  const afterGoogle = ({ isNewUser }: { isNewUser: boolean }): void => {
+    if (isNewUser) navigate(`/onboarding?next=${encodeURIComponent(next)}`, { replace: true });
+    else goNext();
+  };
 
   return (
     <div className="flex max-w-5xl flex-col gap-10">
       <PageHeader title="Sign in">Sign in to sign up for shifts, check in, and get your hours verified.</PageHeader>
       <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex max-w-md flex-col gap-6">
+        <GoogleSignInButton onSignedIn={afterGoogle} onPendingChange={setIsGooglePending} />
+        <AuthDivider />
         <SignInForm onSignedIn={goNext} />
         <p className="text-sm text-fg-muted">
           New here?{" "}
