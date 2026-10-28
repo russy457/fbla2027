@@ -120,12 +120,12 @@ const zonePart = (timeZone: string, ms: number, style: "longOffset" | "short"): 
 
 /**
  * The zone's UTC offset at an instant, in ms, straight from Intl ("GMT-06:00",
- * or "GMT" for zero). date-fns-tz offset helpers work from wall times and can
+ * "GMT+00:00", or "GMT" for zero). date-fns-tz offset helpers work from wall times and can
  * be an hour off right after a spring-forward change, so they are not used.
  */
 const offsetAt = (timeZone: string, ms: number): number => {
   const text = zonePart(timeZone, ms, "longOffset");
-  if (text === "GMT") return 0;
+  // Number("") is zero, so both forms of Intl's zero offset parse identically.
   const magnitude = (Number(text.slice(4, 6)) * 60 + Number(text.slice(7, 9))) * MINUTE_MS;
   return text[3] === "-" ? -magnitude : magnitude;
 };

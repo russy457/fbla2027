@@ -18,6 +18,7 @@ describe("schedule conflicts", () => {
   });
 
   it("allows touching edges, cancelled bookings, and retries for the same shift", () => {
+    expect(findScheduleConflict(target, [])).toBeNull();
     expect(findScheduleConflict(target, [booked(0, 100), booked(200, 300)])).toBeNull();
     expect(findScheduleConflict(target, [booked(100, 200, "cancelled")])).toBeNull();
     expect(findScheduleConflict(target, [booked(100, 200, "confirmed", "target")])).toBeNull();

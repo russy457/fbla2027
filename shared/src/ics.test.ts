@@ -112,6 +112,13 @@ describe("time zone details", () => {
     expect(vtz).toContain("TZOFFSETTO:+0100");
   });
 
+  it("keeps UTC events at UTC when Intl reports a zero offset", () => {
+    const startMs = Date.UTC(2027, 0, 15, 9);
+    const lines = unfold(buildSignupIcs({ ...base, timeZone: "Etc/UTC", startMs, endMs: startMs + 60 * 60_000 }));
+    expect(lines).toContain("DTSTART;TZID=Etc/UTC:20270115T090000");
+    expect(lines).toContain("TZOFFSETTO:+0000");
+  });
+
   it("formats offsets with sign, hours, and minutes", () => {
     expect(formatIcsOffset(-6 * 3_600_000)).toBe("-0600");
     expect(formatIcsOffset(5.5 * 3_600_000)).toBe("+0530");
