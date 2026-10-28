@@ -19,10 +19,13 @@ import {
   ACTIVE_SIGNUP_STATUSES,
   AppError,
   COLLECTIONS,
+  MAX_SHIFT_HOURS,
+  PATHS,
   ageOn,
   assertTransition,
   decideSeat,
   displayNameFor,
+  findScheduleConflict,
   signupIdFor,
   waitlistPosition,
   type InstanceDoc,
@@ -66,6 +69,7 @@ export const signupForInstance = (db: Firestore, { instanceId, uid, profile, now
   const instanceRef = db.collection(COLLECTIONS.instances).doc(instanceId);
   const signupRef = db.collection(COLLECTIONS.signups).doc(signupId);
   const contactRef = db.collection(COLLECTIONS.signupContacts).doc(signupId);
+  const scheduleGuardRef = db.doc(PATHS.scheduleGuard(uid));
 
   return runTx(db, async (tx) => {
     const instance = readDoc<InstanceDoc>(await tx.get(instanceRef));
@@ -101,6 +105,25 @@ export const signupForInstance = (db: Firestore, { instanceId, uid, profile, now
     const status = seat.kind;
     assertTransition(null, status, "signup");
 
+    // The guard makes two bookings by the same person contend even when the
+    // shifts are different documents. Read it and the bounded schedule before
+    // any write. Shifts are at most 12 hours, so an earlier overlapping shift
+    // must start within 12 hours of this one's start.
+    const startMs = msOf(instance.start);
+    const endMs = msOf(instance.end);
+    const guard = readDoc<{ version: number }>(await tx.get(scheduleGuardRef));
+    const nearby = await tx.get(
+      db.collection(COLLECTIONS.signups)
+        .where("uid", "==", uid)
+        .where("instanceStart", ">=", ts(startMs - MAX_SHIFT_HOURS * 60 * 60 * 1000))
+        .where("instanceStart", "<", instance.end)
+    );
+    const conflict = findScheduleConflict(
+      { instanceId, startMs, endMs },
+      nearby.docs.map((doc) => doc.data() as SignupDoc)
+    );
+    if (conflict !== null) throw new AppError("SHIFT_TIME_CONFLICT");
+
     const displayName = displayNameFor(profile.firstName, profile.lastName);
     const seq = status === "waitlisted" ? instance.waitlistSeq : null;
     tx.update(
@@ -123,6 +146,7 @@ export const signupForInstance = (db: Firestore, { instanceId, uid, profile, now
       })
     );
     tx.set(contactRef, newContactDoc(instanceId, instance, uid, profile, isMinor, nowMs));
+    tx.set(scheduleGuardRef, { version: (guard?.version ?? 0) + 1, updatedAt: ts(nowMs) });
     // Step 7: the org now has volunteer history, so it can be archived but not deleted.
     if (org !== null && !org.hasActivity) tx.update(orgRef, { hasActivity: true, updatedAt: ts(nowMs) });
 

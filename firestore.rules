@@ -143,6 +143,8 @@ service cloud.firestore {
                .hasOnly(['textSize', 'contrast', 'reducedMotion', 'notificationPrefs', 'milestonesSeen'])
           && validPreferences(request.resource.data);
       }
+      // Only Functions may read or update the booking guard.
+      match /private/scheduleGuard { allow read, write: if false; }
     }
 
     function validPreferences(data) {

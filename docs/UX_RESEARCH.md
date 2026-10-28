@@ -103,3 +103,7 @@ The [October 20 rendered review](reviews/2026-10-20/README.md) tested these init
 ### Current verification status
 
 The [home and task scene review](reviews/2026-10-20-home-and-scenes/README.md) adds before and after browser evidence at 375px, 768px, and 1440px. The October reviews checked 150% text, high contrast, and automated accessibility. They did not include real-user sessions or field performance data. No formal gstack or AI-slop score is assigned because the gstack CLI is unavailable here and the audit did not cover every route.
+
+### 2026-10-28 schedule decision
+
+A code and rubric review found that the signup flow allowed one volunteer to book overlapping shifts. This is a product risk, not a user research finding. Explore and the shift page now show a direct link to the existing commitment when the live signup list reveals a clash. The server also checks the schedule in the signup transaction and serializes simultaneous bookings for one volunteer. Waitlist places count because they may be promoted into confirmed spots. Adjacent shifts remain available when one ends exactly as the next begins. A future usability session should check whether volunteers understand that a waitlist place holds time on their schedule.

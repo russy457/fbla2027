@@ -12,7 +12,7 @@ import { buttonClassName } from "@/components/ui/buttonStyles";
 import { useActiveOpportunities } from "@/hooks/useInbox";
 import { useNow } from "@/hooks/useNow";
 import { useUpcomingInstances } from "@/hooks/useShiftData";
-import { usePrivateProfile } from "@/hooks/useVolunteerData";
+import { useMySignups, usePrivateProfile } from "@/hooks/useVolunteerData";
 import { recommendShifts } from "@/lib/explore/recommendations";
 
 interface MatchesStepProps {
@@ -23,16 +23,17 @@ interface MatchesStepProps {
 export const MatchesStep = ({ uid, onContinue }: MatchesStepProps): ReactElement => {
   const nowMs = useNow(60_000);
   const profile = usePrivateProfile(uid);
+  const signups = useMySignups(uid);
   const instances = useUpcomingInstances(nowMs);
   const opportunities = useActiveOpportunities();
   const picks = useMemo(() => {
     if (!profile.data) return [];
     const byId = new Map((opportunities.data ?? []).map((opportunity) => [opportunity.id, opportunity]));
     const rows = (instances.data ?? []).map((instance) => ({ instance, opportunity: byId.get(instance.opportunityId) ?? null }));
-    return recommendShifts(rows, profile.data, new Set(), nowMs);
-  }, [profile.data, instances.data, opportunities.data, nowMs]);
+    return recommendShifts(rows, profile.data, new Set((signups.data ?? []).map((signup) => signup.instanceId)), nowMs, signups.data ?? []);
+  }, [profile.data, instances.data, opportunities.data, signups.data, nowMs]);
 
-  if (profile.isLoading || instances.isLoading || opportunities.isLoading) return <LoadingState label="Finding shifts for you" />;
+  if (profile.isLoading || instances.isLoading || opportunities.isLoading || signups.isLoading) return <LoadingState label="Finding shifts for you" />;
 
   return (
     <div className="flex flex-col gap-6">

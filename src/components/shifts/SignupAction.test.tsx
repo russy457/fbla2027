@@ -82,6 +82,14 @@ describe("SignupAction", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("This shift and its waitlist are full.");
   });
 
+  it("explains a schedule clash and links to the other shift", () => {
+    const other = makeSignup({ instanceId: "other-shift" });
+    renderAction({ commitments: [other] });
+    expect(screen.getByRole("button", { name: /Time conflict/ })).toBeDisabled();
+    expect(screen.getByText("You have another shift at this time.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View it" })).toHaveAttribute("href", "/opportunity/other-shift");
+  });
+
   it("sends signed-out visitors to sign in instead of calling the op", async () => {
     renderAction({ signedIn: false, birthDate: null });
     fireEvent.click(screen.getByRole("button", { name: /Sign up/ }));

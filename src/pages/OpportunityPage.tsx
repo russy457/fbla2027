@@ -88,6 +88,7 @@ const OpportunityPage = (): ReactElement => {
         <SignupAction
           instance={shift}
           signup={mySignup}
+          commitments={signups.data ?? []}
           birthDate={profile.data?.birthDate ?? null}
           signedIn={user !== null}
           nowMs={nowMs}

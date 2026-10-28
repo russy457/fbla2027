@@ -77,8 +77,8 @@ const ExplorePage = (): ReactElement => {
     nowMs
   );
   const picks = useMemo(
-    () => (me === null ? [] : recommendShifts(rows, me, new Set(signupByInstance.keys()), nowMs)),
-    [rows, me, signupByInstance, nowMs]
+    () => (me === null ? [] : recommendShifts(rows, me, new Set(signupByInstance.keys()), nowMs, signups.data ?? [])),
+    [rows, me, signupByInstance, signups.data, nowMs]
   );
   const visibleCount = days.reduce((sum, day) => sum + day.instances.length, 0);
   // Tier 2 lane C: map markers for the organizations behind the filtered list.
@@ -118,6 +118,7 @@ const ExplorePage = (): ReactElement => {
               days={days}
               unfilteredCount={rows.length}
               signups={signupByInstance}
+              commitments={signups.data ?? []}
               birthDate={me?.birthDate ?? null}
               signedIn={user !== null}
               nowMs={nowMs}

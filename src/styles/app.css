@@ -403,6 +403,7 @@
 .schedule-row__action .bg-accent:hover { background: var(--accent-100); }
 .schedule-row__action .text-status-success { color: var(--schedule-success); }
 .schedule-row__action .text-status-warning { color: var(--schedule-warning); }
+.schedule-row__action a.text-accent { color: var(--hero-fg); }
 .schedule-board__message, .schedule-board__empty { padding: 1.5rem clamp(1.25rem, 3vw, 2.75rem) 2.75rem; }
 .schedule-board__message > section { color: var(--fg); }
 .schedule-board__empty { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8rem; }

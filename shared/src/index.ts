@@ -13,6 +13,7 @@ export * from "./hours";
 export * from "./stateMachine";
 export * from "./kioskCode";
 export * from "./shiftWindows";
+export * from "./scheduleConflict";
 export * from "./ids";
 export * from "./letters";
 export * from "./collections";

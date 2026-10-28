@@ -25,6 +25,7 @@ interface ShiftRowProps {
   readonly birthDate: string | null;
   readonly signedIn: boolean;
   readonly nowMs: number;
+  readonly commitments?: readonly Signup[];
 }
 
 /** "9:00 AM to 11:00 AM CDT" in the org zone. */
@@ -38,7 +39,7 @@ export const opportunityPathFor = (instanceId: string): string => `/opportunity/
 
 export const seatsText = (left: number): string => (left === 0 ? "No seats left" : left === 1 ? "1 seat left" : `${left} seats left`);
 
-export const ShiftRow = ({ instance, signup, birthDate, signedIn, nowMs }: ShiftRowProps): ReactElement => {
+export const ShiftRow = ({ instance, signup, birthDate, signedIn, nowMs, commitments }: ShiftRowProps): ReactElement => {
   const left = seatsLeft(instance.capacity, instance.signupCount);
   const titleId = `shift-${instance.id}-title`;
   return (
@@ -70,7 +71,7 @@ export const ShiftRow = ({ instance, signup, birthDate, signedIn, nowMs }: Shift
         {/* Tier 1 lane A: save the listing (SPEC 3.18); signed-out visitors see nothing. */}
         <SaveToggle kind="opportunity" refId={instance.opportunityId} label={instance.title} />
       </div>
-      <SignupAction instance={instance} signup={signup} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />
+      <SignupAction instance={instance} signup={signup} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />
     </li>
   );
 };

@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { encodeGeohash } from "@/lib/search";
-import { MINUTE, SHIFT_START_MS, makeInstance } from "@/test/fixtures";
+import { MINUTE, SHIFT_START_MS, makeInstance, makeSignup } from "@/test/fixtures";
 import { EMPTY_FILTERS, type FilterContext, activeFilterCount, applyFilters, filtersToParams, parseFilters, type ExploreRow } from "./filters";
 import { decodeGeohash } from "./geohash";
 import { recommendShifts, whyText } from "./recommendations";
@@ -119,6 +119,10 @@ describe("recommendShifts", () => {
     const rows = [row("unverified", { orgVerified: false }), row("food")];
     expect(recommendShifts(rows, { ...profile, birthDate: "2011-01-01" }, new Set(), before).map((pick) => pick.row.instance.id)).toEqual(["food"]);
     expect(recommendShifts(rows, profile, new Set(), SHIFT_START_MS)).toEqual([]);
+  });
+
+  it("does not recommend a shift that overlaps an existing commitment", () => {
+    expect(recommendShifts([row("food")], profile, new Set(), before, [makeSignup()])).toEqual([]);
   });
 
   it("writes a why for every reason", () => {

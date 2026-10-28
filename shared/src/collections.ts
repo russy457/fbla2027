@@ -53,6 +53,8 @@ export const PATHS = Object.freeze({
   member: (orgId: string, uid: string) => `${COLLECTIONS.organizations}/${orgId}/${COLLECTIONS.members}/${uid}`,
   letterRef: (orgId: string, letterId: string) => `${COLLECTIONS.organizations}/${orgId}/${COLLECTIONS.letterRefs}/${letterId}`,
   privateProfile: (uid: string) => `${COLLECTIONS.users}/${uid}/${COLLECTIONS.private}/profile`,
+  /** Serializes concurrent shift bookings by the same volunteer. Server-only. */
+  scheduleGuard: (uid: string) => `${COLLECTIONS.users}/${uid}/${COLLECTIONS.private}/scheduleGuard`,
   rateLimit: (uid: string, bucket: string) => `${COLLECTIONS.rateLimits}/${uid}_${bucket}`,
   /** The only lease document; runDueJobs is the only scheduler (SPEC#fn-runduejobs-detail). */
   runDueJobsLease: () => `${COLLECTIONS.jobLeases}/runDueJobs`,

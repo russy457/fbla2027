@@ -669,7 +669,7 @@ Outside the callables: `scripts/set-admin.mjs` (admin claim; requires `--project
 
 ### 5.3 Signup and cancel
 
-**signup(instanceId)**, one transaction over the instance doc and the signup doc:
+**signup(instanceId)**, one transaction over the instance, signup, and volunteer's private booking guard:
 
 1. Load instance. `status == cancelled`: `SHIFT_CANCELLED`. `now >= start`: `SHIFT_STARTED`.
 2. Existing signup doc: if status is active (confirmed, waitlisted, checked-in, completed) return it unchanged; if `cancelled` throw `SIGNUP_CANCELLED_BEFORE` (a cancelled signup is final; see [Appendix B](#appendix-b)).
@@ -677,7 +677,8 @@ Outside the callables: `scripts/set-admin.mjs` (admin claim; requires `--project
 4. Seat check: `signupCount < capacity` gives `confirmed` (`walkUp = now >= cutoffAt`), `signupCount += 1`.
 5. Else if `now < cutoffAt` and `waitlist.length < capacity`: `waitlisted` with `waitlistSeq = instance.waitlistSeq`, append `{uid, signupId, seq}`, `waitlistSeq += 1`.
 6. Else if `now >= cutoffAt`: `WAITLIST_CLOSED` ("This shift is full and its waitlist has closed."). Else `SHIFT_FULL` ("This shift and its waitlist are full.").
-7. Write signupContacts (hidden when T4 applies) and set `org.hasActivity = true` if false.
+7. Before writing, reject an overlapping confirmed or waitlisted shift with `SHIFT_TIME_CONFLICT`. Shift ranges are half-open, so one may begin exactly when another ends. Query the volunteer's signups in the bounded 12-hour lookback, then update the private booking guard in the same transaction so two simultaneous bookings for different shifts cannot both pass. A cancelled shift no longer conflicts.
+8. Write signupContacts (hidden when T4 applies) and set `org.hasActivity = true` if false.
 
 Waitlist position = 1 + number of entries with a smaller `seq`. Output `waitlistPosition` and `waitlistSize`.
 

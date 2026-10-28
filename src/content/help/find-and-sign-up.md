@@ -26,6 +26,7 @@ Press **Sign up**. The button shows that it is working until the server confirms
 - **Waitlisted #N of M**: you are in line. You can leave the waitlist from here.
 - **Full**: every seat is taken and the waitlist is full or closed.
 - **Shift started**: you can't sign up once a shift begins.
+- **Time conflict**: another shift or waitlist place overlaps this time. Open it to review your plans, or choose a different shift.
 - **Cancelled by organization**: the organization cancelled this shift.
 
 After you sign up, press **Add to calendar** to save the shift in your calendar app.

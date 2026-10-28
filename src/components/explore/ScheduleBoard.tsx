@@ -19,6 +19,7 @@ interface ScheduleBoardProps {
   readonly days: readonly InstanceDay[];
   readonly unfilteredCount: number;
   readonly signups: ReadonlyMap<string, Signup>;
+  readonly commitments: readonly Signup[];
   readonly birthDate: string | null;
   readonly signedIn: boolean;
   readonly nowMs: number;
@@ -28,10 +29,11 @@ interface ScheduleBoardProps {
   readonly mapContent?: ReactNode;
 }
 
-const ScheduleRow = ({ instance, index, signup, birthDate, signedIn, nowMs }: {
+const ScheduleRow = ({ instance, index, signup, commitments, birthDate, signedIn, nowMs }: {
   readonly instance: Instance;
   readonly index: number;
   readonly signup: Signup | null;
+  readonly commitments: readonly Signup[];
   readonly birthDate: string | null;
   readonly signedIn: boolean;
   readonly nowMs: number;
@@ -51,13 +53,13 @@ const ScheduleRow = ({ instance, index, signup, birthDate, signedIn, nowMs }: {
         <div className="schedule-row__save"><SaveToggle kind="opportunity" refId={instance.opportunityId} label={instance.title} /></div>
       </div>
       <div className="schedule-row__action">
-        <SignupAction instance={instance} signup={signup} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} returnPath={opportunityPathFor(instance.id)} />
+        <SignupAction instance={instance} signup={signup} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} returnPath={opportunityPathFor(instance.id)} />
       </div>
     </li>
   );
 };
 
-export const ScheduleBoard = ({ days, unfilteredCount, signups, birthDate, signedIn, nowMs, isLoading, hasError, onClearFilters, mapContent }: ScheduleBoardProps): ReactElement => {
+export const ScheduleBoard = ({ days, unfilteredCount, signups, commitments, birthDate, signedIn, nowMs, isLoading, hasError, onClearFilters, mapContent }: ScheduleBoardProps): ReactElement => {
   const [selectedDay, setSelectedDay] = useState("all");
   const activeDay = days.find((day) => day.key === selectedDay);
   const visibleDays = activeDay ? [activeDay] : days;
@@ -105,7 +107,7 @@ export const ScheduleBoard = ({ days, unfilteredCount, signups, birthDate, signe
               <ol>
                 {day.instances.map((instance) => {
                   const index = rowIndex++;
-                  return <ScheduleRow key={instance.id} instance={instance} index={index} signup={signups.get(instance.id) ?? null} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />;
+                  return <ScheduleRow key={instance.id} instance={instance} index={index} signup={signups.get(instance.id) ?? null} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />;
                 })}
               </ol>
             </section>

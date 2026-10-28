@@ -5,15 +5,18 @@
  * volunteer's own private profile with the shared matchShift() score, never
  * with reliability (T3). Only shifts the person could actually join are
  * offered: not started, not cancelled, old enough, not a minor at an
- * unverified org, a seat or waitlist place open, and not already signed up.
+ * unverified org, a seat or waitlist place open, not already signed up, and
+ * not overlapping a confirmed shift or waitlist place.
  * Each pick carries a one-line "why".
  */
 import {
   ageOn,
   decideSeat,
+  findScheduleConflict,
   matchShift,
   type MatchProfile,
   type MatchReason,
+  type SignupDoc,
   type TimeBlock,
   type WeekdayKey
 } from "@fbla/shared";
@@ -76,10 +79,19 @@ export const recommendShifts = (
   profile: MatchProfile & { readonly birthDate: string },
   signedUpInstanceIds: ReadonlySet<string>,
   nowMs: number,
+  commitments: readonly Pick<SignupDoc, "instanceId" | "instanceStart" | "instanceEnd" | "status">[] = [],
   count = 3
 ): Recommendation[] =>
   rows
-    .filter((row) => row.opportunity !== null && !signedUpInstanceIds.has(row.instance.id) && canJoin(row, profile.birthDate, nowMs))
+    .filter((row) =>
+      row.opportunity !== null &&
+      !signedUpInstanceIds.has(row.instance.id) &&
+      canJoin(row, profile.birthDate, nowMs) &&
+      findScheduleConflict(
+        { instanceId: row.instance.id, startMs: row.instance.start.toMillis(), endMs: row.instance.end.toMillis() },
+        commitments
+      ) === null
+    )
     .flatMap((row): Recommendation[] => {
       const opportunity = row.opportunity as NonNullable<ExploreRow["opportunity"]>;
       const match = matchShift(profile, {

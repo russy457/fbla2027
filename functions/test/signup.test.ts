@@ -6,7 +6,7 @@
  * `capacity` confirmed).
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { COLLECTIONS, type InstanceDoc, type OrganizationDoc, type SignupContactDoc, type SignupDoc } from "@fbla/shared";
+import { COLLECTIONS, PATHS, type InstanceDoc, type OrganizationDoc, type SignupContactDoc, type SignupDoc } from "@fbla/shared";
 import { BASE_MS, HOUR, MINUTE, call, db, expectCode, resetEmulators, testClock, user } from "./harness";
 import { VOLUNTEERS, seedInstance, seedWorld } from "./fixtures";
 
@@ -41,6 +41,44 @@ describe("volunteer.signup", () => {
     const again = await call("volunteer", "signup", { instanceId: "inst1" }, user("vol1"));
     expect(again).toMatchObject({ signupId: "inst1_vol1", status: "confirmed" });
     expect((await read<InstanceDoc>(COLLECTIONS.instances, "inst1")).signupCount).toBe(1);
+  });
+
+  it("rejects an overlapping booking across organizations and leaves the second seat open", async () => {
+    await seedInstance("morning");
+    await seedInstance("overlap", { orgId: "orgB", startMs: BASE_MS + 4 * HOUR });
+    await call("volunteer", "signup", { instanceId: "morning" }, user("vol1"));
+    await expectCode(call("volunteer", "signup", { instanceId: "overlap" }, user("vol1")), "SHIFT_TIME_CONFLICT");
+    expect((await read<InstanceDoc>(COLLECTIONS.instances, "overlap")).signupCount).toBe(0);
+    expect((await db.collection(COLLECTIONS.signups).doc("overlap_vol1").get()).exists).toBe(false);
+  });
+
+  it("allows shifts that touch at the edge and another booking after a cancellation", async () => {
+    await seedInstance("morning");
+    await seedInstance("later", { startMs: BASE_MS + 7 * HOUR });
+    await seedInstance("overlap", { startMs: BASE_MS + 4 * HOUR, durationMs: 3 * HOUR });
+    await call("volunteer", "signup", { instanceId: "morning" }, user("vol1"));
+    await expect(call("volunteer", "signup", { instanceId: "later" }, user("vol1"))).resolves.toMatchObject({ status: "confirmed" });
+    await call("volunteer", "cancelSignup", { signupId: "morning_vol1" }, user("vol1"));
+    await expect(call("volunteer", "signup", { instanceId: "overlap" }, user("vol1"))).resolves.toMatchObject({ status: "confirmed" });
+  });
+
+  it("treats a waitlist place as a commitment until the volunteer leaves it", async () => {
+    await seedInstance("waitlisted", { capacity: 1, signupCount: 1 });
+    await seedInstance("overlap", { startMs: BASE_MS + 4 * HOUR, durationMs: 3 * HOUR });
+    await expect(call("volunteer", "signup", { instanceId: "waitlisted" }, user("vol1"))).resolves.toMatchObject({ status: "waitlisted" });
+    await expectCode(call("volunteer", "signup", { instanceId: "overlap" }, user("vol1")), "SHIFT_TIME_CONFLICT");
+  });
+
+  it("serializes two simultaneous bookings for one volunteer", async () => {
+    await seedInstance("a");
+    await seedInstance("b", { orgId: "orgB", startMs: BASE_MS + 4 * HOUR });
+    const results = await Promise.allSettled([
+      call("volunteer", "signup", { instanceId: "a" }, user("vol1")),
+      call("volunteer", "signup", { instanceId: "b" }, user("vol1"))
+    ]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+    expect((await db.doc(PATHS.scheduleGuard("vol1")).get()).data()?.version).toBe(1);
   });
 
   it("marks a signup after the 2 h cutoff as a walk-up", async () => {

@@ -11,9 +11,9 @@
  * up, and Download cancellation for a cancelled signup (E2).
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CheckCircle, Clock } from "@phosphor-icons/react";
-import { DEFAULT_CONFIG, checkInWindow, formatClockTime, waitlistPosition, type UserError } from "@fbla/shared";
+import { DEFAULT_CONFIG, checkInWindow, findScheduleConflict, formatClockTime, waitlistPosition, type UserError } from "@fbla/shared";
 import { ErrorNotice } from "@/components/errors/ErrorNotice";
 import { loginPathFor } from "@/components/guards/RouteGuards";
 import { buttonClassName } from "@/components/ui/buttonStyles";
@@ -29,6 +29,8 @@ interface SignupActionProps {
   readonly birthDate: string | null;
   readonly signedIn: boolean;
   readonly nowMs: number;
+  /** Current bookings, used to explain a clash before the server checks it. */
+  readonly commitments?: readonly Signup[];
   /** Where sign-in returns a signed-out visitor (D5 "opens sign-in, then returns"); opportunity detail by default. */
   readonly returnPath?: string;
 }
@@ -37,7 +39,7 @@ type Pending = "signup" | "cancel" | null;
 
 const toUserError = (error: unknown): UserError | null => (error instanceof ApiError ? error.userError : null);
 
-export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, returnPath }: SignupActionProps): ReactElement => {
+export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, commitments = [], returnPath }: SignupActionProps): ReactElement => {
   const navigate = useNavigate();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [pending, setPending] = useState<Pending>(null);
@@ -69,6 +71,12 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
     birthDate,
     signedIn
   });
+  const conflict = signedIn && (state.kind === "available" || state.kind === "join-waitlist")
+    ? findScheduleConflict(
+        { instanceId: instance.id, startMs: instance.start.toMillis(), endMs: instance.end.toMillis() },
+        commitments
+      )
+    : null;
 
   const run = async (kind: Exclude<Pending, null>, action: () => Promise<unknown>): Promise<void> => {
     setPending(kind);
@@ -102,7 +110,7 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
 
   const opensAt = formatClockTime(new Date(checkInWindow(instance.start.toMillis(), instance.end.toMillis(), DEFAULT_CONFIG).fromMs), instance.timeZone);
   const shiftLabel = instance.title;
-  const primaryText = pending === "signup" ? (state.kind === "join-waitlist" ? "Joining..." : "Signing up...") : state.label;
+  const primaryText = conflict !== null ? "Time conflict" : pending === "signup" ? (state.kind === "join-waitlist" ? "Joining..." : "Signing up...") : state.label;
   const isWaitlisted = state.kind === "waitlisted";
   const showCalendar = signup !== null && state.kind === "signed-up";
   const showCancellation = signup !== null && (state.kind === "own-cancelled" || state.kind === "cancelled-by-org");
@@ -124,16 +132,22 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, ret
           ref={buttonRef}
           type="button"
           onClick={onPrimary}
-          disabled={!state.actionable || pending !== null}
+          disabled={!state.actionable || pending !== null || conflict !== null}
           // Screen readers hear which shift the button is for ("Sign up: Sort and pack food boxes");
           // the name always starts with the visible text (WCAG label in name).
           aria-label={state.actionable ? `${primaryText}: ${shiftLabel}` : undefined}
-          className={buttonClassName(state.actionable ? "primary" : "secondary", "min-w-32")}
+          className={buttonClassName(state.actionable && conflict === null ? "primary" : "secondary", "min-w-32")}
         >
           {primaryText}
         </button>
       )}
-      {state.reason ? <p className="max-w-[32ch] text-sm text-fg-muted md:text-right">{state.reason}</p> : null}
+      {state.reason && conflict === null ? <p className="max-w-[32ch] text-sm text-fg-muted md:text-right">{state.reason}</p> : null}
+      {conflict !== null ? (
+        <p className="max-w-[32ch] text-sm text-fg-muted md:text-right">
+          {conflict.status === "waitlisted" ? "You're on another waitlist at this time." : "You have another shift at this time."}{" "}
+          <Link to={`/opportunity/${encodeURIComponent(conflict.instanceId)}`} className="font-semibold text-accent underline underline-offset-2">View it</Link>
+        </p>
+      ) : null}
       {state.kind === "signed-up" ? <p className="text-sm text-fg-muted">Check-in opens {opensAt}</p> : null}
       {state.canCancel && signup ? (
         confirmingCancel ? (

@@ -110,6 +110,7 @@ describe("ids and names (SPEC#data-model)", () => {
     expect(PATHS.member("o1", "u1")).toBe("organizations/o1/members/u1");
     expect(PATHS.letterRef("o1", "l1")).toBe("organizations/o1/letterRefs/l1");
     expect(PATHS.privateProfile("u1")).toBe("users/u1/private/profile");
+    expect(PATHS.scheduleGuard("u1")).toBe("users/u1/private/scheduleGuard");
     expect(PATHS.rateLimit("u1", "checkin")).toBe("rateLimits/u1_checkin");
     expect(PATHS.runDueJobsLease()).toBe("jobLeases/runDueJobs");
     expect(PATHS.demoClock()).toBe("demoClock/global");

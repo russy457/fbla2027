@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Date | 2026-10-07 |
+| Date | 2026-10-28 |
 | Event | FBLA 2026-27 Coding & Programming, "Serving the Community: Nonprofit Volunteer Management" |
 | App | Tandem (constant in `shared/src/brand.ts`) |
 | Required by | `docs/SPEC.md` 10.14 ("Each rubric row to the screen and file that earns it; competitor table") |
-| Status of this doc | The downloaded `Coding-and-Programming.pdf` rating sheet was reviewed on 2026-10-07. All feature paths below exist locally and the design system is being applied. The cloud project remains on Spark, so Functions-dependent flows are available only in the local emulator demo. |
+| Status of this doc | The newer `26-27 Coding and Programming.pdf` was reviewed on 2026-10-28. Tandem is live on Firebase Blaze. This map covers the 110-point State and National presentation sheet; District instead scores a 5–10 slide PDF across four 25-point categories. |
 
 How to read the status column:
 
@@ -19,7 +19,9 @@ How to read the status column:
 | built (Tier 1 integration) | The seams between lanes: alerts from coordinator ops, capacity-increase promotion, Request review in My Shifts, the planner box on the new-shift form, `/me/profile` with `volunteer.updateProfile`, `/organizations/:orgId`, demo reset of Tier 1 data. |
 | planned (Tier 2) | Scheduled after Tier 1 (SPEC 1.2). Listed only where it strengthens a row. |
 
-Rubric row names paraphrase the official 2026-27 rating sheet in [`Coding-and-Programming.pdf`](../Coding-and-Programming.pdf): language choice, comments and naming, modularity, UX and accessibility, navigation and help, validation, prompt coverage, customizable reports, storage and data structures, and presentation. The sheet totals 110 points, including presentation and event-rule scoring.
+Rubric row names paraphrase the locally supplied `26-27 Coding and Programming.pdf`: language choice, comments and naming, modularity, UX and accessibility, navigation and help, validation, prompt coverage, customizable reports, storage and data structures, and presentation. The State and National sheet totals 110 points, including presentation and event-rule scoring. The District submission is a separate 100-point, 5–10 slide PDF with Purpose & Planning, Development Process, Features & Functionality, and Progress & Readiness worth 25 points each.
+
+Current improvement beyond the scoring rows: volunteers see a schedule clash before joining another shift, including a link to the existing commitment. The signup Function checks the same rule in a transaction, including simultaneous requests and waitlist places. Explore recommendations exclude shifts that clash with the volunteer's schedule. See `shared/src/scheduleConflict.ts`, `functions/src/shifts/signupCore.ts`, and `e2e/scheduleConflict.spec.ts`.
 
 ---
 

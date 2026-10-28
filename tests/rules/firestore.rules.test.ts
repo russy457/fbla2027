@@ -58,6 +58,7 @@ beforeEach(async () => {
   await seed("letterVerifications/CODE1", { displayName: "Jordan R.", totalMinutes: 120, status: "valid" });
   await seed("users/vol1", { displayName: "Jordan R.", totalApprovedHours: 2 });
   await seed("users/vol1/private/profile", { firstName: "Jordan", birthDate: "2007-01-01", isMinor: false, textSize: 100 });
+  await seed("users/vol1/private/scheduleGuard", { version: 1 });
   await seed("jobRuns/run1", { outcome: "ok" });
   await seed("demoClock/global", { offsetMs: 0 });
   await seed("rateLimits/vol1_checkin", { count: 1 });
@@ -129,6 +130,16 @@ describe("instanceSecrets", () => {
     await assertFails(getDoc(doc(as("admin1", { admin: true }), "instanceSecrets/inst1")));
     await assertFails(getDoc(doc(kiosk("inst1"), "instanceSecrets/inst1")));
     await assertFails(setDoc(doc(as("coordA"), "instanceSecrets/inst9"), { salt: "x" }));
+  });
+});
+
+describe("schedule guard", () => {
+  it("cannot be read or changed by a volunteer, coordinator, or admin", async () => {
+    const path = "users/vol1/private/scheduleGuard";
+    await assertFails(getDoc(doc(as("vol1"), path)));
+    await assertFails(getDoc(doc(as("coordA"), path)));
+    await assertFails(getDoc(doc(as("admin1", { admin: true }), path)));
+    await assertFails(setDoc(doc(as("vol1"), path), { version: 99 }));
   });
 });
 

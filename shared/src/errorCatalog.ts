@@ -206,6 +206,13 @@ export const ERROR_CATALOG = Object.freeze({
     "Pick another date.",
     "find-and-sign-up"
   ),
+  SHIFT_TIME_CONFLICT: entry(
+    "SHIFT_TIME_CONFLICT",
+    "failed-precondition",
+    "You already have a shift at this time.",
+    "Check My Shifts or choose another time.",
+    "find-and-sign-up"
+  ),
   INVALID_TRANSITION: entry(
     "INVALID_TRANSITION",
     "failed-precondition",
