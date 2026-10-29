@@ -213,16 +213,16 @@ export const ExploreFilters = ({ filters, onChange, resultCount, signedIn, canUs
         </fieldset>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <p aria-live="polite" className="text-sm text-fg-muted">
-          {resultCount === 1 ? "1 shift" : `${resultCount} shifts`}
-        </p>
-        {activeFilterCount(filters) > 0 ? (
+      {activeFilterCount(filters) > 0 ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <p aria-live="polite" className="text-sm text-fg-muted">
+            {resultCount === 1 ? "1 shift" : `${resultCount} shifts`}
+          </p>
           <button type="button" onClick={() => onChange(EMPTY_FILTERS)} className={buttonClassName("quiet")}>
             Clear filters
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
       {applied.length > 0 ? (
         <div role="group" aria-label="Active filters" className="flex flex-wrap gap-x-4 gap-y-1">
           {applied.map(({ key, label }) => (

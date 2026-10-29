@@ -31,6 +31,7 @@ On macOS or Linux use `cp .env.example .env.local`. The values in `.env.example`
 | `npm run demo:restart` | Stops only this project's listeners, verifies signup against isolated emulators, then starts the full stack in one terminal |
 | `npm run demo:cloud` | Legacy hybrid mode for testing cloud Auth and Firestore with local Functions |
 | `npm run seed:cloud -- --yes` | One-time fictional seed for the pinned cloud project; refuses to overwrite a nonempty database |
+| `npm run populate:shifts` | Preview future fictional shifts for the existing cloud demo; add only missing dates with `-- --yes` |
 | `npm run verify:signup` | Uses isolated emulators to sign in, call signup, and confirm Firestore documents and seat counts |
 | `npm run demo:windows` | Opens four isolated local Chrome sessions for coordinator, kiosk setup, volunteer, and admin; run after `npm run demo` |
 | `npm run dev` | Starts the full local stack, including seeded Auth and Firestore emulators |
@@ -38,7 +39,7 @@ On macOS or Linux use `cp .env.example .env.local`. The values in `.env.example`
 | `npm run emulators` | Builds Functions and starts the Auth, Firestore, Functions, and Storage emulators |
 | `npm run doctor` | Checks Node, Java, free ports, `.env.local`, installed dependencies, and warns about OneDrive folders |
 | `npm run typecheck` | `tsc -b` across the app, `shared/`, and `functions/` |
-| `npm test` | Vitest for the app, `shared/`, and `functions/`, with coverage (shared at 100%) |
+| `npm test` | Vitest for the app, `shared/`, `functions/`, and presentation schedule script, with coverage (shared at 100%) |
 | `npm run test:e2e` | Playwright smoke test with an axe accessibility scan |
 | `npm run build` | Typecheck and production web build into `dist/` |
 | `npm run build:production` | Builds the live app with cloud services and onboarding enabled |
@@ -55,7 +56,7 @@ If the local site loads but login or demo controls cannot reach the server, the 
 
 Open the [live site](https://tandemvolunteer.web.app). It uses cloud Auth, Firestore, Functions, and Storage without a local server. Sign in as `volunteer@demo.fbla2027.test`, `minor@demo.fbla2027.test`, `coordinator@demo.fbla2027.test`, or `admin@demo.fbla2027.test`. Their separate passwords are keyed by `demo-volunteer`, `demo-minor`, `demo-coordinator`, and `demo-admin` in `.cloud-demo-accounts.local` (gitignored, mode 600). The one-click local demo role buttons are hidden on the live site.
 
-The project is on Blaze. Cloud signups appear in the Firebase console, and scheduled jobs and Firestore triggers run in the cloud. `npm run seed:cloud -- --yes` is only for an empty project; it refuses to overwrite existing data. Local `npm run dev` still uses a separate emulator database. If the admin resets live demo data, all four accounts use the private `resetPassword` in `.cloud-demo-accounts.local` afterward.
+The project is on Blaze. Cloud signups appear in the Firebase console, and scheduled jobs and Firestore triggers run in the cloud. `npm run seed:cloud -- --yes` is only for an empty project; it refuses to overwrite existing data. `npm run populate:shifts` previews new future dates for the existing fictional listings, and `npm run populate:shifts -- --yes` creates only missing shifts without changing past attendance or signups. Run it again before a presentation if the calendar needs fresh dates. Local `npm run dev` still uses a separate emulator database. If the admin resets live demo data, all four accounts use the private `resetPassword` in `.cloud-demo-accounts.local` afterward.
 
 Use `npm run deploy:production` to update the hosted app. Keep `npm run demo` as the offline rehearsal path.
 

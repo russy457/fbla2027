@@ -16,6 +16,8 @@ Updated 2026-10-26. The competition project is `fbla2027-ethanteng` (display nam
 
 The live site uses cloud Auth, Firestore, Functions, and Storage without a running laptop. A cloud volunteer signup was verified on the original hosting domain in the `signups` and `signupContacts` collections, including its shift seat count. On 2026-10-26, the new domain served the October 20 build, and a demo volunteer signed in successfully. Live onboarding on the new domain still needs the Turnstile hostname update above. The seeded service letter PDF was uploaded to Storage. Private demo passwords are in `.cloud-demo-accounts.local` on the presentation laptop, not in the repository.
 
+On 2026-10-29, the original upcoming demo dates had all passed. `npm run populate:shifts -- --yes` added 19 future instances across eight existing fictional opportunities, with kiosk secrets and refreshed next-start fields. It creates missing dates only and can be rerun as the presentation approaches. [Rendered schedule review](reviews/2026-10-29-open-shifts/README.md).
+
 Run `npm run deploy:production` to rebuild and publish the web app. Deploy rules and Functions separately after backend changes. `npm run demo` remains the offline rehearsal path; `npm run demo:cloud` is a legacy hybrid mode and is no longer needed for the hosted presentation.
 
 Secrets live in Firebase Secret Manager. The browser receives only public Firebase configuration, the Mapbox public token, and the Turnstile site key. Do not put OpenRouter or Turnstile secrets in a `VITE_` variable. If the demo data is reset, use the `resetPassword` field in `.cloud-demo-accounts.local` for all four demo accounts afterward.

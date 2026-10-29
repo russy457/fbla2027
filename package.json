@@ -39,6 +39,7 @@
     "demo:restart": "node scripts/restart-demo.mjs",
     "demo:cloud": "node scripts/demo-cloud.mjs",
     "seed:cloud": "node scripts/seed-cloud-demo.mjs",
+    "populate:shifts": "node scripts/populate-open-shifts.mjs",
     "verify:signup": "node scripts/build-functions.mjs --skip-lock && cross-env FUNCTIONS_DISCOVERY_TIMEOUT=60 E2E_FUNCTIONS_PORT=15001 firebase emulators:exec --config firebase.e2e.json --project demo-fbla2027 --only auth,firestore,functions,storage \"node scripts/seed-demo.mjs --shift-starts-in=1h && node scripts/verify-signup.mjs && vitest run --config vitest.functions.config.ts functions/test/signup.test.ts\"",
     "demo:windows": "node scripts/open-demo-windows.mjs",
     "demo:reset": "node scripts/demo-reset.mjs",

@@ -33,13 +33,15 @@ interface SignupActionProps {
   readonly commitments?: readonly Signup[];
   /** Where sign-in returns a signed-out visitor (D5 "opens sign-in, then returns"); opportunity detail by default. */
   readonly returnPath?: string;
+  /** The schedule already makes the sign-in route clear when its button is used. */
+  readonly showSignInHint?: boolean;
 }
 
 type Pending = "signup" | "cancel" | null;
 
 const toUserError = (error: unknown): UserError | null => (error instanceof ApiError ? error.userError : null);
 
-export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, commitments = [], returnPath }: SignupActionProps): ReactElement => {
+export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, commitments = [], returnPath, showSignInHint = true }: SignupActionProps): ReactElement => {
   const navigate = useNavigate();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [pending, setPending] = useState<Pending>(null);
@@ -141,7 +143,7 @@ export const SignupAction = ({ instance, signup, birthDate, signedIn, nowMs, com
           {primaryText}
         </button>
       )}
-      {state.reason && conflict === null ? <p className="max-w-[32ch] text-sm text-fg-muted md:text-right">{state.reason}</p> : null}
+      {state.reason && conflict === null && (showSignInHint || state.kind !== "signed-out") ? <p className="max-w-[32ch] text-sm text-fg-muted md:text-right">{state.reason}</p> : null}
       {conflict !== null ? (
         <p className="max-w-[32ch] text-sm text-fg-muted md:text-right">
           {conflict.status === "waitlisted" ? "You're on another waitlist at this time." : "You have another shift at this time."}{" "}

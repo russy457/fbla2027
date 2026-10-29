@@ -12,11 +12,13 @@ import { opportunityPathFor, seatsText } from "@/components/shifts/ShiftRow";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import type { InstanceDay } from "@/hooks/useInstanceDays";
 import type { Instance } from "@/lib/data/instances";
+import type { Opportunity } from "@/lib/data/opportunities";
 import type { Signup } from "@/lib/data/signups";
 import { seatsLeft } from "@/lib/signupButtonState";
 
 interface ScheduleBoardProps {
   readonly days: readonly InstanceDay[];
+  readonly opportunities: ReadonlyMap<string, Opportunity>;
   readonly unfilteredCount: number;
   readonly signups: ReadonlyMap<string, Signup>;
   readonly commitments: readonly Signup[];
@@ -29,9 +31,9 @@ interface ScheduleBoardProps {
   readonly mapContent?: ReactNode;
 }
 
-const ScheduleRow = ({ instance, index, signup, commitments, birthDate, signedIn, nowMs }: {
+const ScheduleRow = ({ instance, opportunity, signup, commitments, birthDate, signedIn, nowMs }: {
   readonly instance: Instance;
-  readonly index: number;
+  readonly opportunity: Opportunity | null;
   readonly signup: Signup | null;
   readonly commitments: readonly Signup[];
   readonly birthDate: string | null;
@@ -39,32 +41,36 @@ const ScheduleRow = ({ instance, index, signup, commitments, birthDate, signedIn
   readonly nowMs: number;
 }): ReactElement => {
   const titleId = `schedule-${instance.id}-title`;
+  const place = opportunity?.location?.address.line1 ?? (opportunity?.type === "virtual" ? "Online" : null);
   return (
     <li className="schedule-row" aria-labelledby={titleId}>
-      <span className="schedule-row__index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
       <div className="schedule-row__time">
         <time dateTime={instance.start.toDate().toISOString()}>{formatInTimeZone(instance.start.toDate(), instance.timeZone, "h:mm a")}</time>
-        <span>{formatInTimeZone(instance.end.toDate(), instance.timeZone, "h:mm a zzz")}</span>
+        <span>to {formatInTimeZone(instance.end.toDate(), instance.timeZone, "h:mm a zzz")}</span>
       </div>
       <div className="schedule-row__details">
-        <h3 id={titleId}><Link to={opportunityPathFor(instance.id)}>{instance.title}<ArrowUpRight aria-hidden="true" size={16} /></Link></h3>
-        <p><MapPin aria-hidden="true" size={15} /><OrgLink orgId={instance.orgId} name={instance.orgName} className="underline-offset-4 hover:underline" />{instance.orgVerified ? null : <UnverifiedChip />}</p>
-        <p><UsersThree aria-hidden="true" size={15} />{seatsText(seatsLeft(instance.capacity, instance.signupCount))}{instance.minAge > 13 ? ` · Ages ${instance.minAge}+` : ""}</p>
+        <h4 id={titleId}><Link to={opportunityPathFor(instance.id)}>{instance.title}<ArrowUpRight aria-hidden="true" size={17} /></Link></h4>
+        {opportunity?.description ? <p className="schedule-row__summary">{opportunity.description}</p> : null}
+        <p className="schedule-row__organization"><OrgLink orgId={instance.orgId} name={instance.orgName} className="underline-offset-4 hover:underline" />{instance.orgVerified ? null : <UnverifiedChip />}</p>
+        <p className="schedule-row__facts">
+          {place ? <span><MapPin aria-hidden="true" size={16} />{place}</span> : null}
+          <span><UsersThree aria-hidden="true" size={16} />{seatsText(seatsLeft(instance.capacity, instance.signupCount))}</span>
+          {instance.minAge > 13 ? <span>Ages {instance.minAge}+</span> : null}
+        </p>
         <div className="schedule-row__save"><SaveToggle kind="opportunity" refId={instance.opportunityId} label={instance.title} /></div>
       </div>
       <div className="schedule-row__action">
-        <SignupAction instance={instance} signup={signup} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} returnPath={opportunityPathFor(instance.id)} />
+        <SignupAction instance={instance} signup={signup} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} returnPath={opportunityPathFor(instance.id)} showSignInHint={false} />
       </div>
     </li>
   );
 };
 
-export const ScheduleBoard = ({ days, unfilteredCount, signups, commitments, birthDate, signedIn, nowMs, isLoading, hasError, onClearFilters, mapContent }: ScheduleBoardProps): ReactElement => {
+export const ScheduleBoard = ({ days, opportunities, unfilteredCount, signups, commitments, birthDate, signedIn, nowMs, isLoading, hasError, onClearFilters, mapContent }: ScheduleBoardProps): ReactElement => {
   const [selectedDay, setSelectedDay] = useState("all");
   const activeDay = days.find((day) => day.key === selectedDay);
   const visibleDays = activeDay ? [activeDay] : days;
   const count = days.reduce((total, day) => total + day.instances.length, 0);
-  let rowIndex = 0;
 
   return (
     <section className="schedule-board" aria-labelledby="schedule-title">
@@ -77,7 +83,7 @@ export const ScheduleBoard = ({ days, unfilteredCount, signups, commitments, bir
       {!mapContent && days.length > 0 ? (
         <div role="group" aria-label="Choose a shift date" className="schedule-dates">
           <button type="button" aria-pressed={!activeDay} onClick={() => setSelectedDay("all")}>All dates</button>
-          {days.slice(0, 5).map((day) => (
+          {days.map((day) => (
             <button key={day.key} type="button" aria-pressed={activeDay?.key === day.key} onClick={() => setSelectedDay(day.key)}>{day.label}</button>
           ))}
         </div>
@@ -105,10 +111,7 @@ export const ScheduleBoard = ({ days, unfilteredCount, signups, commitments, bir
             <section key={day.key} aria-labelledby={`day-${day.key}`} className="schedule-day">
               <h3 id={`day-${day.key}`}>{day.label}</h3>
               <ol>
-                {day.instances.map((instance) => {
-                  const index = rowIndex++;
-                  return <ScheduleRow key={instance.id} instance={instance} index={index} signup={signups.get(instance.id) ?? null} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />;
-                })}
+                {day.instances.map((instance) => <ScheduleRow key={instance.id} instance={instance} opportunity={opportunities.get(instance.opportunityId) ?? null} signup={signups.get(instance.id) ?? null} commitments={commitments} birthDate={birthDate} signedIn={signedIn} nowMs={nowMs} />)}
               </ol>
             </section>
           ))}

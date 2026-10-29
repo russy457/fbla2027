@@ -26,6 +26,7 @@ import { useInstanceDays } from "@/hooks/useInstanceDays";
 import { useUpcomingInstances } from "@/hooks/useShiftData";
 import { useMySignups, usePrivateProfile } from "@/hooks/useVolunteerData";
 import type { Signup } from "@/lib/data/signups";
+import type { Opportunity } from "@/lib/data/opportunities";
 import { getOrganizations } from "@/lib/data/orgs";
 import { applyFilters, filtersToParams, parseFilters, type ExploreFilters as Filters, type ExploreRow } from "@/lib/explore/filters";
 import { recommendShifts } from "@/lib/explore/recommendations";
@@ -62,10 +63,13 @@ const ExplorePage = (): ReactElement => {
     () => new Map<string, Signup>((signups.data ?? []).map((signup) => [signup.instanceId, signup])),
     [signups.data]
   );
+  const opportunityById = useMemo(
+    () => new Map<string, Opportunity>((opportunities.data ?? []).map((opportunity) => [opportunity.id, opportunity])),
+    [opportunities.data]
+  );
   const rows = useMemo((): ExploreRow[] => {
-    const byId = new Map((opportunities.data ?? []).map((opportunity) => [opportunity.id, opportunity]));
-    return (instances.data ?? []).map((instance) => ({ instance, opportunity: byId.get(instance.opportunityId) ?? null }));
-  }, [instances.data, opportunities.data]);
+    return (instances.data ?? []).map((instance) => ({ instance, opportunity: opportunityById.get(instance.opportunityId) ?? null }));
+  }, [instances.data, opportunityById]);
 
   const me = profile.data ?? null;
   const filtered = useMemo(
@@ -116,6 +120,7 @@ const ExplorePage = (): ReactElement => {
             ) : null}
             <ScheduleBoard
               days={days}
+              opportunities={opportunityById}
               unfilteredCount={rows.length}
               signups={signupByInstance}
               commitments={signups.data ?? []}

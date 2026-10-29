@@ -43,6 +43,14 @@ export default mergeConfig(
             environment: "node",
             include: ["functions/src/**/*.test.ts"]
           }
+        },
+        {
+          extends: true,
+          test: {
+            name: "scripts",
+            environment: "node",
+            include: ["scripts/**/*.test.mjs"]
+          }
         }
       ],
       coverage: {
