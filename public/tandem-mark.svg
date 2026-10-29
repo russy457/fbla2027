@@ -1,13 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 104" fill="none" color="#43291b">
   <g stroke="currentColor">
-    <circle cx="30" cy="76" r="22" stroke-width="7"/>
-    <circle cx="225" cy="76" r="22" stroke-width="7"/>
-    <path d="M30 56v40M10 76h40m-34-14 28 28m0-28L16 90M225 56v40m-20-20h40m-34-14 28 28m0-28-28 28" stroke-width="2" opacity=".72"/>
-    <path d="M30 76 78 36 103 76 30 76M78 36h72l-47 40h60l-13-40h39l36 40M189 36l-26 40M78 36l-3-7M150 36l-3-8M189 36l-3-15M111 37V22h13M186 21h14l-3 5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="30" cy="76" r="22" stroke-width="10"/>
+    <circle cx="225" cy="76" r="22" stroke-width="10"/>
+    <path d="M30 76V62m0 14 12 8m-12-8-12 8M225 76V62m0 14 12 8m-12-8-12 8" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M30 76 78 38l26 38H30M78 38h72l-46 38h59l-13-38h38l37 38M188 38l-25 38M78 38V28m72 10V28m-38 10V23h13m63 15V20h13" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <path d="M62 26c0-2 2-3 4-3h26c1 0 2 1 2 2 0 3-4 5-8 5H65c-2 0-3-2-3-4Zm72 0c0-2 2-3 4-3h26c1 0 2 1 2 2 0 3-4 5-8 5h-21c-2 0-3-2-3-4Z" fill="currentColor"/>
+  <path d="M64 26h28m45 0h28" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
   <circle cx="30" cy="76" r="4" fill="currentColor"/><circle cx="225" cy="76" r="4" fill="currentColor"/>
-  <circle cx="103" cy="76" r="3" fill="currentColor"/>
-  <circle cx="163" cy="76" r="3" fill="currentColor"/>
-  <path d="M103 76V66m-4 0h8m56 10V66m-4 0h8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
 </svg>

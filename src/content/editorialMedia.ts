@@ -1,6 +1,7 @@
 /** Illustrative editorial photos. Named shifts only use photos supplied by their organization. */
 export interface EditorialPhoto {
   readonly src: string;
+  readonly width?: number;
   readonly alt: string;
   readonly attribution: string;
   readonly sourceUrl: string;
@@ -60,6 +61,7 @@ export const READING_TOGETHER_PHOTO: EditorialPhoto = {
 
 export const PARK_CLEANUP_PHOTO: EditorialPhoto = {
   src: "/images/park-cleanup.webp",
+  width: 1400,
   alt: "Two people collecting litter in a park",
   attribution: "Galib Rahman Nadim / Pexels. Illustrative photo.",
   sourceUrl: "https://www.pexels.com/photo/volunteers-clean-up-park-environmental-awareness-39038090/",
@@ -76,6 +78,7 @@ export const SHELTER_CAT_PHOTO: EditorialPhoto = {
 
 export const PACKING_DONATIONS_PHOTO: EditorialPhoto = {
   src: "/images/packing-donations.webp",
+  width: 1600,
   alt: "A volunteer organizing food donations on a table",
   attribution: "Julia M Cameron / Pexels. Illustrative photo.",
   sourceUrl: "https://www.pexels.com/photo/a-volunteer-wearing-a-face-mask-preparing-donations-6995213/",
@@ -84,6 +87,7 @@ export const PACKING_DONATIONS_PHOTO: EditorialPhoto = {
 
 export const STORYTIME_PHOTO: EditorialPhoto = {
   src: "/images/storytime.webp",
+  width: 1202,
   alt: "An adult reading a picture book with children",
   attribution: "Ksenia Chernaya / Pexels. Illustrative photo.",
   sourceUrl: "https://www.pexels.com/photo/children-in-the-school-reading-a-book-with-a-teacher-8535177/",

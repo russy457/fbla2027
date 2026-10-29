@@ -1,6 +1,6 @@
 # Tandem UI design spec
 
-Updated 2026-10-20 from the design interview, `inspopic.jpg`, and a rendered UX review. [SPEC.md](SPEC.md) remains the source of truth for routes, roles, data, and workflow behavior. The visual system can change without changing those rules. [UX_RESEARCH.md](UX_RESEARCH.md) records the research and review method; [the October review](reviews/2026-10-20/README.md) records screenshots and fixes.
+Updated 2026-10-29 from the design interview, `inspopic.jpg`, and rendered UX reviews. [SPEC.md](SPEC.md) remains the source of truth for routes, roles, data, and workflow behavior. The visual system can change without changing those rules. [UX_RESEARCH.md](UX_RESEARCH.md) records the research and review method; [the home journey review](reviews/2026-10-29-journey/README.md) records the latest scroll sequence.
 
 ## Design direction
 
@@ -14,7 +14,7 @@ Design feasibility check: impact 5, context fit 4, implementation 5, performance
 
 ## Fixed decisions
 
-- Pair the name **Tandem** with the original single-ink tandem bicycle mark. Use the still mark in navigation, footer, and favicon. Its moving version is reserved for loading states.
+- Pair the name **Tandem** with the original single-ink tandem bicycle mark. Use the still mark in navigation, footer, and favicon. Its moving version appears in loading states and advances with the home story scroll.
 - Do not name or imply one home city. Demo organizations are fictional.
 - Keep existing functionality. `/` is a distinct landing page and `/explore` is the shift finder. Restructure markup and shared components when it improves the design.
 - Write short, unpretentious copy. No em dashes, invented impact numbers, hype, or robotic phrasing.
@@ -38,7 +38,7 @@ The selected set and crop positions live in `src/content/editorialMedia.ts` and 
 
 ## Layout and navigation
 
-- `/` shows the same photographic landing page to signed-in and signed-out visitors. Its distinct garden hero leaves the first viewport to the title and primary Explore action. A rising white section holds oval images linked to real cause filters. Three further cause stories and a full width photograph follow.
+- `/` shows the same photographic landing page to signed-in and signed-out visitors. Its distinct garden hero leaves the first viewport to the title and primary Explore action. A rising white section holds oval images linked to real cause filters. A full-width dark story stage then stays in view while three cause scenes change and the bike moves along a road. Scrolling normally releases the stage after the third scene. Short viewports, 150% text, and reduced motion show all three stories in normal flow. A final full-width photograph follows.
 - `/explore` is the scheduling page. Its full viewport photo stays in place as the visitor scrolls into search, filters, and a dark schedule with date choices and shift rows. A nearly white section with four cause photographs, personal recommendations, and collections covers the scene below. The live list remains the default; the map remains available with a public Mapbox token. `PageHeader` serves task routes in a shared shorter scene. Named shift, organization, and coordinator scenes use a plain brown field rather than unrelated stock photography. Onboarding uses a shorter full width photo opening so form steps remain quick to use. Kiosk access has a full width photo opening; the active kiosk keeps its code and arrivals prominent.
 - The shift finder keeps search, filters, map or list switch, live states, dates, signup, and save behavior. Cause links open `/explore?cause=...`, using the existing filter parser.
 - The top navigation starts as a full row with the bike and Tandem wordmark, four volunteer routes, search, quick help, and account access. After 132px of scroll, the same four route links become a centered icon pill. Accessible names and 44px targets remain. On phones, the full header uses a second row for the four routes; the account menu stays in the first row. The fixed bottom tab bar is removed.
@@ -54,7 +54,7 @@ Check the home, Explore, Opportunity, coordinator dashboard, kiosk, and phone ch
 ## Implementation record
 
 - Near white and brown tokens replace the prior green and clay palette throughout the shared shell.
-- `LandingPage` owns `/` and uses `EditorialIntro`, `EditorialGallery`, and `EditorialPhotoNote` for all session states. The cause images are links to valid existing filters. `ExplorePage` owns `/explore`, with the sticky full width scene, `ScheduleBoard`, and `ExploreCauseRibbon`.
+- `LandingPage` owns `/` and uses `EditorialIntro`, `EditorialJourney`, and `EditorialPhotoNote` for all session states. The cause images are links to valid existing filters. The journey story data lives in `homeJourney.ts`; the shared bike SVG has thicker, simpler geometry. `ExplorePage` owns `/explore`, with the sticky full width scene, `ScheduleBoard`, and `ExploreCauseRibbon`.
 - `AppLayout` draws each general route photo and crop from `pageVisuals.ts`. `PageHeader` places the title over that scene and the description on the light section below. The shared route content rises over the shorter opening on scroll. Named shift, organization, and coordinator routes use a plain opening. Help and legal pages use the same layout without changes to their feature screens.
 - Onboarding and kiosk screens carry the same photography and brown accents without compromising form, check-in, or code legibility.
 - The header now morphs into a four icon pill after scrolling, while retaining its route and account behavior.
