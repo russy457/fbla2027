@@ -196,7 +196,7 @@
 .site-footer__legal .site-footer__link { color: var(--hero-muted); font-size: 0.84rem; }
 @media (max-width: 46rem) {
   .site-footer__inner { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
-  .site-footer__brand { max-width: 100%; gap: 0.6rem; font-size: clamp(1.9rem, 6vw, 2.5rem); white-space: normal; }
+  .site-footer__brand { max-width: 100%; flex-wrap: wrap; gap: 0.6rem; font-size: clamp(1.9rem, 6vw, 2.5rem); white-space: normal; }
   .site-footer__brand .tandem-bike { width: clamp(4.1rem, 17vw, 5.5rem); }
   .site-footer__content { gap: 2rem; }
 }
@@ -557,6 +557,11 @@
 @media (max-width: 40rem) {
   :root[data-text-size="125"] .site-nav__label,
   :root[data-text-size="150"] .site-nav__label { display: none; }
+  :root[data-text-size="150"] .site-header__brand { gap: 0.35rem; font-size: 1.05rem; }
+  :root[data-text-size="150"] .site-header__brand-icon { width: 2.4rem; }
+}
+@media (max-width: 23rem) {
+  :root[data-text-size="150"] .site-header__brand span { display: none; }
 }
 
 /* Backstop for reduced motion: also stops CSS animations that do not use tokens. */

@@ -124,7 +124,7 @@ export const AppLayout = (): ReactElement => {
 
       <header className="site-header" data-condensed={condensed} data-home={isHome} data-scene="true">
         <div className="site-header__inner">
-          <Link to="/" className="site-header__brand">
+          <Link to="/" className="site-header__brand" aria-label={`${APP_NAME} home`}>
             <TandemBike className="site-header__brand-icon" />
             <span>{APP_NAME}</span>
           </Link>

@@ -21,7 +21,7 @@ The old menu showed icon-only rows with blank space where text belonged. The new
 ## Interaction and accessibility
 
 - On the phone, keyboard Enter opens the account menu, Tab reaches Profile, Escape closes it and returns focus to the trigger, and an outside click closes it. The Settings row opens the Settings page. The bell opens its dialog and Escape closes it.
-- Text size 150%, high contrast, and reduced motion persisted after reload. At 375px, 768px, and 1440px, Settings, the account menu, and recommendations had no page-level horizontal overflow after the footer wordmark was reduced on narrow screens. [The 150% high-contrast footer](after-footer-contrast-375-settings.webp) and [recommendations](after-recommended-contrast-375.webp) remained legible.
+- Text size 150%, high contrast, and reduced motion persisted after reload. At 375px, 768px, and 1440px, Settings, the account menu, and recommendations had no page-level horizontal overflow after the footer wordmark was reduced on narrow screens. At 320px, the header uses its labelled bike link to leave space for the bell and account trigger. [The enlarged account menu](after-menu-contrast-320.webp), [footer](after-footer-contrast-375-settings.webp), and [recommendations](after-recommended-contrast-375.webp) remained legible.
 - Axe found no violations in the checked 375px Settings and open-menu states, or in the 375px high-contrast, 150%-text Settings and Explore states. The signed-out Settings route kept all five display controls available. The existing no-interests recommendation state still links to Profile.
 - Production build, token scan, and focused Profile, legal, route-head, and recommendation tests passed. No Firebase writes or changes to signup, roster, or kiosk behavior were needed.
 
