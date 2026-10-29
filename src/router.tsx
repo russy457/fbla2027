@@ -21,6 +21,7 @@ const ExplorePage = lazyWithReload(() => import("./pages/ExplorePage"));
 const MyShiftsPage = lazyWithReload(() => import("./pages/MyShiftsPage"));
 const ImpactPage = lazyWithReload(() => import("./pages/ImpactPage"));
 const HelpPage = lazyWithReload(() => import("./pages/HelpPage"));
+const SettingsPage = lazyWithReload(() => import("./pages/SettingsPage"));
 const VerifyPage = lazyWithReload(() => import("./pages/VerifyPage"));
 const OpportunityPage = lazyWithReload(() => import("./pages/OpportunityPage"));
 const LoginPage = lazyWithReload(() => import("./pages/LoginPage"));
@@ -74,6 +75,7 @@ export const routes: RouteObject[] = [
       { path: "collections/:collectionId", element: <CollectionPage /> },
       // End Tier 2 lane B
       { path: "help", element: <HelpPage /> },
+      { path: "settings", element: <SettingsPage /> },
       { path: "help/:slug", element: <HelpPage /> },
       { path: "verify", element: <VerifyPage /> },
       { path: "verify/:code", element: <VerifyPage /> },

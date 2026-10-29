@@ -28,7 +28,7 @@ const SECTIONS: ReadonlyArray<LegalSection> = [
         <li>Every screen works with a keyboard alone, including sign up, check-in code entry, and the kiosk.</li>
         <li>A "Skip to main content" link is the first thing you reach with the Tab key.</li>
         <li>After you move to a new screen, focus moves to that screen's main heading.</li>
-        <li>Text size (100, 125, or 150 percent), high contrast, and reduced motion controls are in the page footer.</li>
+        <li>Text size (100, 125, or 150 percent), high contrast, and reduced motion controls are under Settings.</li>
         <li>The app also follows your device's reduced motion setting.</li>
         <li>Status is shown with an icon and words, never by color alone.</li>
         <li>Buttons and links are at least 44 by 44 pixels so they are easy to tap.</li>

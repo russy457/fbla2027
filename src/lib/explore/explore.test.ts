@@ -112,7 +112,7 @@ describe("recommendShifts", () => {
     ];
     const picks = recommendShifts(rows, profile, new Set(["mine"]), before);
     expect(picks.map((pick) => pick.row.instance.id)).toEqual(["food"]);
-    expect(picks[0]?.why).toBe("Matches your interest in hunger and food");
+    expect(picks[0]?.why).toBe("Your interest: Hunger and food");
   });
 
   it("skips minors at unverified orgs and started shifts", () => {
@@ -126,9 +126,9 @@ describe("recommendShifts", () => {
   });
 
   it("writes a why for every reason", () => {
-    expect(whyText({ kind: "skills", skills: ["Spanish", "Lifting"] })).toBe("Uses your skills: Spanish, Lifting");
-    expect(whyText({ kind: "availability", weekday: "sat", block: "morning" })).toBe("Fits your free time on Saturday mornings");
-    expect(whyText({ kind: "nearby" })).toBe("Close to your ZIP code");
-    expect(whyText({ kind: "virtual" })).toBe("Virtual, so you can help from home");
+    expect(whyText({ kind: "skills", skills: ["Spanish", "Lifting"] })).toBe("Your skills: Spanish, Lifting");
+    expect(whyText({ kind: "availability", weekday: "sat", block: "morning" })).toBe("Your free time: Saturday mornings");
+    expect(whyText({ kind: "nearby" })).toBe("Near your ZIP");
+    expect(whyText({ kind: "virtual" })).toBe("Help from home");
   });
 });

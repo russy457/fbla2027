@@ -176,15 +176,30 @@
 .site-footer__brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.25rem;
-  color: var(--fg);
+  gap: 0.85rem;
+  align-self: start;
+  color: var(--hero-fg);
   font-family: var(--type-display);
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: clamp(2.2rem, 4vw, 3.7rem);
+  font-weight: 500;
+  letter-spacing: -0.06em;
   white-space: nowrap;
 }
-.site-footer__brand .tandem-bike { width: 3.15rem; height: auto; }
+.site-footer__brand .tandem-bike { width: clamp(5.5rem, 9vw, 8.5rem); height: auto; }
+.site-footer { background: var(--hero); color: var(--hero-fg); }
+.site-footer__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); max-width: 84rem; margin-inline: auto; padding: clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 3rem); }
+.site-footer__content { display: flex; min-width: 0; flex-direction: column; gap: clamp(2.5rem, 5vw, 5rem); }
+.site-footer__nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.15rem clamp(1rem, 4vw, 3rem); }
+.site-footer__nav a, .site-footer__link { display: inline-flex; align-items: center; width: fit-content; min-height: var(--touch-target); color: var(--hero-fg); font-size: 0.95rem; text-decoration-color: transparent; text-underline-offset: 0.3em; }
+.site-footer__nav a:hover, .site-footer__link:hover { text-decoration-line: underline; text-decoration-color: currentColor; }
+.site-footer__legal ul { display: flex; flex-wrap: wrap; gap: 0.2rem 1.5rem; }
+.site-footer__legal .site-footer__link { color: var(--hero-muted); font-size: 0.84rem; }
+@media (max-width: 46rem) {
+  .site-footer__inner { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+  .site-footer__brand { max-width: 100%; gap: 0.6rem; font-size: clamp(1.9rem, 6vw, 2.5rem); white-space: normal; }
+  .site-footer__brand .tandem-bike { width: clamp(4.1rem, 17vw, 5.5rem); }
+  .site-footer__content { gap: 2rem; }
+}
 
 /* The frame stays one ink color. Wheel, crank, and road movement imply travel. */
 .bike-loader { display: flex; flex-direction: column; width: 10rem; max-width: 100%; color: currentColor; }
@@ -278,12 +293,14 @@
   box-shadow: var(--elevation-lg);
   color: var(--fg);
 }
-.header-account-panel > div { display: flex; flex-direction: column; align-items: stretch; }
-.header-account-panel a,
-.header-account-panel button { justify-content: flex-start; }
-.header-account-panel > div > a.hidden { display: inline-flex; }
-.header-account-panel > div > a .sr-only,
-.header-account-panel > div > button .sr-only { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; white-space: normal; }
+.account-menu__list { display: flex; flex-direction: column; gap: 0.1rem; }
+.account-menu__item { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); align-items: center; gap: 0.85rem; width: 100%; min-height: var(--touch-target); padding: 0.55rem 0.7rem; border-radius: var(--corner-md); color: var(--fg); font-size: 0.95rem; font-weight: 600; text-align: left; }
+.account-menu__item svg { display: block; width: 1.25rem; height: 1.25rem; }
+.account-menu__item:hover, .account-menu__item.is-active { background: var(--accent-subtle); color: var(--accent); }
+.account-menu__item:disabled { opacity: 0.6; cursor: wait; }
+.account-menu__error { padding: 0.5rem 0.7rem; color: var(--status-danger); font-size: 0.875rem; }
+.account-sign-in { display: inline-flex; align-items: center; gap: 0.45rem; min-height: var(--touch-target); padding-inline: 0.9rem; border-radius: var(--corner-full); background: var(--surface); color: var(--fg); font-size: 0.875rem; font-weight: 600; }
+.account-sign-in:hover { background: var(--surface-sunken); }
 
 .site-header[data-condensed="true"] {
   border-color: transparent;
@@ -403,6 +420,23 @@
 .explore-controls > section { width: 100%; }
 .explore-after { position: relative; z-index: 2; margin-top: -3.25rem; border-radius: 2rem 2rem 0 0; background: var(--bg); color: var(--fg); }
 .explore-after__inner { display: flex; flex-direction: column; gap: clamp(4rem, 7vw, 7rem); max-width: 78rem; margin-inline: auto; padding: clamp(4rem, 7vw, 7rem) clamp(1rem, 3vw, 2rem) clamp(5rem, 8vw, 8rem); }
+.recommended-shifts { display: flex; flex-direction: column; gap: 1.35rem; }
+.recommended-shifts__heading { color: var(--fg); font-family: var(--type-display); font-size: clamp(1.6rem, 2.6vw, 2.25rem); font-weight: 500; letter-spacing: -0.045em; }
+.recommended-shifts__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 2rem); }
+.recommended-shifts__item { display: flex; min-width: 0; flex-direction: column; gap: 0.45rem; padding-top: 1rem; border-top: 1px solid var(--border-strong); }
+.recommended-shifts__item h3 { font-family: var(--type-display); font-size: clamp(1.23rem, 1.6vw, 1.55rem); font-weight: 500; line-height: 1.25; }
+.recommended-shifts__link { display: inline-flex; align-items: baseline; gap: 0.35rem; color: var(--fg); text-decoration-color: transparent; text-underline-offset: 0.22em; }
+.recommended-shifts__link svg { flex: none; transform: translateY(0.15em); }
+.recommended-shifts__link:hover { color: var(--accent); text-decoration-line: underline; text-decoration-color: currentColor; }
+.recommended-shifts__time { color: var(--fg); font-size: 0.9rem; font-weight: 700; }
+.recommended-shifts__reason { color: var(--fg-muted); font-size: 0.9rem; }
+.recommended-shifts__org { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: auto; padding-top: 0.35rem; color: var(--fg-muted); font-size: 0.9rem; }
+@media (max-width: 48rem) { .recommended-shifts__list { grid-template-columns: 1fr; gap: 1.7rem; } }
+.settings-page { display: flex; flex-direction: column; gap: clamp(3rem, 6vw, 5rem); }
+.settings-page__content { width: min(100%, 72rem); margin-inline: auto; padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(5rem, 8vw, 8rem); }
+.settings-page__content fieldset { display: flex; min-width: 0; flex-direction: column; gap: 1.1rem; margin: 0; padding: 0; border: 0; }
+.settings-page__content legend { margin-bottom: 1rem; color: var(--fg); font-family: var(--type-display); font-size: 1.65rem; font-weight: 500; }
+.settings-page__content > p { margin-top: 1.6rem; color: var(--fg-muted); font-size: 0.9rem; }
 
 .schedule-board { overflow: hidden; border-radius: clamp(0.75rem, 1.5vw, 1.25rem); background: var(--schedule-surface); color: var(--hero-fg); }
 .schedule-board__heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: clamp(1.5rem, 3vw, 2.75rem) clamp(1.25rem, 3vw, 2.75rem) 1.25rem; }
@@ -569,6 +603,10 @@
 }
 .site-header[data-scene="true"]:not([data-condensed="true"]) .site-header__tools > a { color: var(--hero-fg); }
 .site-header[data-scene="true"]:not([data-condensed="true"]) .site-header__tools > a.bg-accent-subtle { color: var(--accent); }
+.site-header[data-scene="true"]:not([data-condensed="true"]) .site-header__tools > a.account-sign-in { color: var(--fg); }
+.site-header[data-scene="true"]:not([data-condensed="true"]) .site-header__tools > div > button { color: var(--hero-fg); }
+.site-header[data-scene="true"]:not([data-condensed="true"]) .site-header__tools > div > button:hover { background: var(--hero-nav-active); }
+.site-header[data-scene="true"]:not([data-condensed="true"]) .site-header__tools > div > button[aria-expanded="true"] { background: var(--surface); color: var(--fg); }
 .interior-scene { position: relative; isolation: isolate; }
 .interior-scene__media {
   position: sticky;

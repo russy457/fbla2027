@@ -40,19 +40,19 @@ const WEEKDAY_NAMES: Readonly<Record<WeekdayKey, string>> = {
 };
 const BLOCK_NAMES: Readonly<Record<TimeBlock, string>> = { morning: "mornings", afternoon: "afternoons", evening: "evenings" };
 
-/** One plain sentence for the strongest reason. */
+/** One short, factual reason for the strongest match. */
 export const whyText = (reason: MatchReason): string => {
   switch (reason.kind) {
     case "interest":
-      return `Matches your interest in ${CAUSE_AREA_LABELS[reason.causeArea].toLowerCase()}`;
+      return `Your interest: ${CAUSE_AREA_LABELS[reason.causeArea]}`;
     case "skills":
-      return `Uses your skills: ${reason.skills.join(", ")}`;
+      return `Your skills: ${reason.skills.join(", ")}`;
     case "availability":
-      return `Fits your free time on ${WEEKDAY_NAMES[reason.weekday]} ${BLOCK_NAMES[reason.block]}`;
+      return `Your free time: ${WEEKDAY_NAMES[reason.weekday]} ${BLOCK_NAMES[reason.block]}`;
     case "nearby":
-      return "Close to your ZIP code";
+      return "Near your ZIP";
     case "virtual":
-      return "Virtual, so you can help from home";
+      return "Help from home";
   }
 };
 

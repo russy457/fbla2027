@@ -1,14 +1,14 @@
 /**
  * AppLayout.tsx
  * The volunteer app shell (plan D2, D20): skip link, header with the product
- * name and an adaptive top nav, the routed page inside <main>, and a footer
- * with display preferences. Landmarks (header,
+ * name and an adaptive top nav, the routed page inside <main>, and a footer.
+ * Landmarks (header,
  * nav, main, footer) are real elements so screen reader users can jump
  * between them. After each navigation, focus moves to the new screen's h1
  * (or <main> when the screen has none) so keyboard and screen reader users
  * start reading from the top (D20). The header also holds the Quick help
- * button that opens the help slide-over, the Coordinator and Admin links for
- * those roles, and Sign in / Sign out (AccountControls). The full top row
+ * button that opens the help slide-over, notifications, and the account menu.
+ * The full top row
  * collapses to a four-route icon pill after scrolling.
  */
 import { Suspense, useEffect, useRef, useState, type ReactElement } from "react";
@@ -16,7 +16,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { UserCircle } from "@phosphor-icons/react";
 import FadeContent from "@/components/bits/FadeContent";
 import { DevEnvironmentBanner } from "@/components/DevEnvironmentBanner";
-import { DisplayPreferences } from "@/components/DisplayPreferences";
+import { BellMenu } from "@/components/notifications/BellMenu";
 import { HelpPanelLauncher } from "@/components/help/HelpPanelLauncher";
 import { LoadingState } from "@/components/LoadingState";
 import { TandemBike } from "@/components/brand/TandemBike";
@@ -43,9 +43,22 @@ const HeaderAccount = ({ condensed }: { readonly condensed: boolean }): ReactEle
   useEffect(() => {
     detailsRef.current?.removeAttribute("open");
   }, [pathname, condensed]);
+  useEffect(() => {
+    const dismiss = (event: PointerEvent): void => {
+      if (event.target instanceof Node && !detailsRef.current?.contains(event.target)) detailsRef.current?.removeAttribute("open");
+    };
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, []);
   if (!user) return <AccountControls />;
   return (
-    <details ref={detailsRef} className="header-account-menu">
+    <details ref={detailsRef} className="header-account-menu" onKeyDown={(event) => {
+      if (event.key === "Escape" && detailsRef.current?.open) {
+        event.preventDefault();
+        detailsRef.current.removeAttribute("open");
+        detailsRef.current.querySelector("summary")?.focus();
+      }
+    }}>
       <summary aria-label="Account menu">
         <UserCircle aria-hidden="true" size={20} />
         <span>Account</span>
@@ -137,6 +150,7 @@ export const AppLayout = (): ReactElement => {
             <CommandPaletteLauncher />
             {/* Quick help slide-over, also opened with the "?" key (SPEC 9.6). */}
             <HelpPanelLauncher />
+            {user ? <BellMenu uid={user.uid} /> : null}
             <HeaderAccount condensed={condensed} />
           </div>
         </div>
@@ -163,34 +177,23 @@ export const AppLayout = (): ReactElement => {
         </div>
       </main>
 
-      <footer className="border-t border-border bg-surface">
-        <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+      <footer className="site-footer">
+        <div className="site-footer__inner">
           <Link to="/" className="site-footer__brand" aria-label={`${APP_NAME} home`}>
             <TandemBike />
             <span>{APP_NAME}</span>
           </Link>
-          {/* Linked from /me/profile ("Display settings"). */}
-          <div id="display-preferences" tabIndex={-1} className="outline-none">
-            <DisplayPreferences />
+          <div className="site-footer__content">
+            <nav aria-label="Footer" className="site-footer__nav">
+              <Link to="/explore">Explore shifts</Link>
+              {user ? <Link to="/me/shifts">My shifts</Link> : null}
+              <Link to="/verify">Verify a letter</Link>
+              <Link to="/org/register">For nonprofits</Link>
+              <Link to="/settings">Settings</Link>
+              <Link to="/help">Help</Link>
+            </nav>
+            <LegalLinks />
           </div>
-          {/* The header shows Profile from md up; on phones it lives here. */}
-          {user ? (
-            <p className="mt-4 text-sm md:hidden">
-              <Link to="/me/profile" className="font-medium text-accent underline-offset-4 hover:underline">
-                Your profile and settings
-              </Link>
-            </p>
-          ) : null}
-          <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            <Link to="/verify" className="font-medium text-accent underline-offset-4 hover:underline">
-              Verify a letter
-            </Link>
-            <Link to="/org/register" className="font-medium text-accent underline-offset-4 hover:underline">
-              Register your nonprofit
-            </Link>
-          </p>
-          {/* Tier 1 lane C */}
-          <LegalLinks />
         </div>
       </footer>
 

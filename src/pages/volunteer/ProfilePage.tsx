@@ -3,8 +3,7 @@
  * Route "/me/profile" (SPEC#screen-inventory "Profile", Tier 1): keep
  * details current. Name, interests, skills, availability, phone, and ZIP are
  * saved through volunteer.updateProfile (ProfileForm); display settings
- * (text size, contrast, motion) live in the page footer on every screen, so
- * this page links there; the Discoverable toggle is the secondary action.
+ * (text size, contrast, motion) live on the public Settings page.
  * Birth date is shown read-only (only an admin can correct it, SPEC 4.2).
  *
  * Links such as "/me/profile#interests" (Explore's "Add interests") and
@@ -12,7 +11,7 @@
  * has rendered, after the shell's own focus-the-h1 step (D20).
  */
 import { useEffect, type ReactElement } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { DiscoverableToggle } from "@/components/profile/DiscoverableToggle";
@@ -70,10 +69,9 @@ const ProfilePage = (): ReactElement => {
         <DiscoverableToggle uid={user.uid} discoverable={data.notificationPrefs?.discoverable === true} />
         <p className="text-sm text-fg">
           Text size, contrast, and motion are under{" "}
-          <a href="#display-preferences" className="font-semibold text-accent underline underline-offset-2">
+          <Link to="/settings" className="font-semibold text-accent underline underline-offset-2">
             Display settings
-          </a>{" "}
-          at the bottom of every page.
+          </Link>.
         </p>
       </section>
     </div>

@@ -14,13 +14,13 @@ export const LEGAL_LINKS: ReadonlyArray<{ to: string; label: string }> = [
 ];
 
 export const LegalLinks = (): ReactElement => (
-  <nav aria-label="Legal" className="mt-4 border-t border-border pt-2">
-    <ul className="flex flex-wrap gap-x-4">
+  <nav aria-label="Legal" className="site-footer__legal">
+    <ul>
       {LEGAL_LINKS.map(({ to, label }) => (
         <li key={to}>
           <Link
             to={to}
-            className="inline-flex min-h-touch items-center text-sm text-fg-muted underline underline-offset-2 hover:text-fg"
+            className="site-footer__link"
           >
             {label}
           </Link>

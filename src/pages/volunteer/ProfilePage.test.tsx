@@ -74,7 +74,7 @@ describe("ProfilePage", () => {
     expect(screen.getByLabelText("ZIP code (optional)")).toHaveValue("78204");
     expect(screen.getByRole("checkbox", { name: "Hunger and food" })).toBeChecked();
     expect(screen.getByText("2007-03-02")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Display settings" })).toHaveAttribute("href", "#display-preferences");
+    expect(screen.getByRole("link", { name: "Display settings" })).toHaveAttribute("href", "/settings");
   });
 
   it("sends only the changed fields, pending until the op returns", async () => {
