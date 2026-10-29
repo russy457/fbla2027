@@ -5,7 +5,7 @@ Read [docs/SPEC.md](docs/SPEC.md) for behavior, [docs/DESIGN.md](docs/DESIGN.md)
 ## Design contract
 
 - Make Tandem feel like a warm, photographic field guide to local service. Keep its barely off-white and brown palette, real contextual photos, and clear space for text in image crops.
-- Use one or two word editorial headings. Give task, error, legal, and accessibility headings the words needed for clarity. Do not add tiny eyebrow headings, mixed fonts within a heading, a logo, em dashes, fake impact figures, or city-specific branding.
+- Use one or two word editorial headings. Give task, error, legal, and accessibility headings the words needed for clarity. Keep the single-ink tandem bike mark with the Tandem wordmark; do not add other logo treatments, tiny eyebrow headings, mixed fonts within a heading, em dashes, fake impact figures, or city-specific branding.
 - Keep `/` distinct from `/explore`. Preserve the full-width photo scenes, layered scrolling, and shrinking icon navigation. Keep controls, schedules, and role workflows easy to find.
 - Remove decorative cards, frames, shadows, borders, and animation when they do no work. Keep boundaries, labels, focus, and contrast needed to recognize controls and states.
 - Store reusable visual choices in tokens, media metadata, shared components, or page configuration. Do not scatter hard-coded colors, crops, or one-off spacing across routes.

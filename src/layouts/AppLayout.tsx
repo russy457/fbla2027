@@ -19,6 +19,7 @@ import { DevEnvironmentBanner } from "@/components/DevEnvironmentBanner";
 import { DisplayPreferences } from "@/components/DisplayPreferences";
 import { HelpPanelLauncher } from "@/components/help/HelpPanelLauncher";
 import { LoadingState } from "@/components/LoadingState";
+import { TandemBike } from "@/components/brand/TandemBike";
 import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { isHostingPreview } from "@/lib/hostingPreview";
@@ -111,7 +112,8 @@ export const AppLayout = (): ReactElement => {
       <header className="site-header" data-condensed={condensed} data-home={isHome} data-scene="true">
         <div className="site-header__inner">
           <Link to="/" className="site-header__brand">
-            {APP_NAME}
+            <TandemBike className="site-header__brand-icon" />
+            <span>{APP_NAME}</span>
           </Link>
           <nav aria-label="Main" className="site-nav">
             <ul>
@@ -154,7 +156,7 @@ export const AppLayout = (): ReactElement => {
         ) : null}
         <div className={isEditorialInterior ? "interior-scene__flow" : undefined}>
           <FadeContent key={pathname} className={isEditorialInterior ? "interior-scene__route" : pathname === "/onboarding" ? "onboarding-route-shell" : undefined}>
-            <Suspense fallback={<LoadingState label="Loading this screen" />}>
+            <Suspense fallback={isEditorialInterior ? <div className="interior-scene__loading"><LoadingState label="Loading this screen" lines={0} /></div> : <LoadingState label="Loading this screen" lines={0} />}>
               <Outlet />
             </Suspense>
           </FadeContent>
@@ -163,6 +165,10 @@ export const AppLayout = (): ReactElement => {
 
       <footer className="border-t border-border bg-surface">
         <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+          <Link to="/" className="site-footer__brand" aria-label={`${APP_NAME} home`}>
+            <TandemBike />
+            <span>{APP_NAME}</span>
+          </Link>
           {/* Linked from /me/profile ("Display settings"). */}
           <div id="display-preferences" tabIndex={-1} className="outline-none">
             <DisplayPreferences />

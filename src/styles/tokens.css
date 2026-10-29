@@ -103,6 +103,7 @@
   --duration-fast: 150ms;
   --duration-base: 240ms;
   --duration-slow: 400ms;
+  --duration-bike-cycle: 1200ms;
   --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
   --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 

@@ -8,6 +8,7 @@
  * until a production Turnstile widget is configured.
  */
 import { useEffect, useRef, useState, type ReactElement } from "react";
+import { BikeLoader } from "@/components/brand/BikeLoader";
 import { readClientEnv } from "@/lib/env";
 
 interface TurnstileApi {
@@ -116,6 +117,7 @@ export const TurnstileWidget = ({ onToken, onStatus }: TurnstileWidgetProps): Re
   return (
     <div className="flex flex-col gap-2">
       <div ref={containerRef} />
+      {status === "loading" ? <BikeLoader className="human-check-loading" /> : null}
       <p aria-live="polite" className="text-sm text-fg-muted">
         {status === "loading" ? "Loading a quick human check..." : null}
         {status === "verified" ? "Human check done." : null}

@@ -14,7 +14,7 @@ Design feasibility check: impact 5, context fit 4, implementation 5, performance
 
 ## Fixed decisions
 
-- Keep the name **Tandem** as text. Do not make a logo yet.
+- Pair the name **Tandem** with the original single-ink tandem bicycle mark. Use the still mark in navigation, footer, and favicon. Its moving version is reserved for loading states.
 - Do not name or imply one home city. Demo organizations are fictional.
 - Keep existing functionality. `/` is a distinct landing page and `/explore` is the shift finder. Restructure markup and shared components when it improves the design.
 - Write short, unpretentious copy. No em dashes, invented impact numbers, hype, or robotic phrasing.
@@ -41,7 +41,7 @@ The selected set and crop positions live in `src/content/editorialMedia.ts` and 
 - `/` shows the same photographic landing page to signed-in and signed-out visitors. Its distinct garden hero leaves the first viewport to the title and primary Explore action. A rising white section holds oval images linked to real cause filters. Three further cause stories and a full width photograph follow.
 - `/explore` is the scheduling page. Its full viewport photo stays in place as the visitor scrolls into search, filters, and a dark schedule with date choices and shift rows. A nearly white section with four cause photographs, personal recommendations, and collections covers the scene below. The live list remains the default; the map remains available with a public Mapbox token. `PageHeader` serves task routes in a shared shorter scene. Named shift, organization, and coordinator scenes use a plain brown field rather than unrelated stock photography. Onboarding uses a shorter full width photo opening so form steps remain quick to use. Kiosk access has a full width photo opening; the active kiosk keeps its code and arrivals prominent.
 - The shift finder keeps search, filters, map or list switch, live states, dates, signup, and save behavior. Cause links open `/explore?cause=...`, using the existing filter parser.
-- The top navigation starts as a full row with brand text, four volunteer routes, search, quick help, and account access. After 132px of scroll, the same four route links become a centered icon pill. Accessible names and 44px targets remain. On phones, the full header uses a second row for the four routes; the account menu stays in the first row. The fixed bottom tab bar is removed.
+- The top navigation starts as a full row with the bike and Tandem wordmark, four volunteer routes, search, quick help, and account access. After 132px of scroll, the same four route links become a centered icon pill. Accessible names and 44px targets remain. On phones, the full header uses a second row for the four routes; the account menu stays in the first row. The fixed bottom tab bar is removed.
 - Account controls, role routes, alerts, and sign out stay in the account menu. Coordinator and admin workflows remain reachable. The full header returns when the user scrolls to the top.
 - Task pages, coordinator tables, kiosk, verification, and forms inherit the near white and brown tokens and rounded action controls while remaining information first. Short photographic openings are used where the photo gives honest context. Keep feedback, errors, and statuses visible in text as well as color.
 
@@ -58,6 +58,7 @@ Check the home, Explore, Opportunity, coordinator dashboard, kiosk, and phone ch
 - `AppLayout` draws each general route photo and crop from `pageVisuals.ts`. `PageHeader` places the title over that scene and the description on the light section below. The shared route content rises over the shorter opening on scroll. Named shift, organization, and coordinator routes use a plain opening. Help and legal pages use the same layout without changes to their feature screens.
 - Onboarding and kiosk screens carry the same photography and brown accents without compromising form, check-in, or code legibility.
 - The header now morphs into a four icon pill after scrolling, while retaining its route and account behavior.
+- The original tandem bike SVG anchors the header wordmark and footer. A motion version replaces generic loading pulse in shared data and route states, the kiosk code wait, help answer wait, and onboarding human check. CSS movement uses only transforms and stops for reduced motion.
 - The photo set was chosen after reviewing multiple candidates from Pexels and Unsplash. Individual credits and license references are recorded in [ASSET_CREDITS.md](ASSET_CREDITS.md).
 - Full and thumbnail WebP files are generated from retained source photos with `npm run images:optimize`. A small route-aware preload script requests the home or Explore hero before React mounts.
 - Browser review covered the landing, login, help, and onboarding openings at 1440px and 390px, including the point where light content covers the photo. Captures should wait for image decoding before judging blank lazy image slots.

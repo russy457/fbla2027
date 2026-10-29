@@ -20,6 +20,7 @@ import { useId, useState, type FormEvent, type ReactElement } from "react";
 import { Sparkle } from "@phosphor-icons/react";
 import { Link, useLocation } from "react-router-dom";
 import type { AskAssistantOutput, OpInput } from "@fbla/shared";
+import { BikeLoader } from "@/components/brand/BikeLoader";
 import { buttonClassName } from "@/components/ui/buttonStyles";
 import { api, toApiUserError } from "@/lib/api";
 import { answerFromHelpCenter, COUNTER_THRESHOLD, MAX_QUESTION_CHARS, type HelpAnswer, type HelpLibrary } from "@/lib/help";
@@ -98,7 +99,7 @@ const AssistantPanelView = ({ library, renderLink = renderPageArticleLink, headi
   };
 
   const renderState = (): ReactElement | null => {
-    if (state.kind === "pending") return <p className="text-sm text-fg-muted">Finding an answer...</p>;
+    if (state.kind === "pending") return <div role="status" className="assistant-loading"><BikeLoader /><p>Finding an answer...</p></div>;
     if (state.kind === "remote") return <AssistantAnswerView result={state.result} library={library} renderLink={renderLink} />;
     if (state.kind === "local") return <HelpCenterAnswer answer={state.answer} notice={state.notice} renderLink={renderLink} />;
     return null;

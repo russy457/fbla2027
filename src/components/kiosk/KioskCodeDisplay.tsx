@@ -16,6 +16,7 @@ import { WifiSlash } from "@phosphor-icons/react";
 import { DEFAULT_CONFIG } from "@fbla/shared";
 import type { KioskCodeState } from "@/hooks/useKioskCode";
 import { cn } from "@/lib/cn";
+import { BikeLoader } from "@/components/brand/BikeLoader";
 import { CountdownRing } from "./CountdownRing";
 import { KioskQr } from "./KioskQr";
 
@@ -56,9 +57,7 @@ export const KioskCodeDisplay = ({ state }: KioskCodeDisplayProps): ReactElement
       </p>
       <p className="text-lg font-semibold text-fg-muted">Check-in code</p>
       {state.kind === "loading" ? (
-        <span aria-hidden="true" className={cn(CODE_CLASSES, "animate-pulse text-fg-subtle")}>
-          --- ---
-        </span>
+        <div className="kiosk-code-loading" aria-hidden="true"><BikeLoader /></div>
       ) : state.kind === "live" ? (
         <span key={state.code} data-testid="kiosk-code" className={cn(CODE_CLASSES, "text-fg motion-safe:animate-[fade-in_var(--duration-base)_ease-out]")}>
           {spaced(state.code)}
